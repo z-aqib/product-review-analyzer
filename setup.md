@@ -7,3 +7,7 @@ to install requirements:
 ```bash
 pip install -r requirements.txt
 ```
+make sure to do
+```bash
+pre-commit install
+```
