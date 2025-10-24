@@ -1,8 +1,9 @@
 # Python bytecode
 __pycache__/
 
-# Virtual environment
+# Virtual environments
 venv/
+mlops-venv/
 
 # Pytest cache
 .pytest_cache/
