@@ -1,0 +1,12 @@
+# Python bytecode
+__pycache__/
+
+# Virtual environments
+venv/
+mlops-venv/
+
+# Pytest cache
+.pytest_cache/
+
+# macOS system file
+.DS_Store
