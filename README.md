@@ -11,12 +11,12 @@ first create a virtual environment
 ```bash
 python -m venv mlops-venv
 .mlops-venv\Scripts\activate
-```	
+```
 then install the requirements
 ```bash
 pip install -r requirements.txt
 ```
 then activate the pre-commit hooks
-```bash	
+```bash
 pre-commit install
 ```
