@@ -11,3 +11,11 @@ make sure to do
 ```bash
 pre-commit install
 ```
+haris
+this is how I run my venv
+
+.\.venv\Scripts\activate
+maham
+this is how I run my venv
+
+.\mlops-venv\Scripts\activate
