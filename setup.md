@@ -11,3 +11,6 @@ make sure to do
 ```bash
 pre-commit install
 ```
+this is how I run my venv
+
+.\.venv\Scripts\activate
