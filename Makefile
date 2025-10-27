@@ -1,11 +1,19 @@
-run:
-\tuvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+.PHONY: dev train drift serve-drift stack-up stack-down
 
-test:
-\tpytest -q
+dev:
+	uvicorn src.api:app --host 0.0.0.0 --port 8000 --reload
 
-lint:
-\truff .
+train:
+	python src/train.py
 
-format:
-\tblack .
+drift:
+	python monitoring/generate_drift.py
+
+serve-drift:
+	uvicorn monitoring.evidently_app:app --host 0.0.0.0 --port 7000
+
+stack-up:
+	docker compose up -d
+
+stack-down:
+	docker compose down

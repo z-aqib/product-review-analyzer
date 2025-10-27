@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "sentiment-api"
+    static_configs:
+      - targets: ["host.docker.internal:8000"]  # macOS/Windows Docker
+        # On Linux, use your machine IP (e.g., 172.17.0.1:8000) or run API as a compose service.

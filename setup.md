@@ -19,3 +19,12 @@ maham
 this is how I run my venv
 
 .\mlops-venv\Scripts\activate
+
+
+
+pre-commit
+      # - id: ruff-check
+      #   name: ruff (check + fix)
+      #   entry: ruff check --fix
+      #   language: system
+      #   types: [python]
