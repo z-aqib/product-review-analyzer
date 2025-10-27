@@ -1,0 +1,8 @@
+mlflow
+evidently
+fastapi
+uvicorn
+prometheus-client
+prometheus-fastapi-instrumentator
+pandas
+scikit-learn
