@@ -58,3 +58,9 @@ ADD THESE 3 LINES IN APP.PY
 >s3.download_file('your-bucket-name', 'model.pkl', 'model.pkl'))
 Run your model’s FastAPI/Flask/Streamlit serve
 
+if mlops-key.pem gets a warning for unsafe, run this with correct path, in powershell as administrator
+icacls "D:\sem7\mlops\project\product-review-analyzer\mlops-key.pem" /inheritance:r
+icacls "D:\sem7\mlops\project\product-review-analyzer\mlops-key.pem" /grant:r "$($env:USERNAME):(R)"
+
+then back in vscode run this, run with correct path
+ssh -i "D:\sem7\mlops\project\product-review-analyzer\mlops-key.pem" ubuntu@ec2-13-60-193-55.eu-north-1.compute.amazonaws.com
