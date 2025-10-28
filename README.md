@@ -39,10 +39,10 @@ Command to upload to S3
 aws s3 cp README.md s3://mlops-d9/ 
 
 Command to check what has been uploaded to S3 Bucket
-aws s3 ls s3://maham-mlops-d9/
+aws s3 ls s3://mlops-d9/
 
 EC2
-cd into the direction where the mlops-key pem file is located
+cd into the directory where the mlops-key pem file is located
 
 Command to connect to EC2 instance (this opens ubuntu)
 ssh -i "mlops-key.pem" ubuntu@ec2-13-60-193-55.eu-north-1.compute.amazonaws.com
