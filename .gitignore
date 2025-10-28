@@ -10,3 +10,6 @@ mlops-venv/
 
 # macOS system file
 .DS_Store
+
+#ec2 key
+mlops-key.pem
