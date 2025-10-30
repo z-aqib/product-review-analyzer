@@ -1,58 +1,76 @@
 project/
-  data/
-    cleaning/
-      data-cleaning.ipynb
-    processed/
-      product_categories.csv
-      products.csv
-      README.md
-      reviews.csv
-      users.csv
-    raw/
-      amazon.csv
-      README.md
-  images/
-    docker-setup.png
-    evidently_report_1.png
-    evidently_report_2.png
-    fast-api.jpg
-  infra/
-    prometheus/
-      prometheus.yml
-    README.md
-  milestones/
-    milestone_0/
-      MLOPS - Milestone 0.pdf
-    milestone_1/
-      Milestone1_MLOps.pdf
-    milestone_2/
-  monitoring/
-    evidently_app.py
-    evidently_report.html
-    generate_drift.py
-    README.md
-  src/
-    app/
-      main.py
-      README.md
-    ml/
-      README.md
-    mlruns/
-    scripts/
-      README.md
-    tests/
-      README.md
-      test_health.py
-    api.py
-    train.py
-  .gitignore
-  docker-compose.yml
-  Makefile
-  mlops-key.pem
-  README.md
-  requirements-dev.txt
-  requirements-monitoring.txt
-  requirements.txt
-  setup.md
-  structure-maker.py
-  structure.txt
+├── data
+│   ├── cleaning
+│   │   └── data-cleaning.ipynb
+│   ├── processed
+│   │   ├── eval
+│   │   │   ├── eval_summary_item_item_k10.json
+│   │   │   ├── eval_user_level_item_item_k10.csv
+│   │   │   ├── test.csv
+│   │   │   └── train.csv
+│   │   ├── product_categories.csv
+│   │   ├── products.csv
+│   │   ├── README.md
+│   │   ├── reviews.csv
+│   │   └── users.csv
+│   ├── raw
+│   │   ├── amazon.csv
+│   │   └── README.md
+│   └── splits
+│       ├── test
+│       │   └── test_set.csv
+│       └── train
+│           ├── train_set.csv
+│           └── val_set.csv
+├── images
+│   ├── docker-setup.png
+│   ├── evidently_report_1.png
+│   ├── evidently_report_2.png
+│   └── fast-api.jpg
+├── infra
+│   ├── prometheus
+│   │   └── prometheus.yml
+│   └── README.md
+├── milestones
+│   ├── milestone_0
+│   │   └── MLOPS - Milestone 0.pdf
+│   ├── milestone_1
+│   │   ├── Milestone 1.pdf
+│   │   └── Milestone1_MLOps.pdf
+│   └── milestone_2
+├── monitoring
+│   ├── evidently_app.py
+│   ├── evidently_report.html
+│   ├── generate_drift.py
+│   └── README.md
+├── src
+│   ├── app
+│   │   ├── main.py
+│   │   └── README.md
+│   ├── ml
+│   │   ├── eval
+│   │   │   ├── eval_dataset.py
+│   │   │   └── metrics.py
+│   │   ├── recommenders
+│   │   │   └── item_item.py
+│   │   └── README.md
+│   ├── mlruns
+│   ├── scripts
+│   │   └── README.md
+│   ├── tests
+│   │   ├── README.md
+│   │   └── test_health.py
+│   ├── api.py
+│   ├── evaluate.py
+│   └── train.py
+├── .gitignore
+├── docker-compose.yml
+├── Makefile
+├── mlops-key.pem
+├── README.md
+├── requirements-dev.txt
+├── requirements-monitoring.txt
+├── requirements.txt
+├── setup.md
+├── structure-maker.py
+└── structure.txt
