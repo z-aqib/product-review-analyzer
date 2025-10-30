@@ -17,3 +17,4 @@ mlops-key.pem
 # Python artifacts
 *.pkl
 artifacts/
+mlops-key.pem
