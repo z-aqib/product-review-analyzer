@@ -1,13 +1,31 @@
-minimum_pre_commit_version: "3.5.0"
-
-default_language_version:
-  python: python3
-
+# .pre-commit-config.yaml  (final)
 repos:
-  - repo: local
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
     hooks:
-      - id: ruff-format
-        name: ruff format
-        entry: ruff format
-        language: system
-        types: [python]
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        args: [--line-length=100]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.3
+    hooks:
+      - id: ruff
+        args: [--fix]
+        additional_dependencies: []  # keeps it python-version agnostic
+
+  # - repo: https://github.com/Yelp/detect-secrets
+  #   rev: v1.5.0
+  #   hooks:
+  #     - id: detect-secrets
+  #       name: detect-secrets (baseline)
+  #       args:
+  #         - --baseline
+  #         - .secrets.baseline
+  #         - --exclude-files
+  #         - '(^\.git|\.venv|\.mlops-venv|node_modules|^data/|^images/|\.lock$)'
