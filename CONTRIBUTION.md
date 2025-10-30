@@ -1,18 +1,18 @@
 # CONTRIBUTION.md
 
-**Project:** *Product Review Analyzer — Collaborative Filtering*
+**Project:** *Product Review Analyzer —ML & LLMops*
 **Course:** MLOps & LLMOps (Fall 2025, IBA Karachi)
 
 ---
 
 ## 👥 Team Members
 
-| Name             | ERP ID | Role                             |
-| ---------------- | ------ | -------------------------------- |
-| **Zuha Aqib**    | 26106  | Team Lead — Backend + Monitoring |
-| **Maham Junaid** | 26832  | Data Pipeline & Model Training   |
-| **Maryam Ihsan** | 26948  | Evaluation & API Integration     |
-| **Haris**        | 27110  | Infrastructure & CI/CD           |
+| Name             | ERP ID | Role                                    |
+| ---------------- | ------ | --------------------------------------- |
+| **Zuha Aqib**    | 26106  | Team Lead — Data Pipeline & Model Training + CI/CD |
+| **Maham Junaid** | 26909  | Cloud Integration & Monitoring setup    |
+| **Maryam Ihsan** | 27152  | Evaluation & API Documentation    |
+| **Muhammad Haaris** | 27083  | Data Pipeline & Model Training + CI/CD  |
 
 ---
 
@@ -20,10 +20,10 @@
 
 | Member           | Primary Responsibilities                       | Details of Work Done                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Zuha Aqib**    | Backend Development, Monitoring, Documentation | <ul><li>Designed overall architecture and repo structure.</li><li>Implemented FastAPI service (`src/api.py`) with `/predict`, `/health`, `/metrics` endpoints.</li><li>Integrated **Prometheus FastAPI Instrumentator** for metrics.</li><li>Set up **Grafana dashboards** for latency, request counts, and uptime.</li><li>Wrote `Makefile` automation commands (`make dev`, `make stack-up`, etc.).</li><li>Prepared all documentation including **README.md** and **CONTRIBUTION.md**.</li></ul> |
-| **Maham Junaid** | Data Preparation & Model Training              | <ul><li>Cleaned and preprocessed Amazon reviews dataset.</li><li>Structured processed data under `data/processed/` and ensured format consistency.</li><li>Implemented **Item–Item Collaborative Filtering** in `src/ml/recommenders/item_item.py` (fit, similarity matrix, recommend).</li><li>Generated pickled model artifacts for inference.</li></ul>                                                                                                                                          |
-| **Maryam Ihsan** | Evaluation, Testing, and API Integration       | <ul><li>Built **Leave-One-Out evaluation** pipeline in `src/evaluate.py` and linked it to recommender outputs.</li><li>Created metrics summary CSVs (recall@k, NDCG, coverage).</li><li>Connected trained artifacts to FastAPI inference layer (`src/app/main.py`).</li><li>Implemented `/predict` logic and JSON response formatting.</li><li>Added **unit tests** for health endpoint (`src/tests/test_health.py`).</li></ul>                                                                     |
-| **Haris**        | Infrastructure, CI/CD, and Automation          | <ul><li>Configured **Dockerfile** and `docker-compose.yml` for reproducible environments.</li><li>Integrated **Prometheus** + **Grafana** containers under `infra/` with correct service discovery.</li><li>Implemented GitHub Actions workflow for CI linting and pytest checks (to be finalized).</li><li>Handled **Evidently Drift Report** automation in `monitoring/generate_drift.py`.</li><li>Maintained overall repo hygiene and ensured all dependencies are pinned.</li></ul>             |
+| **Zuha Aqib**    | Data Pipeline, Model Training, and CI/CD | <ul><li>Led data cleaning and preprocessing of Amazon reviews dataset</li><li>Implemented core data pipeline architecture</li><li>Co-developed **Item–Item Collaborative Filtering** algorithm</li><li>Implemented GitHub Actions workflow for CI/CD pipeline</li><li>Set up automated testing and linting checks</li><li>Created data validation and model testing workflows</li><li>Managed model versioning and artifact tracking</li><li>Implemented automated deployment pipelines</li></ul> |
+| **Muhammad Haaris** | Data Pipeline, Model Training, and CI/CD | <ul><li>Co-developed data preprocessing and cleaning workflows</li><li>Implemented train-test split methodology</li><li>Enhanced **Item–Item Collaborative Filtering** implementation</li><li>Set up Docker containerization for model training</li><li>Configured CI/CD pipelines for model deployment</li><li>Implemented automated model retraining workflows</li><li>Created data validation checks</li><li>Set up monitoring for model training pipelines</li></ul> |
+| **Maham Junaid** | Cloud Integration & API Documentation | <ul><li>Implemented AWS EC2 instance setup for model deployment</li><li>Configured S3 buckets for data and model storage</li><li>Set up CloudWatch monitoring for model performance</li><li>Created comprehensive FastAPI documentation</li><li>Developed API schema and example cURL commands</li><li>Implemented automated API testing</li><li>Created cloud infrastructure documentation</li><li>Set up cloud-based monitoring dashboards</li></ul> |
+| **Maryam Ihsan** | Cloud Integration & API Documentation | <ul><li>Configured AWS Lambda functions for serverless operations</li><li>Implemented automated cloud deployment scripts</li><li>Created cloud service integration documentation</li><li>Enhanced FastAPI documentation with detailed examples</li><li>Developed comprehensive API testing suite</li><li>Created cloud deployment guides in README.md</li><li>Documented cloud service interactions</li><li>Implemented cloud resource monitoring</li></ul> |
 
 ---
 
