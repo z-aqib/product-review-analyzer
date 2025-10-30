@@ -64,3 +64,15 @@ icacls "D:\sem7\mlops\project\product-review-analyzer\mlops-key.pem" /grant:r "$
 
 then back in vscode run this, run with correct path
 ssh -i "D:\sem7\mlops\project\product-review-analyzer\mlops-key.pem" ubuntu@ec2-13-60-193-55.eu-north-1.compute.amazonaws.com
+
+Uploaded processed data using this command
+aws s3 cp . s3://mlops-d9/processed/ --recursive
+
+Checked if data is uploaded using this
+aws s3 ls s3://mlops-d9/processed/
+
+Command to delete something from S3
+aws s3 rm s3://mlops-d9/processed/README.md
+
+If fastapi app not running check if port is busy
+netstat -ano | findstr :8000
