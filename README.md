@@ -4,6 +4,7 @@ this is a product review analyzer multi modal project for course mlops
 Milestone 1 verifies that each project team has translated its idea into a production-ready
 repository skeleton.
 
+We follow the Contributor Covenant Code of Conduct. Please read it before contributing.
 ## STEPS TO RUN THE PROJECT LOCALLY
 
 ### MILESTONE 1
