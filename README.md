@@ -76,3 +76,39 @@ aws s3 rm s3://mlops-d9/processed/README.md
 
 If fastapi app not running check if port is busy
 netstat -ano | findstr :8000
+
+Command to kill any task
+taskkill /PID 20112 /F
+
+Run this to avoid pre-commit
+git commit -m "Your commit message" --no-verify
+
+Run when something changed in main.py
+docker build -t product-recommender .
+
+Run a new container
+docker run -d -p 8000:8000 --name recommender product-recommender
+
+Shows running
+docker logs recommender
+
+Force stop container
+docker stop recommender
+docker rm recommender
+
+Health checkpoint
+http://127.0.0.1:8000/health
+
+Use to check if backend working
+curl http://127.0.0.1:8000/recommend?user_id=AE243IWFZJ3BB6E6WMUG52DHWJVA&k=5
+
+When you want to run with prometheus and grafana
+docker-compose up --build
+
+Prometheus runs on this
+http://localhost:9090
+
+Grafana runs on this
+http://localhost:3000
+
+Grafana username: admin, pw: admin

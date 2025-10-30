@@ -3,23 +3,25 @@ from fastapi import FastAPI
 import joblib
 import numpy as np
 from scipy.sparse import csr_matrix
+import os
+from prometheus_fastapi_instrumentator import Instrumentator
 
-# Path to artifacts (2 folders up from src/app/)
-ARTIFACT_DIR = "C:/Users/Tech Fever/mlops/project/product-review-analyzer/artifacts/"
+ARTIFACT_DIR = os.path.join(os.path.dirname(__file__), "../../artifacts/")
 
-# Load artifacts
-print("Loading model artifacts...")
-user2idx = joblib.load(f"{ARTIFACT_DIR}user2idx.pkl")
-idx2user = joblib.load(f"{ARTIFACT_DIR}idx2user.pkl")
-prod2idx = joblib.load(f"{ARTIFACT_DIR}prod2idx.pkl")
-idx2prod = joblib.load(f"{ARTIFACT_DIR}idx2prod.pkl")
-prod_name_map = joblib.load(f"{ARTIFACT_DIR}prod_name_map.pkl")
-
-item_item_sim = joblib.load(f"{ARTIFACT_DIR}item_item_sim.pkl")
-user_item_sparse = joblib.load(f"{ARTIFACT_DIR}user_item_sparse.pkl")  # csr_matrix saved as pickle
+user2idx = joblib.load(os.path.join(ARTIFACT_DIR, "user2idx.pkl"))
+idx2user = joblib.load(os.path.join(ARTIFACT_DIR, "idx2user.pkl"))
+prod2idx = joblib.load(os.path.join(ARTIFACT_DIR, "prod2idx.pkl"))
+idx2prod = joblib.load(os.path.join(ARTIFACT_DIR, "idx2prod.pkl"))
+item_item_sim = joblib.load(os.path.join(ARTIFACT_DIR, "item_item_sim.pkl"))
+prod_name_map = joblib.load(os.path.join(ARTIFACT_DIR, "prod_name_map.pkl"))
+user_item_sparse = joblib.load(os.path.join(ARTIFACT_DIR, "user_item_sparse.pkl"))
 
 # FastAPI app
 app = FastAPI()
+
+# Instrumentator for Prometheus metrics
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
 
 def get_product_name(pid: str) -> str:
     return prod_name_map.get(str(pid), str(pid))

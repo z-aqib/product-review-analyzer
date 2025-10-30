@@ -21,6 +21,19 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks: [monitoring]
 
+  recommender:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: recommender
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./artifacts:/app/artifacts
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks: [monitoring]
+
 networks:
   monitoring:
     driver: bridge
