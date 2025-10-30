@@ -1,0 +1,9 @@
+{
+  "model": "item_item",
+  "k": 10,
+  "users_evaluated": 909,
+  "users_skipped_low_activity": 8081,
+  "recall@10": 0.0,
+  "ndcg@10": 0.0,
+  "catalog_coverage": 0.17172464840858623
+}
