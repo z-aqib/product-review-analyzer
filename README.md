@@ -431,6 +431,19 @@ In Milestone-2, we’ll enhance our system into a **multimodal LLMOps pipeline**
 See 👉 [CONTRIBUTION.md](CONTRIBUTION.md)
 updated information can be found in CONTRIBUTION.md
 
+## 🌟 **Bonus Features**
+
+| Bonus Feature                                | Description                                                                                                         | Status        |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 🐳 *Docker Compose Multi-Service Setup*    | Separate containers/services for *App, **DB, **Prometheus, and **Grafana*. Supports dev/test/prod profiles. | ✅ Implemented |
+| ⚡ *GPU-enabled Image & Self-Hosted Runner* | CI/CD pipeline uses GPU-enabled Docker image for model training and integrates with self-hosted GitHub runner.      | ▓▓░░░ 40%     |
+| 🏗️ *IaC Sample (Terraform / MinIO)*       | Example scripts to spin up local object storage (MinIO) and other resources via Terraform or other IaC tools.       | ▓░░░░ 20%     |
+| 📊 *End-to-End Load Test Script (k6)*      | Load testing scripts with latency SLO assertions for the deployed services.                                         | ▓░░░░ 30%     |
+| 🛡️ *Dependency Vulnerability Scan*        | pip-audit checks for critical CVEs and fails build if found.                                                      | ✅ Implemented |
+| 📦 *Git LFS (Large File Support)*          | Optional: Not required for this project due to dataset size, but pipeline supports it.                              | ✅ Implemented/ Optional   |
+
+all remaining will be fully implemented in stage 2 !!!
+
 ## 💡 **Tag & Submission**
 
 ✅ Push with tag:
