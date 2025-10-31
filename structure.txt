@@ -1,4 +1,12 @@
 project/
+├── artifacts
+│   ├── idx2prod.pkl
+│   ├── idx2user.pkl
+│   ├── item_item_sim.pkl
+│   ├── prod2idx.pkl
+│   ├── prod_name_map.pkl
+│   ├── user2idx.pkl
+│   └── user_item_sparse.pkl
 ├── data
 │   ├── cleaning
 │   │   └── data-cleaning.ipynb
@@ -10,12 +18,10 @@ project/
 │   │   │   └── train.csv
 │   │   ├── product_categories.csv
 │   │   ├── products.csv
-│   │   ├── README.md
 │   │   ├── reviews.csv
 │   │   └── users.csv
 │   ├── raw
-│   │   ├── amazon.csv
-│   │   └── README.md
+│   │   └── amazon.csv
 │   └── splits
 │       ├── test
 │       │   └── test_set.csv
@@ -28,6 +34,9 @@ project/
 │   ├── evidently_report_2.png
 │   └── fast-api.jpg
 ├── infra
+│   ├── grafana-dashboards
+│   │   ├── dashboard-1.json
+│   │   └── dashboard-1.png
 │   ├── prometheus
 │   │   └── prometheus.yml
 │   └── README.md
@@ -43,8 +52,11 @@ project/
 │   ├── evidently_report.html
 │   ├── generate_drift.py
 │   └── README.md
+├── notebooks
+│   └── item-item-collabfiltering.ipynb
 ├── src
 │   ├── app
+│   │   ├── item-item-collabfiltering.py
 │   │   ├── main.py
 │   │   └── README.md
 │   ├── ml
@@ -65,11 +77,10 @@ project/
 │   └── train.py
 ├── .gitignore
 ├── docker-compose.yml
+├── Dockerfile
 ├── Makefile
 ├── mlops-key.pem
 ├── README.md
-├── requirements-dev.txt
-├── requirements-monitoring.txt
 ├── requirements.txt
 ├── setup.md
 ├── structure-maker.py
