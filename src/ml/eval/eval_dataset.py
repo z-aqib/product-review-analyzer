@@ -15,9 +15,7 @@ def build_leave_one_out(data_dir: str | Path, seed: int = 42):
     """
     rng = np.random.default_rng(seed)
     data_dir = Path(data_dir)
-    reviews = pd.read_csv(
-        data_dir / "reviews.csv", dtype={"user_id": str, "product_id": str}
-    )
+    reviews = pd.read_csv(data_dir / "reviews.csv", dtype={"user_id": str, "product_id": str})
 
     # implicit interactions
     inter = reviews[["user_id", "product_id"]].dropna().drop_duplicates()

@@ -5,7 +5,6 @@ import argparse
 import json
 from pathlib import Path
 import pandas as pd
-import numpy as np
 
 from src.ml.eval.eval_dataset import build_leave_one_out
 from src.ml.eval.metrics import recall_at_k, ndcg_at_k, catalog_coverage
@@ -89,9 +88,7 @@ def main():
         f"ndcg@{K}": ndcg_mean,
         "catalog_coverage": coverage,
     }
-    with open(
-        out_dir / f"eval_summary_item_item_k{K}.json", "w", encoding="utf-8"
-    ) as f:
+    with open(out_dir / f"eval_summary_item_item_k{K}.json", "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
     print(json.dumps(summary, indent=2))

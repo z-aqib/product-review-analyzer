@@ -1,3 +1,13 @@
+# Prometheus metrics setup
+from prometheus_client import (
+    Counter,
+    Histogram,
+    REGISTRY,
+    generate_latest,
+)
+from fastapi.responses import PlainTextResponse
+import time
+
 # # from fastapi import FastAPI
 # from fastapi import FastAPI
 # import joblib
@@ -67,7 +77,6 @@
 from fastapi import FastAPI
 import joblib
 import numpy as np
-from scipy.sparse import csr_matrix
 import os
 from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -84,21 +93,8 @@ user_item_sparse = joblib.load(os.path.join(ARTIFACT_DIR, "user_item_sparse.pkl"
 # FastAPI app
 app = FastAPI()
 
-# Prometheus metrics setup
-from prometheus_client import (
-    Counter,
-    Histogram,
-    start_http_server,
-    REGISTRY,
-    generate_latest,
-)
-from fastapi.responses import PlainTextResponse
-import time
-
 # Custom metrics
-RECOMMENDATIONS_COUNTER = Counter(
-    "recommendations_total", "Total number of recommendations made"
-)
+RECOMMENDATIONS_COUNTER = Counter("recommendations_total", "Total number of recommendations made")
 RECOMMENDATION_DURATION = Histogram(
     "recommendation_duration_seconds", "Time spent generating recommendations"
 )
@@ -126,7 +122,6 @@ def get_product_name(pid: str) -> str:
 
 
 def recommend_for_user(user_id: str, k: int = 10, exclude_seen: bool = True):
-    start_time = time.time()
     RECOMMENDATIONS_COUNTER.inc()
 
     if user_id not in user2idx:

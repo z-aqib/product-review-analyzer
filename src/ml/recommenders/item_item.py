@@ -36,17 +36,13 @@ class ItemItemRecommender:
         self.reviews["user_id"] = self.reviews["user_id"].astype(str)
         self.reviews["product_id"] = self.reviews["product_id"].astype(str)
 
-        self.prod_name_map = self.products.set_index("product_id")[
-            "product_name"
-        ].to_dict()
+        self.prod_name_map = self.products.set_index("product_id")["product_name"].to_dict()
 
     def fit(self):
         self._load()
 
         # Build implicit interactions (dedup)
-        interactions = (
-            self.reviews[["user_id", "product_id"]].dropna().drop_duplicates()
-        )
+        interactions = self.reviews[["user_id", "product_id"]].dropna().drop_duplicates()
 
         # Encode IDs → indices
         user_ids = interactions["user_id"].unique()
@@ -63,9 +59,7 @@ class ItemItemRecommender:
         vv = np.ones(len(interactions), dtype=np.float32)
 
         # Sparse user×item matrix
-        self.R = csr_matrix(
-            (vv, (ui, ii)), shape=(len(self.user2idx), len(self.item2idx))
-        )
+        self.R = csr_matrix((vv, (ui, ii)), shape=(len(self.user2idx), len(self.item2idx)))
 
         # Item–item cosine similarity (on columns)
         self.item_item_sim = cosine_similarity(self.R.T)  # (n_items, n_items)

@@ -33,9 +33,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 # 1) Load data
 # ----------------------------
 print("Loading CSVs...")
-products = pd.read_csv('data/processed/products.csv')
-reviews = pd.read_csv('data/processed/reviews.csv')
-users = pd.read_csv('data/processed/users.csv')
+products = pd.read_csv("data/processed/products.csv")
+reviews = pd.read_csv("data/processed/reviews.csv")
+users = pd.read_csv("data/processed/users.csv")
 
 
 # We only need (user_id, product_id) for implicit CF
@@ -89,9 +89,10 @@ np.fill_diagonal(item_item_sim, 0.0)  # remove self-similarity
 # ----------------------------
 prod_name_map = (
     products.assign(product_id=products["product_id"].astype(str))
-            .set_index("product_id")["product_name"]
-            .to_dict()
+    .set_index("product_id")["product_name"]
+    .to_dict()
 )
+
 
 def get_product_name(pid: str) -> str:
     """Return readable product name or ID if not found."""
@@ -128,11 +129,9 @@ def recommend_for_user(user_id: str, k: int = 10, exclude_seen: bool = True):
     results = []
     for j in topk_idx:
         pid = idx2prod[j]
-        results.append({
-            "product_id": pid,
-            "score": float(scores[j]),
-            "product_name": get_product_name(pid)
-        })
+        results.append(
+            {"product_id": pid, "score": float(scores[j]), "product_name": get_product_name(pid)}
+        )
     return results
 
 
@@ -159,11 +158,13 @@ def similar_items(product_id: str, k: int = 10):
         if jj == j:
             continue
         pid2 = idx2prod[jj]
-        results.append({
-            "product_id": pid2,
-            "similarity": float(sims[jj]),
-            "product_name": get_product_name(pid2)
-        })
+        results.append(
+            {
+                "product_id": pid2,
+                "similarity": float(sims[jj]),
+                "product_name": get_product_name(pid2),
+            }
+        )
     return results[:k]
 
 
@@ -184,9 +185,9 @@ if __name__ == "__main__":
     for s in sims:
         print(f"- [{s['product_id']}] {s['product_name'][:80]} ... | sim={s['similarity']:.4f}")
 
-# ----------------------------
-# 9) Save model artifacts
-# ----------------------------
+    # ----------------------------
+    # 9) Save model artifacts
+    # ----------------------------
     import joblib
     import os
 
