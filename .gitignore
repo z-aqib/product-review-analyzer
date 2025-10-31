@@ -13,3 +13,8 @@ mlops-venv/
 
 #ec2 key
 mlops-key.pem
+
+# Python artifacts
+*.pkl
+artifacts/
+mlops-key.pem

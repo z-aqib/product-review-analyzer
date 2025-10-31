@@ -1,0 +1,42 @@
+# Ignore Python cache and build artifacts
+_pycache_/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.db
+*.sqlite3
+*.egg-info/
+*.egg
+build/
+dist/
+
+# Ignore virtual environments
+venv/
+.env/
+.venv/
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.out
+.DS_Store
+
+# Ignore infrastructure configs that shouldn't go into FastAPI image
+infra/
+docker-compose.yml
+prometheus.yml
+grafana/
+monitoring/
+tests/
+notebooks/
+
+# Ignore git and docs
+.git/
+.gitignore
+README.md

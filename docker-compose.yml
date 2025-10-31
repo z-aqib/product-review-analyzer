@@ -1,4 +1,45 @@
+# version: "3.8"
+# services:
+#   prometheus:
+#     image: prom/prometheus:latest
+#     container_name: prometheus
+#     volumes:
+#       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#     command:
+#       - --config.file=/etc/prometheus/prometheus.yml
+#     ports:
+#       - "9090:9090"
+#     networks: [monitoring]
+
+#   grafana:
+#     image: grafana/grafana:latest
+#     container_name: grafana
+#     ports:
+#       - "3000:3000"
+#     environment:
+#       - GF_SECURITY_ADMIN_USER=admin
+#       - GF_SECURITY_ADMIN_PASSWORD=admin
+#     networks: [monitoring]
+
+#   recommender:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: recommender
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./artifacts:/app/artifacts
+#     environment:
+#       - PYTHONUNBUFFERED=1
+#     networks: [monitoring]
+
+# networks:
+#   monitoring:
+#     driver: bridge
+
 version: "3.8"
+
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -19,6 +60,19 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks: [monitoring]
+
+  recommender:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: recommender
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./artifacts:/app/artifacts
+    environment:
+      - PYTHONUNBUFFERED=1
     networks: [monitoring]
 
 networks:

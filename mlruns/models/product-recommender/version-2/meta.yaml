@@ -1,0 +1,15 @@
+creation_timestamp: 1761922510787
+current_stage: None
+deployment_job_state: null
+description: ''
+last_updated_timestamp: 1761922510787
+model_id: m-f89f7edf1b1643468c63696139e2c3cf
+name: product-recommender
+run_id: 4f37005ea74a49a09e4ba50b228ae94b
+run_link: ''
+source: models:/m-f89f7edf1b1643468c63696139e2c3cf
+status: READY
+status_message: null
+storage_location: mlflow-artifacts:/0/models/m-f89f7edf1b1643468c63696139e2c3cf/artifacts
+user_id: null
+version: 2
