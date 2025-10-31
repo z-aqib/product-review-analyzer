@@ -67,7 +67,7 @@ icacls "D:\sem7\mlops\project\product-review-analyzer\mlops-key.pem" /inheritanc
 icacls "D:\sem7\mlops\project\product-review-analyzer\mlops-key.pem" /grant:r "$($env:USERNAME):(R)"
 
 then back in vscode run this, run with correct path
-ssh -i "D:\sem7\mlops\project\product-review-analyzer\mlops-key.pem" ubuntu@ec2-13-60-193-55.eu-north-1.compute.amazonaws.com
+ssh -i "mlops-key.pem" ubuntu@ec2-13-60-193-55.eu-north-1.compute.amazonaws.com
 
 Uploaded processed data using this command
 aws s3 cp . s3://mlops-d9/processed/ --recursive
@@ -116,3 +116,9 @@ Grafana runs on this
 http://localhost:3000
 
 Grafana username: admin, pw: admin
+
+working
+http://13.60.193.55:8000/docs#/default/recommend_recommend_get
+http://13.60.193.55:3000/login
+http://13.60.193.55:9090/targets
+http://13.60.193.55:8000/health
