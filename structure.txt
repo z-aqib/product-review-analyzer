@@ -21,6 +21,10 @@ project/
 │           ├── train_set.csv
 │           └── val_set.csv
 ├── images
+│   ├── cloud-1.jpg
+│   ├── cloud-2.jpg
+│   ├── cloud-3.jpg
+│   ├── cloud-4.jpg
 │   ├── docker-setup.png
 │   ├── evidently_report_1.png
 │   ├── evidently_report_2.png
@@ -35,9 +39,8 @@ project/
 │   ├── grafana-dashboards
 │   │   ├── dashboard-1.json
 │   │   └── dashboard-1.png
-│   ├── prometheus
-│   │   └── prometheus.yml
-│   └── README.md
+│   └── prometheus
+│       └── prometheus.yml
 ├── milestones
 │   ├── milestone_0
 │   │   └── MLOPS - Milestone 0.pdf
@@ -201,24 +204,20 @@ project/
 ├── monitoring
 │   ├── evidently_app.py
 │   ├── evidently_report.html
-│   ├── generate_drift.py
-│   └── README.md
+│   └── generate_drift.py
 ├── notebooks
 │   └── item-item-collabfiltering.ipynb
 ├── src
 │   ├── app
 │   │   ├── item-item-collabfiltering.py
-│   │   ├── main.py
-│   │   └── README.md
+│   │   └── main.py
 │   ├── ml
 │   │   ├── eval
 │   │   │   ├── eval_dataset.py
 │   │   │   └── metrics.py
-│   │   ├── recommenders
-│   │   │   └── item_item.py
-│   │   └── README.md
+│   │   └── recommenders
+│   │       └── item_item.py
 │   ├── tests
-│   │   ├── README.md
 │   │   └── test_health.py
 │   ├── api.py
 │   ├── evaluate.py
@@ -226,7 +225,6 @@ project/
 ├── .gitignore
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTION.md
-├── data.zip
 ├── docker-compose.yml
 ├── Dockerfile
 ├── dvc.yaml
