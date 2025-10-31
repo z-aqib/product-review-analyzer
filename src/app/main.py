@@ -19,15 +19,53 @@ user_item_sparse = joblib.load(os.path.join(ARTIFACT_DIR, "user_item_sparse.pkl"
 # FastAPI app
 app = FastAPI()
 
-# Instrumentator for Prometheus metrics
-instrumentator = Instrumentator()
-instrumentator.instrument(app).expose(app)
+# Prometheus metrics setup
+from prometheus_client import (
+    Counter,
+    Histogram,
+    start_http_server,
+    REGISTRY,
+    generate_latest,
+)
+from fastapi.responses import PlainTextResponse
+import time
+
+# Custom metrics
+RECOMMENDATIONS_COUNTER = Counter(
+    "recommendations_total", "Total number of recommendations made"
+)
+RECOMMENDATION_DURATION = Histogram(
+    "recommendation_duration_seconds", "Time spent generating recommendations"
+)
+EMPTY_RECOMMENDATIONS = Counter(
+    "empty_recommendations_total", "Number of times no recommendations were found"
+)
+
+
+@app.get("/metrics", response_class=PlainTextResponse)
+async def metrics():
+    return PlainTextResponse(content=generate_latest(REGISTRY).decode())
+
+
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    should_ignore_untemplated=True,
+    should_respect_env_var=True,
+    should_instrument_requests_inprogress=True,
+)
+instrumentator.instrument(app).expose(app, "/metrics")
+
 
 def get_product_name(pid: str) -> str:
     return prod_name_map.get(str(pid), str(pid))
 
+
 def recommend_for_user(user_id: str, k: int = 10, exclude_seen: bool = True):
+    start_time = time.time()
+    RECOMMENDATIONS_COUNTER.inc()
+
     if user_id not in user2idx:
+        EMPTY_RECOMMENDATIONS.inc()
         return []
 
     uidx = user2idx[user_id]
@@ -48,18 +86,25 @@ def recommend_for_user(user_id: str, k: int = 10, exclude_seen: bool = True):
     results = []
     for j in topk_idx:
         pid = idx2prod[j]
-        results.append({
-            "product_id": pid,
-            "score": float(scores[j]),
-            "product_name": get_product_name(pid)
-        })
+        results.append(
+            {
+                "product_id": pid,
+                "score": float(scores[j]),
+                "product_name": get_product_name(pid),
+            }
+        )
     return results
+
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-@app.get("/recommend")
+
+@app.get("/recommend/{user_id}")
 def recommend(user_id: str, k: int = 5):
+    start_time = time.time()
     recs = recommend_for_user(user_id, k)
+    duration = time.time() - start_time
+    RECOMMENDATION_DURATION.observe(duration)
     return recs if recs else {"message": "No recommendations"}
