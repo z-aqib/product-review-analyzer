@@ -36,7 +36,9 @@ def train_and_register():
 
         # Log the model
         mlflow.sklearn.log_model(
-            sk_model=model, artifact_path="model", registered_model_name="product-recommender"
+            sk_model=model,
+            artifact_path="model",
+            registered_model_name="product-recommender",
         )
 
 

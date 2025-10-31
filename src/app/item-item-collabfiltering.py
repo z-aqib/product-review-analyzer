@@ -130,7 +130,11 @@ def recommend_for_user(user_id: str, k: int = 10, exclude_seen: bool = True):
     for j in topk_idx:
         pid = idx2prod[j]
         results.append(
-            {"product_id": pid, "score": float(scores[j]), "product_name": get_product_name(pid)}
+            {
+                "product_id": pid,
+                "score": float(scores[j]),
+                "product_name": get_product_name(pid),
+            }
         )
     return results
 
