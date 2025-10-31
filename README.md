@@ -4,6 +4,7 @@ this is a product review analyzer multi modal project for course mlops
 Milestone 1 verifies that each project team has translated its idea into a production-ready
 repository skeleton.
 
+We follow the Contributor Covenant Code of Conduct. Please read it before contributing.
 ## STEPS TO RUN THE PROJECT LOCALLY
 
 ### MILESTONE 1
@@ -36,7 +37,7 @@ Bucket list command
 aws s3 ls
 
 Command to upload to S3
-aws s3 cp README.md s3://mlops-d9/ 
+aws s3 cp README.md s3://mlops-d9/
 
 Command to check what has been uploaded to S3 Bucket
 aws s3 ls s3://mlops-d9/
