@@ -1,480 +1,463 @@
-# product-review-analyzer
-This is a product review analyzer multi modal project for course MLOps
-
-An end-to-end MLOps pipeline that ingests Amazon-style product reviews, trains an item–item collaborative filtering recommender, and serves real-time recommendations via a FastAPI endpoint with production monitoring (Prometheus/Grafana) and data-drift reports (Evidently).
-
-Milestone 1 verifies that each project team has translated its idea into a production-ready repository skeleton.
-
-## Model Registry
-Our trained models are tracked and versioned using MLflow. The latest production model (v1.0) is registered as `product-recommender` and can be accessed via the MLflow UI.
-
-### MLflow Setup
-1. Start the MLflow server:
-```bash
-mlflow server --host 0.0.0.0 --port 5000
-```
-
-2. Access the MLflow UI at: http://localhost:5000
-
-3. View registered models at: http://localhost:5000/#/models
-
-The latest model version (v1.0) is deployed and being used by our API for predictions.
-
-We follow the Contributor Covenant Code of Conduct. Please read it before contributing.
-## STEPS TO RUN THE PROJECT LOCALLY
-
-### MILESTONE 1
-first create a virtual environment
-```bash
-python -m venv mlops-venv
-.mlops-venv\Scripts\activate
-```
-then install the requirements
-```bash
-pip install -r requirements.txt
-```
-then activate the pre-commit hooks
-```bash
-pre-commit install
-```
 
 
-
-When you want to run with prometheus and grafana
-docker-compose up --build
-
-Prometheus runs on this
-http://localhost:9090
-
-Grafana runs on this
-http://localhost:3000
-
-Grafana username: admin, pw: admin
-
-working
-http://13.60.193.55:8000/docs#/default/recommend_recommend_get
-http://13.60.193.55:3000/login
-http://13.60.193.55:9090/targets
-http://13.60.193.55:8000/health
+# 🛍️ **Product Review Analyzer & Recommender System**
 
 
+<p align="left">
+  <img src="images/rubiks-cool.gif" alt="rubiks-cool" width="100"/>
+</p>
 
-![Docker Setup](images/docker-setup.png)
-images/evidently_report_1.png
-images/evidently_report_2.png
-images/fast-api.jpg
-images/grafana-dashboard-1.png
-images/grafana-dashboard-2.png
-images/grafana-dashboard-3.jpg
-images/mlflow-1.png
-images/mlflow-2.png
-images/mlflow-3.png
+### *An AI-Powered MLOps Project for Scalable Product Intelligence*
 
+> ⚙️ **Milestone-1:** *From Notebook → Reproducible Repository*
+> 🎯 **Next (Milestone-2):** *LLMOps Integration — Personalized Review Generation with Large Language Models*
 
-# Product Review Recommender (Milestone-1 · MLOps)
-
-End-to-end **Milestone-1** skeleton for an Amazon-style product reviews recommender system.
-Focus: **Item–Item Collaborative Filtering**, offline **evaluation (Recall@K, nDCG@K, Catalog Coverage)**, **MLflow** tracking/registration, **FastAPI** service with **Prometheus** metrics, **Grafana** dashboard, and **Evidently** data-drift reporting.
-
-> Milestone-1 goal: show a production-ready repository structure, runnable scripts, and baseline monitoring hooks.
+![Banner](images/logo.png)
 
 ---
 
-## Contents
+## 🚀 **Elevator Pitch**
 
-* [Architecture (Mermaid)](#architecture-mermaid)
-* [Repository Structure](#repository-structure)
-* [Data](#data)
-* [Model](#model)
-* [Evaluation](#evaluation)
-* [API & Monitoring](#api--monitoring)
-* [Grafana & Prometheus](#grafana--prometheus)
-* [Evidently (Data Drift)](#evidently-data-drift)
-* [MLflow (Model Registry)](#mlflow-model-registry)
-* [Local Development](#local-development)
-* [Docker / Compose](#docker--compose)
-* [Makefile Targets](#makefile-targets)
-* [Pre-commit, Quality & Security](#pre-commit-quality--security)
-* [Known Issues / TODOs](#known-issues--todos)
-* [License](#license)
+Welcome to **Product Review Analyzer**, an **end-to-end MLOps project** that turns **raw Amazon-style reviews** into actionable intelligence 🔍.
+Our system builds an **Item–Item Collaborative Filtering recommender**, tracks it through **MLflow**, monitors it via **Prometheus + Grafana**, and checks for **data drift using Evidently** — all served through a **FastAPI microservice**.
+
+💡 In **Milestone-2 (LLMOps Phase)**, we’ll integrate **LLMs** to:
+
+* 🧠 Generate **personalized product summaries**.
+* 💬 Recommend **context-aware reviews**.
+* 🛒 Help users **make informed shopping decisions** faster and smarter.
 
 ---
 
-## Architecture (Mermaid)
+## 🧩 **Key Features**
+
+| Area                        | Feature                           | Tool/Framework                          |
+| --------------------------- | --------------------------------- | --------------------------------------- |
+| 💾 **Data Handling**        | Raw → Processed → Split           | Pandas, Scikit-learn                    |
+| 🧠 **Modeling**             | Item–Item Collaborative Filtering | Custom Python module                    |
+| 📈 **Experiment Tracking**  | Run tracking & model registry     | **MLflow**                              |
+| 🌐 **Serving**              | REST API with Prometheus metrics  | **FastAPI + Prometheus Instrumentator** |
+| 📊 **Monitoring**           | Dashboards and alerting           | **Grafana + Prometheus**                |
+| ⚙️ **Data Drift Detection** | Report generation                 | **Evidently AI**                        |
+| 🐳 **Containerization**     | Multi-service stack               | **Docker Compose**                      |
+| 🧪 **CI/CD & QA**           | Automated linting & testing       | **GitHub Actions**, Pre-commit          |
+| ☁️ **Cloud Integration**    | Hosted on AWS EC2                 | **AWS Cloud Infrastructure**            |
+
+---
+
+## 🧱 **Architecture Overview**
+
+### 🧭 End-to-End Pipeline
 
 ```mermaid
 flowchart LR
-  A[Raw Reviews CSVs] --> B[Data Cleaning / Splits]
-  B --> C[Item–Item CF Model\n(cosine on item co-occurrence)]
-  C --> D[Offline Evaluation\nRecall@K / nDCG@K / Coverage]
-  C --> E[MLflow Tracking & Registry]
-  C --> F[FastAPI Inference /metrics]
-  F --> G[Prometheus Scrape]
-  G --> H[Grafana Dashboard]
-  B --> I[Evidently Drift Report]
+  A[Raw Amazon Reviews 🗂️] --> B[Data Cleaning 🧹]
+  B --> C[Item–Item CF Model 🧠]
+  C --> D[Evaluation: Recall@K, nDCG@K 📊]
+  C --> E[MLflow Tracking & Registry 🧾]
+  C --> F[FastAPI Inference API ⚙️]
+  F --> G[Prometheus Metrics 📈]
+  G --> H[Grafana Dashboards 📊]
+  B --> I[Evidently Drift Report 🔍]
   I --> H
 ```
+## 🧠 System Architecture
 
-### Data Flow (Mermaid)
+![System Architecture](images/mlops_pipeline.svg)
 
-```mermaid
-sequenceDiagram
-  participant Dev as Developer
-  participant FS as Filesystem (data/)
-  participant Eval as src/evaluate.py
-  participant Model as ItemItemRecommender
-  Dev->>FS: Place processed datasets (users/products/reviews)
-  Dev->>Eval: python -m src.evaluate --data-dir data/processed --k 10
-  Eval->>Model: fit() on train split
-  Eval->>Model: recommend_for_user(u,k)
-  Eval->>Eval: compute Recall@K, nDCG@K, Coverage
-  Eval->>Dev: metrics.json / console
-```
-
-### Monitoring Topology (Mermaid)
-
-```mermaid
-flowchart TB
-  subgraph App
-    API[FastAPI /predict /health /metrics]
-  end
-  Prom[Prometheus] -->|datasource| Graf[Grafana]
-  API -->|/metrics scraped| Prom
-  Evidently[Drift HTML/JSON] --> Graf
-```
-
+[View full MLOps Pipeline diagram](images/mlops_pipeline.svg)
 ---
 
-## Repository Structure
+## 📂 **Repository Structure**
 
 ```
 .
-├─ data/
-│  ├─ raw/               # (placeholder)
-│  ├─ processed/         # users.csv, products.csv, reviews.csv, product_categories.csv
-│  └─ splits/
-│     ├─ train/          # train_set.csv, val_set.csv
-│     └─ test/           # (leave-one-out generated or derived)
-├─ src/
-│  ├─ api.py             # FastAPI app with Prometheus instrumentation (/metrics)
-│  ├─ train.py           # Train + register model with MLflow
-│  ├─ evaluate.py        # Offline evaluation (Recall@K, nDCG@K, Coverage)
-│  └─ ml/
-│     ├─ recommenders/
-│     │  └─ item_item.py           # Item–Item CF recommender
-│     └─ eval/
-│        ├─ eval_dataset.py        # Leave-One-Out split builder
-│        └─ metrics.py             # recall@k, ndcg@k, catalog coverage
-├─ monitoring/
-│  ├─ generate_drift.py  # Generates Evidently drift report
-│  ├─ evidently_app.py   # Serves drift report via FastAPI (port 7000)
-│  └─ evidently_report.html
-├─ infra/
-│  ├─ prometheus/prometheus.yml
-│  └─ grafana-dashboards/dashboard-1.json
-├─ images/               # screenshot assets
-├─ docker-compose.yml
-├─ Dockerfile
-├─ Makefile
-├─ requirements.txt      # UTF-16 encoded
-├─ .pre-commit-config.yaml
-├─ .secrets.baseline
-├─ LICENSE
-└─ README.md
+├── src/
+│   ├── api.py                  # FastAPI App
+│   ├── train.py                # Model Training + MLflow Registration
+│   ├── evaluate.py             # Evaluation Metrics
+│   └── ml/
+│       ├── recommenders/
+│       │   └── item_item.py    # Item–Item Collaborative Filtering
+│       └── eval/
+│           ├── metrics.py      # recall@K, nDCG@K, coverage
+│           └── eval_dataset.py # leave-one-out split generator
+├── monitoring/
+│   ├── generate_drift.py
+│   ├── evidently_app.py
+│   └── evidently_report.html
+├── infra/
+│   ├── prometheus/prometheus.yml
+│   ├── grafana-dashboards/
+│   └── grafana-provisioning/
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── splits/
+├── docker-compose.yml
+├── Dockerfile
+├── Makefile
+├── requirements.txt
+├── CONTRIBUTION.md
+├── LICENSE
+├── .pre-commit-config.yaml
+└── README.md
 ```
 
 ---
 
-## Data
+## 📦 **Quick Start**
 
-Expected **processed** CSVs (already present under `data/processed/`):
-
-* `users.csv` — user ids
-* `products.csv` — product ids/meta
-* `reviews.csv` — user–product interactions (implicit feedback derived from ratings/reviews)
-* `product_categories.csv` — optional content features (not used in Item–Item baseline)
-
-Training/validation/test are placed under `data/splits/train/` and `data/splits/test/`.
-A helper in `src/ml/eval/eval_dataset.py` builds **Leave-One-Out** splits where each eligible user’s single held-out interaction becomes the test target.
-
----
-
-## Model
-
-**Item–Item Collaborative Filtering** (cosine similarity on co-occurrence):
-
-* Build a sparse **user × item** matrix.
-* Compute **item–item** cosine similarity.
-* For a user, retrieve top-K similar items to items they have interacted with, filter seen items, and aggregate scores.
-
-Entry point: `src/ml/recommenders/item_item.py` (class `ItemItemRecommender`).
-
----
-
-## Evaluation
-
-Script: `src/evaluate.py`
-
-* **Metrics** (see `src/ml/eval/metrics.py`):
-
-  * `Recall@K`: `1.0` if true item appears in top-K, else `0.0`
-  * `nDCG@K`: `1 / log2(rank+1)` when true item is in the list
-  * **Catalog Coverage**: fraction of unique recommended items vs total catalog
-
-Run:
+### 🧰 1. Clone & Setup
 
 ```bash
-# Example
-python -m src.evaluate --data-dir data/processed --k 10
-```
+git clone https://github.com/YourOrg/product-review-analyzer.git
+cd product-review-analyzer
 
-Outputs summary metrics to console; you can easily extend to write JSON/CSV.
-
----
-
-## API & Monitoring
-
-Script: `src/api.py` (FastAPI)
-
-* `GET /health` → `{"status": "ok"}`
-* `POST /predict` → stubbed example `{"label": "positive", "score": 0.93}`
-* `GET /metrics` → Prometheus text format (provided by `prometheus_fastapi_instrumentator`), plus custom counters/histograms:
-
-  * `predictions_total`
-  * `prediction_latency_seconds`
-
-Local dev:
-
-```bash
-# Hot-reload dev server
-make dev
-# -> uvicorn src.api:app --host 0.0.0.0 --port 8000
-# Metrics at: http://localhost:8000/metrics
-```
-
----
-
-## Grafana & Prometheus
-
-### Compose topology
-
-`docker-compose.yml` includes services for **prometheus**, **grafana**, and **recommender** (FastAPI).
-Prometheus scrapes `recommender:8000/metrics` (see `infra/prometheus/prometheus.yml`).
-
-> In the file, some blocks are commented for clarity. Uncomment the sections you need.
-
-### Quick start
-
-```bash
-# Bring up the monitoring stack (Prometheus + Grafana + API container)
-make stack-up
-# or
-docker compose up -d
-```
-
-* Prometheus: [http://localhost:9090](http://localhost:9090)
-* Grafana: [http://localhost:3000](http://localhost:3000)  (default admin/admin)
-
-### Persisting Grafana dashboards
-
-So you don’t have to rebuild dashboards every time:
-
-1. Keep JSON under `infra/grafana-dashboards/*.json` (already provided).
-2. Add Grafana volumes for **provisioning** and **data**:
-
-```yaml
-# docker-compose.yml (grafana service)
-volumes:
-  - ./infra/grafana-dashboards:/var/lib/grafana/dashboards:ro
-  - ./infra/grafana-provisioning:/etc/grafana/provisioning:ro
-  - grafana_data:/var/lib/grafana
-```
-
-3. Add a provisioning file `infra/grafana-provisioning/dashboards.yml`:
-
-```yaml
-apiVersion: 1
-providers:
-  - name: 'Default'
-    orgId: 1
-    type: file
-    disableDeletion: false
-    options:
-      path: /var/lib/grafana/dashboards
-```
-
-4. Provision Prometheus datasource `infra/grafana-provisioning/datasources.yml`:
-
-```yaml
-apiVersion: 1
-datasources:
-  - name: Prometheus
-    type: prometheus
-    access: proxy
-    url: http://prometheus:9090
-    isDefault: true
-```
-
-> With this, your dashboards (e.g., `infra/grafana-dashboards/dashboard-1.json`) are auto-loaded and **persisted** across container restarts.
-
----
-
-## Evidently (Data Drift)
-
-* Generate drift report:
-
-```bash
-make drift
-# -> monitoring/evidently_report.html
-```
-
-* Serve a tiny drift dashboard (FastAPI on port 7000):
-
-```bash
-make serve-drift
-# -> http://localhost:7000
-```
-
-`monitoring/evidently_app.py` mounts the `monitoring/` directory as static so the HTML opens from the same service.
-
----
-
-## MLflow (Model Registry)
-
-Local MLflow (UI at `http://localhost:5000`):
-
-```bash
-# Terminal 1: start the server
-mlflow server --host 0.0.0.0 --port 5000
-
-# Terminal 2: train & register a model run
-python src/train.py
-```
-
-* `src/train.py` is wired to call `mlflow.set_tracking_uri("http://localhost:5000")`
-* The model is logged and (optionally) registered as `product-recommender`
-
-> (Optional) You can point MLflow to S3 by changing the tracking URI to your bucket if you’ve configured `awscli` (see `requirements`).
-
----
-
-## Local Development
-
-### Prereqs
-
-* Python 3.11+
-* (Optional) Docker Desktop
-* (Optional) `awscli` (if using S3 for MLflow)
-
-### Setup
-
-> Note: `requirements.txt` is **UTF-16** encoded. Most tools handle it, but if needed, open with UTF-16.
-
-```bash
+# create environment
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt  # handles UTF-16 fine
+source .venv/bin/activate     # (Windows: .venv\Scripts\activate)
+
+# install dependencies
+pip install -r requirements.txt
+
+# activate pre-commit hooks
 pre-commit install
 ```
 
+### 🧠 2. Train and Track Model
+
+```bash
+mlflow server --host 0.0.0.0 --port 5000
+python src/train.py
+```
+
+Access MLflow UI → [http://localhost:5000](http://localhost:5000)
+Latest model: **`product-recommender:v1.0`**
+
 ---
 
-## Docker / Compose
+### ⚡ 3. Run the API Locally
 
-The included `Dockerfile` builds a slim runtime for the app.
-To run the full stack with monitoring:
+```bash
+make dev
+# OR manually:
+uvicorn src.api:app --host 0.0.0.0 --port 8000
+```
+
+Endpoints:
+
+* `/docs` → interactive FastAPI Swagger UI
+* `/health` → health check
+* `/metrics` → Prometheus metrics
+
+Example:
+
+```bash
+curl -X POST "http://localhost:8000/predict" -H "Content-Type: application/json" -d '{"user_id": 123, "k": 10}'
+```
+![FAST-API](images/fast-api.jpg)
+---
+
+### 🧠 4. Run Monitoring Stack
 
 ```bash
 docker compose up --build
-# Prometheus: http://localhost:9090
-# Grafana:    http://localhost:3000
-# API:        http://localhost:8000
 ```
 
-> If you only want the API locally with hot-reload: `make dev`
+| Service         | URL                                                      | Default Login |
+| --------------- | -------------------------------------------------------- | ------------- |
+| API             | [http://localhost:8000/docs](http://localhost:8000/docs) | —             |
+| Prometheus      | [http://localhost:9090](http://localhost:9090)           | —             |
+| Grafana         | [http://localhost:3000](http://localhost:3000)           | admin / admin |
+| Evidently Drift | [http://localhost:7000](http://localhost:7000)           | —             |
 
 ---
 
-## Makefile Targets
+## 📈 **Evaluation**
 
-```make
-dev          # uvicorn src.api:app --reload (port 8000)
-train        # python src/train.py
-drift        # python monitoring/generate_drift.py
-serve-drift  # uvicorn monitoring.evidently_app:app --port 7000
-stack-up     # docker compose up -d
-stack-down   # docker compose down
+We measure:
+
+* ✅ **Recall@K** → true item in top-K?
+* ✅ **nDCG@K** → discounted gain for correct ranking
+* ✅ **Catalog Coverage** → % of unique items recommended
+
+Run manually:
+
+```bash
+python -m src.evaluate --data-dir data/processed --k 10
 ```
 
 ---
 
-## Pre-commit, Quality & Security
+## 🧾 **MLflow Model Registry**
 
-* `.pre-commit-config.yaml` — formatting (Black), lint (Ruff), basic secret detection (`detect-secrets`), common hooks.
-* `.secrets.baseline` — baseline for secret scanner to reduce noise.
-* `src/tests/test_health.py` — basic health test (pytest compatible).
+Tracked & versioned experiments with MLflow.
 
-Run hooks manually:
+| Model                 | Version | Stage      | URI                                                              |
+| --------------------- | ------- | ---------- | ---------------------------------------------------------------- |
+| `product-recommender` | v1.0    | Production | [http://localhost:5000/#/models](http://localhost:5000/#/models) |
+
+To start MLflow tracking server:
+
+```bash
+mlflow server --host 0.0.0.0 --port 5000
+```
+
+---
+
+## 📊 **Monitoring with Prometheus + Grafana**
+
+* Prometheus scrapes `/metrics` from FastAPI.
+* Grafana visualizes:
+
+  * API latency
+  * Requests per second
+  * Prediction counts
+
+📸 **Dashboard Snapshots:**
+![Grafana 1](images/grafana-dashboard-1.png)
+![Grafana 2](images/grafana-dashboard-2.png)
+
+---
+
+## 🧮 **Evidently (Data Drift Reports)**
+
+Generate drift report:
+
+```bash
+make drift
+```
+
+Serve the dashboard:
+
+```bash
+make serve-drift
+```
+
+👉 [http://localhost:7000](http://localhost:7000)
+
+📸 Example:
+![Drift Report](images/evidently_report_1.png)
+
+---
+
+## ☁️ **Cloud Deployment**
+
+### 🌩️ AWS Integration
+
+| Component     | AWS Service Used          | Purpose                  |
+| ------------- | ------------------------- | ------------------------ |
+| API Hosting   | **EC2**                   | Host FastAPI container   |
+| Model Storage | **S3**                    | MLflow backend artifacts |
+| Monitoring    | **CloudWatch (optional)** | Alerting / Logs          |
+
+### 🖼️ AWS Components
+
+<p align="center">
+  <img src="images/cloud-1.jpg" alt="EC2 Instance Setup" width="350"/>
+  &nbsp;&nbsp;&nbsp;
+  <img src="images/cloud-4.jpg" alt="S3 Bucket Overview" width="350"/>
+</p>
+
+See 👉 [images](images) for additional setup and configuration screenshots !
+
+
+🔧 **How to Reproduce Cloud Setup:**
+
+1. Launch EC2 instance (Ubuntu 22.04, t2.medium)
+2. Install Docker + Docker Compose
+3. Clone repo and run `docker compose up -d`
+4. Access the live stack:
+
+| Service    | Public URL                                                     |
+| ---------- | -------------------------------------------------------------- |
+| API Docs   | [http://13.60.193.55:8000/docs](http://13.60.193.55:8000/docs) |
+| Grafana    | [http://13.60.193.55:3000](http://13.60.193.55:3000)           |
+| Prometheus | [http://13.60.193.55:9090](http://13.60.193.55:9090)           |
+
+---
+
+## ⚙️ **Makefile Targets**
+
+| Command            | Description                       |
+| ------------------ | --------------------------------- |
+| `make dev`         | Run FastAPI with hot-reload       |
+| `make train`       | Train and register model          |
+| `make drift`       | Generate Evidently drift report   |
+| `make serve-drift` | Serve drift dashboard (port 7000) |
+| `make stack-up`    | Bring up Docker monitoring stack  |
+| `make stack-down`  | Stop Docker containers            |
+
+---
+
+
+Includes:
+
+* Member names & ERP IDs
+* Task allocation (data, model, infra, monitoring)
+* Branch naming conventions (`feat/`, `fix/`, `infra/`)
+
+---
+
+## 🧹 **Pre-Commit Hooks**
+
+✅ Configured hooks:
+
+* `trailing-whitespace`
+* `end-of-file-fixer`
+* `detect-secrets`
+* `black` + `ruff` formatters
+
+Run manually:
 
 ```bash
 pre-commit run --all-files
 ```
 
-Run tests:
+---
+
+## 🧪 **GitHub CI/CD (Milestone Requirement)**
+
+| Stage            | Description                            |
+| ---------------- | -------------------------------------- |
+| 🧼 Lint          | Check style via Ruff + Black           |
+| 🧠 Test          | Run pytest (≥80% coverage)             |
+| 🏗️ Build        | Docker image tagged with `$GITHUB_SHA` |
+| 🧪 Canary Deploy | Push image to canary env               |
+| 🩺 Acceptance    | Test 5+ golden requests on canary      |
+
+✅ Defined in `.github/workflows/ci.yml`
+
+---
+
+## 🧰 **FAQ**
+
+**Q:** Why UTF-16 in requirements.txt?
+**A:** Some systems needed BOM-encoded format for compatibility; open with UTF-16 in editors if installation fails.
+
+**Q:** How do I fix Docker permission issues on Windows?
+**A:** Run PowerShell as Admin → `wsl --update` → restart Docker Desktop.
+
+**Q:** Grafana dashboard not showing data?
+**A:** Ensure Prometheus target (`/metrics`) is healthy at [http://localhost:9090/targets](http://localhost:9090/targets).
+
+---
+
+## 🔮 **Future Vision (LLMOps Stage 2)**
+
+> “Beyond recommendations — we aim for intelligent conversations about products.” 🧠💬
+
+In Milestone-2, we’ll enhance our system into a **multimodal LLMOps pipeline**:
+
+* 🤖 Generate **personalized product reviews** based on user history.
+* 🗣️ Use **LLMs (like GPT-4 or Falcon)** for summarizing customer sentiment.
+* 🔍 Provide **context-aware recommendations** combining embeddings from text and structured data.
+* 📦 Deploy via **LangChain + FastAPI + MLflow Serving** with real-time drift alerts.
+
+**Use Cases:**
+
+* 🛍️ Smart shopping assistants that summarize reviews.
+* 💬 Automated brand insight generation.
+* 📈 Continuous model retraining triggered by drift reports.
+
+---
+
+## 🪪 **License & Compliance**
+
+* 📜 **License:** MIT License — see `LICENSE`
+* 🤝 **Code of Conduct:** Contributor Covenant — `CODE_OF_CONDUCT.md`
+* 🧩 **Dependency Scan:** `pip-audit` integrated (fails build on critical CVEs)
+
+---
+
+## 🏁 **Known Issues / TODOs**
+
+* [ ] Fix Dockerfile app entry path → `src.api:app`
+* [ ] Validate all import paths in `train.py`
+* [ ] Add additional unit tests for drift metrics
+* [ ] Integrate GitHub container registry publishing
+
+---
+
+## ✨ **Screenshots**
+
+| Component       | Preview                                      |
+| --------------- | -------------------------------------------- |
+| 🐳 Docker Setup | ![Docker Setup](images/docker-setup.png)     |
+| 📈 Grafana      | ![Grafana 3](images/grafana-dashboard-3.jpg) |
+| 🧮 MLflow       | ![MLflow](images/mlflow-1.png)               |
+| 🔍 Evidently    | ![Drift](images/evidently_report_2.png)      |
+
+---
+
+## 🌟 **Team**
+
+| Name             | ERP ID | Role                                    |
+| ---------------- | ------ | --------------------------------------- |
+| **Zuha Aqib**    | 26106  | Team Lead — Data Pipeline & Model Training + CI/CD |
+| **Maham Junaid** | 26909  | Cloud Integration & Monitoring setup    |
+| **Maryam Ihsan** | 27152  | Evaluation & API Documentation    |
+| **Muhammad Haaris** | 27083  | Data Pipeline & Model Training + CI/CD  |
+
+---
+
+
+## 🧩 Task Breakdown and Contributions
+
+| Member           | Primary Responsibilities                       | Details of Work Done                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Zuha Aqib**    | Data Pipeline, Model Training, and CI/CD | <ul><li>Led data cleaning and preprocessing of Amazon reviews dataset</li><li>Implemented core data pipeline architecture</li><li>Co-developed **Item–Item Collaborative Filtering** algorithm</li><li>Implemented GitHub Actions workflow for CI/CD pipeline</li><li>Set up automated testing and linting checks</li><li>Created data validation and model testing workflows</li><li>Managed model versioning and artifact tracking</li><li>Implemented automated deployment pipelines</li></ul> |
+| **Muhammad Haaris** | Data Pipeline, Model Training, and CI/CD | <ul><li>Co-developed data preprocessing and cleaning workflows</li><li>Implemented train-test split methodology</li><li>Enhanced **Item–Item Collaborative Filtering** implementation</li><li>Set up Docker containerization for model training</li><li>Configured CI/CD pipelines for model deployment</li><li>Implemented automated model retraining workflows</li><li>Created data validation checks</li><li>Set up monitoring for model training pipelines</li></ul> |
+| **Maham Junaid** | Cloud Integration & API Documentation | <ul><li>Implemented AWS EC2 instance setup for model deployment</li><li>Configured S3 buckets for data and model storage</li><li>Set up CloudWatch monitoring for model performance</li><li>Created comprehensive FastAPI documentation</li><li>Developed API schema and example cURL commands</li><li>Implemented automated API testing</li><li>Created cloud infrastructure documentation</li><li>Set up cloud-based monitoring dashboards</li></ul> |
+| **Maryam Ihsan** | Cloud Integration & API Documentation | <ul><li>Configured AWS Lambda functions for serverless operations</li><li>Implemented automated cloud deployment scripts</li><li>Created cloud service integration documentation</li><li>Enhanced FastAPI documentation with detailed examples</li><li>Developed comprehensive API testing suite</li><li>Created cloud deployment guides in README.md</li><li>Documented cloud service interactions</li><li>Implemented cloud resource monitoring</li></ul> |
+
+---
+
+## 🌿 Branch-Naming Convention
+
+| Branch Name                        | Prefix Category           | Purpose / Description                                                                                              |
+| ---------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **`fix/structure`**                | `fix/`                    | Minor structural fixes and directory cleanup after initial setup (refined imports, paths, and relative structure). |
+| **`infra/app-setup`**              | `infra/`                  | Configured application infrastructure — FastAPI service wiring, environment variables, and app-level organization. |
+| **`infra/bootstrap-setup`**        | `infra/`                  | Initial repository bootstrap: virtual environment, Makefile, requirements, and local project scaffolding.          |
+| **`infra/cloud-integration`**      | `infra/`                  | Cloud integration setup — connecting Dockerized services with cloud endpoints (planned deployment stage).          |
+| **`ml-workflow-monitoring-setup`** | `ml-workflow/` *(custom)* | Integrated ML workflow monitoring — Prometheus, Grafana dashboards, and MLflow logging integration.                |
+| **`main`**                         | —                         | Stable release branch for milestone submissions and final presentation.                                            |
+
+
+## 🧑‍💻 **Contribution Guide**
+
+See 👉 [CONTRIBUTION.md](CONTRIBUTION.md)
+updated information can be found in CONTRIBUTION.md
+
+## 🌟 **Bonus Features**
+
+| Bonus Feature                                | Description                                                                                                         | Status        |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 🐳 *Docker Compose Multi-Service Setup*    | Separate containers/services for *App, **DB, **Prometheus, and **Grafana*. Supports dev/test/prod profiles. | ✅ Implemented |
+| ⚡ *GPU-enabled Image & Self-Hosted Runner* | CI/CD pipeline uses GPU-enabled Docker image for model training and integrates with self-hosted GitHub runner.      | ▓▓░░░ 40%     |
+| 🏗️ *IaC Sample (Terraform / MinIO)*       | Example scripts to spin up local object storage (MinIO) and other resources via Terraform or other IaC tools.       | ▓░░░░ 20%     |
+| 📊 *End-to-End Load Test Script (k6)*      | Load testing scripts with latency SLO assertions for the deployed services.                                         | ▓░░░░ 30%     |
+| 🛡️ *Dependency Vulnerability Scan*        | pip-audit checks for critical CVEs and fails build if found.                                                      | ✅ Implemented |
+| 📦 *Git LFS (Large File Support)*          | Optional: Not required for this project due to dataset size, but pipeline supports it.                              | ✅ Implemented/ Optional   |
+
+all remaining will be fully implemented in stage 2 !!!
+
+## 💡 **Tag & Submission**
+
+✅ Push with tag:
 
 ```bash
-pytest -q
+git tag v1.0-milestone1
+git push origin v1.0-milestone1
 ```
 
----
-
-## Known Issues / TODOs
-
-> These are minor path mismatches I found while reading the repo. Listing them here so you can fix in one pass (or leave as “Milestone-2 cleanups”).
-
-1. **Dockerfile entrypoint paths**
-
-   * Current `Dockerfile` copies `src/app` and runs `src.app.main:app`, but the FastAPI app lives in `src/api.py`.
-   * **Fix**: either move the API to `src/app/main.py` or adjust the `Dockerfile` to:
-
-     ```dockerfile
-     COPY src ./src
-     CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
-     ```
-
-2. **Training import path**
-
-   * `src/train.py` uses `from ml.recommenders ...` but the rest of the project uses `from src.ml ...`
-   * **Fix**: change to:
-
-     ```python
-     from src.ml.recommenders.item_item import ItemItemRecommender
-     ```
-
-3. **Evaluate script partial lines**
-
-   * Some lines in `src/evaluate.py` look truncated in the copy I saw (e.g., variable name cut mid-word). Just ensure the final for-loop collects per-user metrics and prints/records aggregates.
-
-4. **Tests import path**
-
-   * `src/tests/test_health.py` imports `from app.main import app`.
-   * **Fix**: change to `from src.api import app`.
-
-5. **Compose comments**
-
-   * `docker-compose.yml` has multiple commented blocks. Keep only one canonical set for Prometheus/Grafana/Api to avoid confusion.
 
 ---
 
-## License
+### 💬 *“From product reviews to product intelligence — the journey starts here.”* 🧠💬✨
 
-This project is released under the **MIT License**. See `LICENSE`.
+Developed with ❤️ by Team **Product Review Analyzer**
 
 ---
-
-### Credits
-
-* Recommender baseline: Item–Item (cosine)
-* Monitoring: Prometheus + Grafana + Evidently
-* Tracking: MLflow
-* API: FastAPI (with `prometheus_fastapi_instrumentator`)
