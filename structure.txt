@@ -32,9 +32,12 @@ project/
 │   ├── grafana-dashboard-1.png
 │   ├── grafana-dashboard-2.png
 │   ├── grafana-dashboard-3.jpg
+│   ├── logo.png
 │   ├── mlflow-1.png
 │   ├── mlflow-2.png
-│   └── mlflow-3.png
+│   ├── mlflow-3.png
+│   ├── Mlops_pipeline.svg
+│   └── rubiks-cool.gif
 ├── infra
 │   ├── grafana-dashboards
 │   │   ├── dashboard-1.json
@@ -44,9 +47,11 @@ project/
 ├── milestones
 │   ├── milestone_0
 │   │   └── MLOPS - Milestone 0.pdf
-│   └── milestone_1
-│       ├── Milestone 1.pdf
-│       └── Milestone1_MLOps.pdf
+│   ├── milestone_1
+│   │   ├── Milestone 1.pdf
+│   │   └── Milestone1_MLOps.pdf
+│   └── milestone_2
+│       └── MLOps_Milestone2.pdf
 ├── mlartifacts
 │   └── 0
 │       └── models
@@ -206,7 +211,8 @@ project/
 │   ├── evidently_report.html
 │   └── generate_drift.py
 ├── notebooks
-│   └── item-item-collabfiltering.ipynb
+│   ├── item-item-collabfiltering.ipynb
+│   └── item-item-collabfiltering.py
 ├── src
 │   ├── app
 │   │   ├── item-item-collabfiltering.py
