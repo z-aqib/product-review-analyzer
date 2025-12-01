@@ -18,3 +18,5 @@ mlops-key.pem
 *.pkl
 artifacts/
 mlops-key.pem
+
+.env
