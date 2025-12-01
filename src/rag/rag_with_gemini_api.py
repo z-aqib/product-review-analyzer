@@ -15,7 +15,7 @@ from tqdm.auto import tqdm
 import google.generativeai as genai
 
 # Step 3: Load dataset
-df = pd.read_csv("/kaggle/input/mlops-amazon/amazon.csv")  # Adjust path if needed
+df = pd.read_csv("data/raw/amazon.csv")  # Adjust path if needed
 
 print(f"Loaded {len(df)} products")
 
