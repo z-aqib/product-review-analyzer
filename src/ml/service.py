@@ -1,4 +1,4 @@
-from src.ml.recommenders.item_item import ItemItemRecommender
+from ml.recommenders.item_item import ItemItemRecommender
 
 model = ItemItemRecommender("data/processed").fit()
 
