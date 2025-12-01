@@ -12,7 +12,6 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
 from tqdm.auto import tqdm
-import textwrap
 import google.generativeai as genai
 
 # Step 3: Load dataset
@@ -80,26 +79,27 @@ print("RAG System Ready with Gemini!")
 # Step 8: Query function (GEMINI)
 # ================================
 def ask(question: str, k: int = 3):
-    # Retrieve
+    # 1) Retrieve
     q_emb = embedder.encode([question], normalize_embeddings=True)
     array_D, array_I = index.search(q_emb, k)
 
-    context = "\n\n".join([documents[i] for i in array_I[0]])
-    scores = array_D[0]
-
-    print(f"\nTop {k} Retrieved Products:\n")
-    for idx, (score, doc_idx) in enumerate(zip(scores, array_I[0])):
+    products = []
+    for score, doc_idx in zip(array_D[0], array_I[0]):
         meta = metadatas[doc_idx]
-        print(
-            f"{idx+1}. {meta['name'][:80]}... ({meta['rating']}⭐, {meta['price']}) "
-            f"[Score: {score:.3f}]"
+        products.append(
+            {
+                "product_id": meta["product_id"],
+                "name": meta["name"],
+                "price": float(meta["price"]) if meta["price"] == meta["price"] else None,
+                "rating": float(meta["rating"]) if meta["rating"] == meta["rating"] else None,
+                "retrieval_score": float(score),
+                "document": documents[doc_idx],
+            }
         )
 
-    print("\n" + "=" * 60)
-    print("GENERATING ANSWER WITH GEMINI...")
-    print("=" * 60)
+    # 2) Build context for Gemini (just like before)
+    context = "\n\n".join(p["document"] for p in products)
 
-    # LLM prompt for Gemini
     prompt = f"""
 You are an expert Amazon shopping assistant.
 
@@ -114,21 +114,16 @@ User Question: {question}
 Give a clear, helpful answer based ONLY on the above data.
 """
 
-    # Generate answer
     response = model.generate_content(prompt)
-    answer = response.text.strip()
+    rag_answer = response.text.strip()
 
-    print("\nAnswer:\n")
-    print(textwrap.fill(answer, width=90))
-    print("\n" + "-" * 80)
+    # 3) Return structured data instead of print
+    return {
+        "question": question,
+        "products": products,
+        "rag_answer": rag_answer,
+    }
 
-
-# ================================
-# NOW ASK QUESTIONS USING GEMINI
-# ================================
-
-ask("Recommend a good fast charging USB-C cable under 300 rupees")
-ask("Which cable has the highest rating and supports 60W charging?")
-ask("What is the best iPhone lightning cable in the list?")
-ask("Show me durable braided cables from boAt or Ambrane")
-ask("Which product has the most reviews and good rating?")
+    # print("\nAnswer:\n")
+    # print(textwrap.fill(answer, width=90))
+    # print("\n" + "-"*80)
