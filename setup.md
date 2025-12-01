@@ -115,3 +115,11 @@ http://127.0.0.1:8000/health
 
 Use to check if backend working
 curl http://127.0.0.1:8000/recommend?user_id=AE243IWFZJ3BB6E6WMUG52DHWJVA&k=5
+
+
+# to clean requiremnts txt
+```
+pip freeze > requirements_all.txt
+pip freeze > requirements.txt
+pipreqs . --force --encoding=utf-8 --ignore .venv,.git
+```
