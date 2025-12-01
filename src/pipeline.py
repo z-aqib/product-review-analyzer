@@ -54,8 +54,11 @@ def run_pipeline(user_id: str, user_query: str) -> Dict:
 
 # Example usage at the bottom for testing
 if __name__ == "__main__":
-    query = "I want a Dell laptop for programming under 150k with good battery."
-    user_id = "123"  # must exist in your ML matrix, or use a cold-start strategy
+    # query = "I want a Dell laptop for programming under 150k with good battery."
+    query = "I want some good earphones that would last."
+    user_id = (
+        "AG3D6O4STAQKAY2UVGEUV46KN35Q"  # must exist in your ML matrix, or use a cold-start strategy
+    )
 
     result = run_pipeline(user_id, query)
 
