@@ -1,13 +1,20 @@
 import os
 import textwrap
 from typing import List, Dict
-
+from dotenv import load_dotenv
 import google.generativeai as genai
 
 # -------------------------------------
 # GEMINI CONFIG
 # -------------------------------------
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+# Load .env from project root
+load_dotenv()  # this reads .env and populates os.environ
+
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    raise RuntimeError("GEMINI_API_KEY is not set. Check your .env file.")
+
+genai.configure(api_key=api_key)
 
 # Model for FINAL RESPONSE (advisor)
 ADVISOR_MODEL = genai.GenerativeModel("gemini-2.5-flash")
