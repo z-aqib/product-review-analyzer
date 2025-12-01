@@ -27,12 +27,17 @@ def run_pipeline(user_id: str, user_query: str) -> Dict:
     """
 
     # 1) ML
+    print("Begin ML")
     ml_candidates = get_ml_candidates_for_user(user_id=user_id, k=5)
+    print("ML result ", ml_candidates)
 
     # 2) RAG
+    print("Begin RAG")
     rag_result = ask(user_query, k=5)
+    print("RAG result ", rag_result)
 
     # 3) LLM Advisor
+    print("Begin LLM Advisor")
     final_answer = generate_final_answer(
         user_query=user_query,
         ml_candidates=ml_candidates,
