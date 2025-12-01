@@ -1,0 +1,58 @@
+"""
+End-to-end pipeline:
+USER QUERY → ML → RAG → LLM → final text response
+"""
+
+from typing import Dict
+
+# ---- Import ML recommender (your API or class-based function)
+from src.ml.service import get_ml_candidates_for_user
+
+# or if using the FastAPI service, you would switch this to an HTTP request
+
+# ---- Import RAG function (Haaris's ask())
+from src.rag.rag_service import ask  # you will create this wrapper file from notebook
+
+# ---- Import LLM advisor
+from src.llm.advisor import generate_final_answer
+
+
+def run_pipeline(user_id: str, user_query: str) -> Dict:
+    """
+    Unified pipeline:
+    1. Get ML recommendations
+    2. Get RAG results
+    3. Get final LLM answer
+    Returns dict containing all intermediate + final results.
+    """
+
+    # 1) ML
+    ml_candidates = get_ml_candidates_for_user(user_id=user_id, k=5)
+
+    # 2) RAG
+    rag_result = ask(user_query, k=5)
+
+    # 3) LLM Advisor
+    final_answer = generate_final_answer(
+        user_query=user_query,
+        ml_candidates=ml_candidates,
+        rag_result=rag_result,
+    )
+
+    return {
+        "user_query": user_query,
+        "ml_candidates": ml_candidates,
+        "rag_result": rag_result,
+        "final_answer": final_answer,
+    }
+
+
+# Example usage at the bottom for testing
+if __name__ == "__main__":
+    query = "I want a Dell laptop for programming under 150k with good battery."
+    user_id = "123"  # must exist in your ML matrix, or use a cold-start strategy
+
+    result = run_pipeline(user_id, query)
+
+    print("\n=== FINAL RESPONSE ===\n")
+    print(result["final_answer"])
