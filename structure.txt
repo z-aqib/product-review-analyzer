@@ -212,21 +212,29 @@ project/
 │   └── generate_drift.py
 ├── notebooks
 │   ├── item-item-collabfiltering.ipynb
-│   └── item-item-collabfiltering.py
+│   ├── item-item-collabfiltering.py
+│   └── rag_with_gemini_api.ipynb
 ├── src
 │   ├── app
 │   │   ├── item-item-collabfiltering.py
 │   │   └── main.py
+│   ├── llm
+│   │   └── advisor.py
 │   ├── ml
 │   │   ├── eval
 │   │   │   ├── eval_dataset.py
 │   │   │   └── metrics.py
-│   │   └── recommenders
-│   │       └── item_item.py
+│   │   ├── recommenders
+│   │   │   └── item_item.py
+│   │   └── service.py
+│   ├── rag
+│   │   ├── rag_service.py
+│   │   └── rag_with_gemini_api.py
 │   ├── tests
 │   │   └── test_health.py
 │   ├── api.py
 │   ├── evaluate.py
+│   ├── pipeline.py
 │   └── train.py
 ├── .gitignore
 ├── CODE_OF_CONDUCT.md
@@ -239,6 +247,7 @@ project/
 ├── pyproject.toml
 ├── README.md
 ├── requirements.txt
+├── requirements_all.txt
 ├── setup.md
 ├── structure-maker.py
 └── structure.txt
