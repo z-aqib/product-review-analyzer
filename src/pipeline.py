@@ -6,15 +6,15 @@ USER QUERY → ML → RAG → LLM → final text response
 from typing import Dict
 
 # ---- Import ML recommender (your API or class-based function)
-from ml.service import get_ml_candidates_for_user
+from .ml.service import get_ml_candidates_for_user
 
 # or if using the FastAPI service, you would switch this to an HTTP request
 
 # ---- Import RAG function (Haaris's ask())
-from rag.rag_service import ask  # you will create this wrapper file from notebook
+from .rag.rag_service import ask  # you will create this wrapper file from notebook
 
 # ---- Import LLM advisor
-from llm.advisor import generate_final_answer
+from .llm.advisor import generate_final_answer
 
 
 def run_pipeline(user_id: str, user_query: str) -> Dict:
