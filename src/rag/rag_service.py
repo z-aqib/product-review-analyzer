@@ -7,4 +7,4 @@ project can simply do:
 and get a nice Python function.
 """
 
-from .rag_with_gemini_api import ask  # noqa: F401 # re-export the ask() function
+from .rag import ask  # noqa: F401 # re-export the ask() function
