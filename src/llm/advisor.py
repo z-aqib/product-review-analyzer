@@ -108,7 +108,7 @@ Candidate Products (ML + RAG):
 RAG Review Summary:
 {rag_answer}
 
-Now give a helpful final answer to the user (2–4 short paragraphs).
+Now give a helpful final answer to the user (2–4 short paragraphs). You may give a shorter or longer answer where needed. Dont give options for your responses, pick the best response you think is applicable and return that.
 """.strip()
 
     return textwrap.dedent(prompt)
