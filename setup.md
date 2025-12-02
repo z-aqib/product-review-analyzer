@@ -118,8 +118,18 @@ curl http://127.0.0.1:8000/recommend?user_id=AE243IWFZJ3BB6E6WMUG52DHWJVA&k=5
 
 
 # to clean requiremnts txt
-```
+```bash
 pip freeze > requirements_all.txt
 pip freeze > requirements.txt
 pipreqs . --force --encoding=utf-8 --ignore .venv,.git
+```
+
+# to run
+terminal 1
+```bash
+uvicorn src.app:app --reload
+```
+terminal 2
+```bash
+streamlit run src/streamlit_app.py
 ```
