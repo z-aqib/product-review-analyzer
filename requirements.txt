@@ -21,4 +21,4 @@ sentence_transformers==5.1.2
 streamlit==1.51.0
 tqdm==4.67.1
 uvicorn==0.38.0
-~treamlit==1.50.0
+streamlit==1.50.0
