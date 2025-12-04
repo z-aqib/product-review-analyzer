@@ -1,7 +1,14 @@
 project/
 ├── data
-│   ├── cleaning
-│   │   └── data-cleaning.ipynb
+│   ├── embeddings
+│   │   └── adf7761a
+│   │       ├── documents.pkl
+│   │       ├── index.faiss
+│   │       ├── metadata.json
+│   │       └── metadatas.pkl
+│   ├── insights
+│   │   ├── product_names.csv
+│   │   └── unique_brands.csv
 │   ├── processed
 │   │   ├── eval
 │   │   │   ├── eval_summary_item_item_k10.json
@@ -13,7 +20,8 @@ project/
 │   │   ├── reviews.csv
 │   │   └── users.csv
 │   ├── raw
-│   │   └── amazon.csv
+│   │   ├── amazon.csv
+│   │   └── pakistani_amazon.csv
 │   └── splits
 │       ├── test
 │       │   └── test_set.csv
@@ -37,7 +45,8 @@ project/
 │   ├── mlflow-2.png
 │   ├── mlflow-3.png
 │   ├── Mlops_pipeline.svg
-│   └── rubiks-cool.gif
+│   ├── rubiks-cool.gif
+│   └── working-ui.png
 ├── infra
 │   ├── grafana-dashboards
 │   │   ├── dashboard-1.json
@@ -211,6 +220,11 @@ project/
 │   ├── evidently_report.html
 │   └── generate_drift.py
 ├── notebooks
+│   ├── data-clean-product-names.ipynb
+│   ├── data-cleaning.ipynb
+│   ├── data-extract-product-names.ipynb
+│   ├── data-remove-non-pakistani.ipynb
+│   ├── data-rename-brands.ipynb
 │   ├── item-item-collabfiltering.ipynb
 │   ├── item-item-collabfiltering.py
 │   └── rag_with_gemini_api.ipynb
@@ -218,6 +232,9 @@ project/
 │   ├── app
 │   │   ├── item-item-collabfiltering.py
 │   │   └── main.py
+│   ├── guards
+│   │   ├── __init__.py
+│   │   └── policy.py
 │   ├── llm
 │   │   └── advisor.py
 │   ├── ml
@@ -228,13 +245,19 @@ project/
 │   │   │   └── item_item.py
 │   │   └── service.py
 │   ├── rag
-│   │   ├── rag_service.py
-│   │   └── rag_with_gemini_api.py
+│   │   ├── ingest.py
+│   │   ├── rag.py
+│   │   └── rag_service.py
+│   ├── sft
+│   │   └── running-hugging-face-model.ipynb
 │   ├── tests
 │   │   └── test_health.py
-│   ├── api.py
+│   ├── __init__.py
+│   ├── app.py
 │   ├── evaluate.py
 │   ├── pipeline.py
+│   ├── streamlit_app.py
+│   ├── test.py
 │   └── train.py
 ├── .gitignore
 ├── CODE_OF_CONDUCT.md
