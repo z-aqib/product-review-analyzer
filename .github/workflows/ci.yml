@@ -36,7 +36,7 @@ jobs:
         run: ruff check src --extend-exclude "rag/experiments,sft"
 
       - name: Run Black formatting check
-        run: black --check src
+        run: black --line-length=100 --check src
 
   # -------------------------------
   # 🧪 Job 2: Test with Coverage
