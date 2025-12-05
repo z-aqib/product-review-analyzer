@@ -21,7 +21,7 @@ project/
 │   │   └── users.csv
 │   ├── raw
 │   │   ├── amazon.csv
-│   │   └── pakistani_amazon.csv
+│   │   └── original_amazon.csv
 │   └── splits
 │       ├── test
 │       │   └── test_set.csv
@@ -236,6 +236,12 @@ project/
 │   │   ├── __init__.py
 │   │   └── policy.py
 │   ├── llm
+│   │   ├── experiments
+│   │   │   ├── experiment_results.csv
+│   │   │   ├── experiments_config.csv
+│   │   │   ├── run_experiments.py
+│   │   │   ├── sample_responses.json
+│   │   │   └── test_run_hf.py
 │   │   └── advisor.py
 │   ├── ml
 │   │   ├── eval
@@ -245,10 +251,41 @@ project/
 │   │   │   └── item_item.py
 │   │   └── service.py
 │   ├── rag
+│   │   ├── experiments
+│   │   │   ├── 1-embedding-model-comparison-py.ipynb
+│   │   │   ├── 10-similarity-metric-comparison-py.ipynb
+│   │   │   ├── 2-generation-model-comparison-mistral-py.ipynb
+│   │   │   ├── 2-generation-model-comparison-Qwen-py.ipynb
+│   │   │   ├── 3-top-k-retrieval-ablation-py.ipynb
+│   │   │   ├── 4-temperature-ablation-py.ipynb
+│   │   │   ├── 5-max-new-tokens-test-py.ipynb
+│   │   │   ├── 6-top-p-nucleus-sampling-test-py.ipynb
+│   │   │   ├── 7-prompt-engineering-comparison-py.ipynb
+│   │   │   ├── 8-context-chunking-strategy-py.ipynb
+│   │   │   ├── 9-reranking-with-cross-encoder-py.ipynb
+│   │   │   └── grid-search-hyperparameter-selection.ipynb
+│   │   ├── results
+│   │   │   ├── grid search results
+│   │   │   │   ├── rag_grid_search_results_advanced.csv
+│   │   │   │   ├── rag_model_summary_advanced.csv
+│   │   │   │   └── rag_statistics_summary.csv
+│   │   │   ├── 10_similarity_metric_comparison.csv
+│   │   │   ├── 1_embedding_comparison.csv
+│   │   │   ├── 2_generation_model_comparison_mistral.csv
+│   │   │   ├── 2_generation_model_comparison_Qwen.csv
+│   │   │   ├── 3_top_k_retrieval_ablation.csv
+│   │   │   ├── 4_temperature_ablation.csv
+│   │   │   ├── 5_max_new_tokens_test.csv
+│   │   │   ├── 6_top_p_nucleus_sampling_test.csv
+│   │   │   ├── 7_prompt_engineering_comparison.csv
+│   │   │   ├── 8_context_chunking_strategy.csv
+│   │   │   └── 9_reranking_with_cross_encoder.csv
 │   │   ├── ingest.py
 │   │   ├── rag.py
 │   │   └── rag_service.py
 │   ├── sft
+│   │   ├── complete_sft.ipynb
+│   │   ├── query-response-pairs-SFT-training-data.csv
 │   │   └── running-hugging-face-model.ipynb
 │   ├── tests
 │   │   └── test_health.py
@@ -271,6 +308,7 @@ project/
 ├── README.md
 ├── requirements.txt
 ├── requirements_all.txt
+├── security.md
 ├── setup.md
 ├── structure-maker.py
 └── structure.txt
