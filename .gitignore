@@ -15,7 +15,7 @@ mlops-venv/
 mlops-key.pem
 
 # Python artifacts
-artifacts/
+mlartifacts
 mlops-key.pem
 
 .env
