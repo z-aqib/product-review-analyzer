@@ -42,38 +42,6 @@ services:
       - "9091:9090"
     restart: unless-stopped
 
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: llmops_grafana
-  #   ports:
-  #     - "3001:3000"
-  #   environment:
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #     - GF_USERS_ALLOW_SIGN_UP=false
-  #   volumes:
-  #     # - ./src/llm/grafana-dashboards:/var/lib/grafana/dashboards
-  #     - ./src/llm/grafana/dashboards:/var/lib/grafana/dashboards
-  #     - ./src/llm/grafana/provisioning:/etc/grafana/provisioning/dashboards
-
-  #   depends_on:
-  #     - prometheus
-  #   restart: unless-stopped
-
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: llmops_grafana
-  #   ports:
-  #     - "3001:3000"
-  #   environment:
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #     - GF_USERS_ALLOW_SIGN_UP=false
-  #   volumes:
-  #     - ./src/llm/grafana/dashboards:/var/lib/grafana/dashboards
-  #     - ./src/llm/grafana/provisioning:/etc/grafana/provisioning
-  #   depends_on:
-  #     - prometheus
-  #   restart: unless-stopped
-
   grafana:
     image: grafana/grafana:latest
     container_name: llmops_grafana
@@ -88,4 +56,19 @@ services:
       - D:\sem7\mlops\project\product-review-analyzer\src\llm\grafana\provisioning\datasources\:/etc/grafana/provisioning/datasources
     depends_on:
       - prometheus
+    restart: unless-stopped
+
+  evidently_app:
+    build:
+      context: ../../                # project root
+      dockerfile: src/llm/Dockerfile.evidently
+    container_name: llmops_evidently
+    ports:
+      - "7000:7000"
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=us-east-1
+    depends_on:
+      - llmops_app
     restart: unless-stopped
