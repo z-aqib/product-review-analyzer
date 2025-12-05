@@ -1,0 +1,86 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Total LLM Requests",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "YOUR_PROM_UID"},
+      "targets": [
+        {
+          "expr": "llm_requests_total",
+          "legendFormat": "Total requests",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+    },
+    {
+      "title": "LLM Request Latency (Histogram)",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "YOUR_PROM_UID"},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(llm_request_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "95th percentile latency",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+    },
+    {
+      "title": "Guardrail Violations (Input Validation)",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "YOUR_PROM_UID"},
+      "targets": [
+        {
+          "expr": "llm_guardrail_violations_total{type=\"input_validation\"}",
+          "legendFormat": "Input Validation",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+    },
+    {
+      "title": "Guardrail Violations (Output Moderation)",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "YOUR_PROM_UID"},
+      "targets": [
+        {
+          "expr": "llm_guardrail_violations_total{type=\"output_moderation\"}",
+          "legendFormat": "Output Moderation",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+    }
+  ],
+  "schemaVersion": 42,
+  "tags": ["LLMOps"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "LLMOps Dashboard",
+  "uid": "llmops_dashboard",
+  "version": 1
+}

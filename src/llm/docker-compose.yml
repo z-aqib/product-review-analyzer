@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  llmops_app:
+    build:
+      context: ../../        # project root
+      dockerfile: src/llm/Dockerfile.backend
+    container_name: llmops_app
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONPATH=/app
+      - AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION: us-east-1
+    restart: unless-stopped
+    volumes:
+    - ../../src:/app/src
+
+  llmops_frontend:
+    build:
+      context: ../../        # project root
+      dockerfile: src/llm/Dockerfile.frontend
+    container_name: llmops_frontend
+    ports:
+      - "8501:8501"
+    depends_on:
+      - llmops_app
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: llmops_prometheus
+    volumes:
+       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9091:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: llmops_grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./src/llm/grafana-dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    restart: unless-stopped

@@ -19,13 +19,63 @@ from tqdm.auto import tqdm
 import google.generativeai as genai
 import joblib  # for saving/loading python objects
 from dotenv import load_dotenv
+import boto3
+from io import BytesIO, StringIO
+import botocore.exceptions
+
+# =============================
+# S3 HELPERS
+# =============================
+
+S3_BUCKET = "mlops-d9"  # your bucket
+
+s3 = boto3.client("s3")
+
+
+def s3_read_csv(key: str) -> pd.DataFrame:
+    """Read CSV from S3 key like data/raw/amazon.csv"""
+    obj = s3.get_object(Bucket=S3_BUCKET, Key=key)
+    return pd.read_csv(StringIO(obj["Body"].read().decode("utf-8")))
+
+
+def s3_read_json(key: str) -> dict:
+    obj = s3.get_object(Bucket=S3_BUCKET, Key=key)
+    return json.loads(obj["Body"].read().decode("utf-8"))
+
+
+def s3_write_json(key: str, data: dict):
+    s3.put_object(
+        Bucket=S3_BUCKET,
+        Key=key,
+        Body=json.dumps(data, indent=2).encode("utf-8"),
+        ContentType="application/json",
+    )
+
+
+def s3_write_bytes(key: str, data: bytes):
+    s3.put_object(Bucket=S3_BUCKET, Key=key, Body=data)
+
+
+def s3_write_pickle(key: str, obj: Any):
+    buffer = BytesIO()
+    joblib.dump(obj, buffer)
+    buffer.seek(0)
+    s3.put_object(Bucket=S3_BUCKET, Key=key, Body=buffer.read())
+
+
+def s3_read_pickle(key: str):
+    obj = s3.get_object(Bucket=S3_BUCKET, Key=key)
+    return joblib.load(BytesIO(obj["Body"].read()))
+
 
 # ----------------------------------------
 # CONFIG
 # ----------------------------------------
 BASE_DIR = Path(__file__).resolve().parents[2]  # project root (../.. from src/rag/)
-DATA_PATH = BASE_DIR / "data" / "raw" / "amazon.csv"
-EMBED_ROOT = BASE_DIR / "data" / "embeddings"
+# DATA_PATH = BASE_DIR / "data" / "raw" / "amazon.csv"
+# EMBED_ROOT = BASE_DIR / "data" / "embeddings"
+DATA_PATH = "data/raw/amazon.csv"
+EMBED_PREFIX = "data/embeddings"
 
 RAG_CONFIG: Dict[str, Any] = {
     "model_name": "BAAI/bge-small-en-v1.5",
@@ -61,14 +111,17 @@ def _config_hash() -> str:
     return hashlib.md5(cfg_str.encode()).hexdigest()[:8]
 
 
-def _get_embed_dir() -> Path:
-    """Folder for embeddings & index for this config."""
-    cfg_hash = _config_hash()
-    return EMBED_ROOT / cfg_hash
+# def _get_embed_dir() -> Path:
+#     """Folder for embeddings & index for this config."""
+#     cfg_hash = _config_hash()
+#     return EMBED_ROOT / cfg_hash
+def _get_embed_dir() -> str:
+    return f"{EMBED_PREFIX}/{_config_hash()}/"
 
 
 def _load_dataset() -> pd.DataFrame:
-    df_ = pd.read_csv(DATA_PATH)
+    # df_ = pd.read_csv(DATA_PATH)
+    df_ = s3_read_csv(DATA_PATH)
     # Ensure IDs are strings if needed
     if "product_id" in df_.columns:
         df_["product_id"] = df_["product_id"].astype(str)
@@ -102,44 +155,83 @@ Reviews: {str(row['review_content'])[:1000]}...
     return docs, metas
 
 
-def _save_index_and_metadata(
-    embed_dir: Path,
-    index_obj: faiss.IndexFlatIP,
-    docs: List[str],
-    metas: List[Dict[str, Any]],
-    df_len: int,
-):
-    embed_dir.mkdir(parents=True, exist_ok=True)
+# def _save_index_and_metadata(
+#     embed_dir: Path,
+#     index_obj: faiss.IndexFlatIP,
+#     docs: List[str],
+#     metas: List[Dict[str, Any]],
+#     df_len: int,
+# ):
+#     embed_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save FAISS index
-    faiss.write_index(index_obj, str(embed_dir / "index.faiss"))
+#     # Save FAISS index
+#     faiss.write_index(index_obj, str(embed_dir / "index.faiss"))
 
-    # Save docs + metadatas
-    joblib.dump(docs, embed_dir / "documents.pkl")
-    joblib.dump(metas, embed_dir / "metadatas.pkl")
+#     # Save docs + metadatas
+#     joblib.dump(docs, embed_dir / "documents.pkl")
+#     joblib.dump(metas, embed_dir / "metadatas.pkl")
 
-    # Save metadata JSON
-    data_path_rel = os.path.relpath(DATA_PATH, BASE_DIR)
+#     # Save metadata JSON
+#     data_path_rel = os.path.relpath(DATA_PATH, BASE_DIR)
 
+
+#     meta = {
+#         "config": RAG_CONFIG,
+#         "created_at": datetime.utcnow().isoformat(),
+#         "num_docs_indexed": len(docs),
+#         "num_rows_dataset": df_len,
+#         "data_path": data_path_rel,  # e.g. "data/raw/amazon.csv"
+#         "faiss_index_type": "IndexFlatIP",
+#         "embedding_dim": index_obj.d,
+#     }
+#     with open(embed_dir / "metadata.json", "w", encoding="utf-8") as f:
+#         json.dump(meta, f, indent=2)
+def _save_index_and_metadata(embed_dir: str, index_obj, docs, metas, df_len):
+    # 1. Save FAISS index → bytes → S3
+    buffer = BytesIO()
+    faiss.write_index(index_obj, faiss.PyCallbackIOWriter(buffer.write))
+    buffer.seek(0)
+    s3_write_bytes(embed_dir + "index.faiss", buffer.read())
+
+    # 2. Save docs/metas pkl
+    s3_write_pickle(embed_dir + "documents.pkl", docs)
+    s3_write_pickle(embed_dir + "metadatas.pkl", metas)
+
+    # 3. Save metadata.json
     meta = {
         "config": RAG_CONFIG,
         "created_at": datetime.utcnow().isoformat(),
         "num_docs_indexed": len(docs),
         "num_rows_dataset": df_len,
-        "data_path": data_path_rel,  # e.g. "data/raw/amazon.csv"
+        "data_path": DATA_PATH,
         "faiss_index_type": "IndexFlatIP",
         "embedding_dim": index_obj.d,
     }
-    with open(embed_dir / "metadata.json", "w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=2)
+    s3_write_json(embed_dir + "metadata.json", meta)
 
 
-def _load_index_and_metadata(embed_dir: Path):
-    idx = faiss.read_index(str(embed_dir / "index.faiss"))
-    docs = joblib.load(embed_dir / "documents.pkl")
-    metas = joblib.load(embed_dir / "metadatas.pkl")
-    with open(embed_dir / "metadata.json", "r", encoding="utf-8") as f:
-        meta = json.load(f)
+# def _load_index_and_metadata(embed_dir: Path):
+#     idx = faiss.read_index(str(embed_dir / "index.faiss"))
+#     docs = joblib.load(embed_dir / "documents.pkl")
+#     metas = joblib.load(embed_dir / "metadatas.pkl")
+#     with open(embed_dir / "metadata.json", "r", encoding="utf-8") as f:
+#         meta = json.load(f)
+#     return idx, docs, metas, meta
+def _load_index_and_metadata(embed_dir: str):
+    # Load FAISS index
+    buffer = BytesIO()
+    obj = s3.get_object(Bucket=S3_BUCKET, Key=embed_dir + "index.faiss")
+    buffer.write(obj["Body"].read())
+    buffer.seek(0)
+    idx = faiss.read_index(faiss.PyCallbackIOReader(buffer.read))
+
+    # Load docs/metas pickles
+    docs = s3_read_pickle(embed_dir + "documents.pkl")
+    metas = s3_read_pickle(embed_dir + "metadatas.pkl")
+
+    # Load metadata.json
+    meta = s3_read_json(embed_dir + "metadata.json")
+
     return idx, docs, metas, meta
 
 
@@ -195,10 +287,21 @@ def _initialize_rag():
     emb_dim = embedder.get_sentence_embedding_dimension()
     normalize = RAG_CONFIG.get("normalize", True)
 
-    embed_dir = _get_embed_dir()
-    meta_path = embed_dir / "metadata.json"
+    # embed_dir = _get_embed_dir()
+    # meta_path = embed_dir / "metadata.json"
 
-    if embed_dir.exists() and meta_path.exists():
+    # if embed_dir.exists() and meta_path.exists():
+    embed_dir = _get_embed_dir()
+    meta_key = embed_dir + "metadata.json"
+
+    # check existence in S3
+    # existing = True
+    try:
+        s3.head_object(Bucket=S3_BUCKET, Key=meta_key)
+        existing = True
+    except botocore.exceptions.ClientError:
+        existing = False
+    if existing:
         # Try to load existing index
         print(f"[RAG] Found existing embeddings in {embed_dir}, loading...")
         idx, docs_cached, metas_cached, meta = _load_index_and_metadata(embed_dir)

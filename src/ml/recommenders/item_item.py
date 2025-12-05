@@ -6,6 +6,14 @@ import numpy as np
 from pathlib import Path
 from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
+import boto3
+from io import StringIO
+
+
+def read_csv_from_s3(bucket_name, key):
+    s3 = boto3.client("s3")
+    obj = s3.get_object(Bucket=bucket_name, Key=key)
+    return pd.read_csv(StringIO(obj["Body"].read().decode("utf-8")))
 
 
 class ItemItemRecommender:
@@ -29,9 +37,16 @@ class ItemItemRecommender:
         self.prod_name_map = {}
 
     def _load(self):
-        dd = self.data_dir
-        self.products = pd.read_csv(dd / "products.csv")
-        self.reviews = pd.read_csv(dd / "reviews.csv")
+        # dd = self.data_dir
+        BUCKET_NAME = "mlops-d9"  # <-- REPLACE THIS
+        PRODUCTS_KEY = "data/processed/products.csv"
+        REVIEWS_KEY = "data/processed/reviews.csv"
+
+        self.products = read_csv_from_s3(BUCKET_NAME, PRODUCTS_KEY)
+        self.reviews = read_csv_from_s3(BUCKET_NAME, REVIEWS_KEY)
+
+        # self.products = pd.read_csv(dd / "products.csv")
+        # self.reviews = pd.read_csv(dd / "reviews.csv")
         self.products["product_id"] = self.products["product_id"].astype(str)
         self.reviews["user_id"] = self.reviews["user_id"].astype(str)
         self.reviews["product_id"] = self.reviews["product_id"].astype(str)

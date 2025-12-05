@@ -1,0 +1,125 @@
+# evidently==0.4.28
+# faiss_cpu==1.12.0
+# fastapi==0.123.5
+# joblib==1.5.1
+# joblib==1.5.2
+# mlflow==3.5.1
+# mlflow_skinny==3.5.1
+# mlflow_tracing==3.5.1
+# numpy==2.3.5
+# pandas==2.3.3
+# prometheus_client==0.22.1
+# prometheus_client==0.23.1
+# prometheus_fastapi_instrumentator==7.1.0
+# protobuf==6.33.1
+# pydantic==2.12.5
+# python-dotenv==1.2.1
+# Requests==2.32.5
+# scikit_learn==1.7.2
+# scipy==1.16.3
+# sentence_transformers==5.1.2
+# streamlit==1.51.0
+# tqdm==4.67.1
+# uvicorn==0.38.0
+# streamlit==1.50.0
+
+# # optimised req.text for cloud so it doesnt exceed size limits
+# evidently==0.4.28
+# faiss_cpu==1.12.0
+# fastapi==0.123.5
+# joblib==1.5.1
+# mlflow==3.5.1
+# mlflow_skinny==3.5.1
+# mlflow_tracing==3.5.1
+# numpy==1.26.4
+# pandas==2.3.3
+# prometheus_client==0.23.1
+# prometheus_fastapi_instrumentator==7.1.0
+# protobuf==6.33.1
+# pydantic==2.12.5
+# python-dotenv==1.2.1
+# requests==2.32.5
+# scikit_learn==1.7.2
+# scipy==1.16.3
+# # sentence_transformers==5.1.2 (updates made in the ec2 instance directly to avoid size limit issues)
+# sentence-transformers==2.2.2
+# torch==2.0.0+cpu
+# torchvision==0.15.1+cpu
+# torchaudio==2.0.1+cpu
+# --extra-index-url https://download.pytorch.org/whl/cpu
+# streamlit==1.51.0
+# tqdm==4.67.1
+# uvicorn==0.38.0
+
+
+# # new version of re-txt for cloud deployment
+
+# Core dependencies
+evidently==0.4.28
+faiss_cpu==1.12.0
+fastapi==0.123.5
+joblib==1.5.1
+mlflow==3.5.1
+mlflow_skinny==3.5.1
+mlflow_tracing==3.5.1
+numpy==1.26.4
+pandas==2.3.3
+prometheus_client==0.23.1
+prometheus_fastapi_instrumentator==7.1.0
+protobuf==6.33.1
+pydantic==2.12.5
+python-dotenv==1.2.1
+requests==2.32.5
+scikit_learn==1.7.2
+scipy>=1.10.1,<1.12  # Updated for Python 3.10 compatibility
+
+# Sentence Transformers and CPU PyTorch stack
+# CPU PyTorch (compatible versions)
+torch==2.2.1+cpu
+torchvision==0.17.1+cpu
+torchaudio==2.2.1+cpu
+sentence-transformers==5.1.2
+--extra-index-url https://download.pytorch.org/whl/cpu
+# torch==2.2.0+cpu
+# torchvision==0.17.1+cpu
+# torchaudio==2.2.0+cpu
+# sentence-transformers==5.1.2
+# --extra-index-url https://download.pytorch.org/whl/cpu
+
+# App runtime
+streamlit==1.51.0
+tqdm==4.67.1
+uvicorn==0.38.0
+boto3
+
+# # Core dependencies
+# evidently==0.4.28
+# faiss_cpu==1.12.0
+# fastapi==0.123.5
+# joblib==1.5.1
+# mlflow==3.5.1
+# mlflow_skinny==3.5.1
+# mlflow_tracing==3.5.1
+# numpy==1.26.4
+# pandas==2.3.3
+# prometheus_client==0.23.1
+# prometheus_fastapi_instrumentator==7.1.0
+# protobuf==6.33.1
+# pydantic==2.12.5
+# python-dotenv==1.2.1
+# requests==2.32.5
+# scikit_learn==1.7.2
+# # scipy==1.16.3 (changing this because of dependncy issues)
+# scipy>=1.10.1,<1.12
+# sentence-transformers==5.1.2
+
+# # CPU-only PyTorch (compatible with sentence-transformers 5.x)
+# torch==2.9.1+cpu
+# torchvision==0.15.2+cpu
+# torchaudio==2.9.1+cpu
+# --extra-index-url https://download.pytorch.org/whl/cpu
+
+# # App runtime
+# streamlit==1.51.0
+# tqdm==4.67.1
+# uvicorn==0.38.0
