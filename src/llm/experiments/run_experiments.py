@@ -28,7 +28,18 @@ from ..advisor import merge_ml_and_rag
 
 THIS_DIR = Path(__file__).resolve().parent
 
-CONFIG_PATH = THIS_DIR / "experiments_config.csv"
+# Default config (full experiments)
+DEFAULT_CONFIG_PATH = THIS_DIR / "experiments_config.csv"
+
+# CI-specific config (small subset so GitHub Actions stays fast + cheap)
+CI_CONFIG_PATH = THIS_DIR / "experiments_config_ci.csv"
+
+# If running inside CI (GitHub Actions sets CI=true), prefer the CI config
+if os.getenv("CI", "").lower() == "true" and CI_CONFIG_PATH.exists():
+    CONFIG_PATH = CI_CONFIG_PATH
+else:
+    CONFIG_PATH = DEFAULT_CONFIG_PATH
+
 RESULTS_PATH = THIS_DIR / "experiment_results.csv"
 SAMPLE_RESPONSES_PATH = THIS_DIR / "sample_responses.json"
 
