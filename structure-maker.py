@@ -34,6 +34,7 @@ def is_hidden(p: Path) -> bool:
         ".gitignore",
         ".gitattributes",
         ".gitkeep",
+        ".github",
     }
 
 
