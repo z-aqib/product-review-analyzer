@@ -1,0 +1,32 @@
+> pytest --cov=src
+>>
+========================================================= test session starts ==========================================================
+platform win32 -- Python 3.13.5, pytest-8.4.2, pluggy-1.6.0
+rootdir: D:\Users\DELL\new-onedrive\OneDrive - Institute of Business Administration\Documents\sem7\mlops\project
+configfile: pyproject.toml
+plugins: anyio-4.11.0, Faker-37.11.0, langsmith-0.4.49, cov-7.0.0
+collected 5 items
+
+src\tests\test_metrics_and_policy.py .....                                                                                        [100%]
+
+============================================================ tests coverage ============================================================
+___________________________________________ coverage: platform win32, python 3.13.5-final-0 ____________________________________________
+
+Name                                   Stmts   Miss  Cover
+----------------------------------------------------------
+src\__init__.py                            0      0   100%
+src\app.py                                51     51     0%
+src\evaluate.py                           47     47     0%
+src\guards\__init__.py                     0      0   100%
+src\guards\policy.py                      32      2    94%
+src\llm\experiments\test_run_hf.py         5      0   100%
+src\ml\eval\metrics.py                    15      2    87%
+src\pipeline.py                           20     20     0%
+src\streamlit_app.py                      44     44     0%
+src\test.py                                3      3     0%
+src\tests\__init__.py                      0      0   100%
+src\tests\test_metrics_and_policy.py      33      2    94%
+src\train.py                              17     17     0%
+----------------------------------------------------------
+TOTAL                                    267    188    30%
+========================================================== 5 passed in 29.73s ==========================================================
