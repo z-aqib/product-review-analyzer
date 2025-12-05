@@ -58,7 +58,7 @@ def ask(question: str, k: int = 3) -> Dict[str, Any]:
                 "product_id": meta["product_id"],
                 "name": meta["name"],
                 "price": parse_price(meta.get("price")),
-                "rating": float(meta["rating"]) if meta["rating"] == meta["rating"] else None,
+                "rating": (float(meta["rating"]) if meta["rating"] == meta["rating"] else None),
                 "retrieval_score": float(score),
                 "document": documents[doc_idx],
             }

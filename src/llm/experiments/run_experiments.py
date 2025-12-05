@@ -102,7 +102,7 @@ def call_space(
                 time.sleep(backoff_seconds)
 
     print("        [call_space] ❌ All attempts failed. Giving up for this experiment.")
-    raise last_error if last_error is not None else RuntimeError("Unknown error calling Space")
+    raise (last_error if last_error is not None else RuntimeError("Unknown error calling Space"))
 
 
 def build_context_block(
@@ -529,7 +529,10 @@ def main() -> None:
 
         # Base LLM prompt
         base_llm_prompt = (row.get("llm_prompt") or "").rstrip()
-        print("   base llm_prompt set? : ", "YES" if base_llm_prompt else "NO (using default)")
+        print(
+            "   base llm_prompt set? : ",
+            "YES" if base_llm_prompt else "NO (using default)",
+        )
 
         # Build final instruction prompt
         llm_prompt = build_llm_prompt_for_strategy(
