@@ -461,3 +461,400 @@ git push origin v1.0-milestone1
 Developed with ❤️ by Team **Product Review Analyzer**
 
 ---
+
+# 🛍️ Product Intelligence Recommender System
+
+### **(MLOps → LLMOps End-to-End Project)**
+
+> Milestone-1 + Milestone-2 Combined Final Submission
+
+---
+
+## 📌 Overview
+
+This project evolved through **two major milestones**:
+
+| Stage                    | Focus                                                                                                                 | Outcome                                                                                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Milestone 1 (MLOps)**  | Build a reproducible ML recommender system with monitoring, CI/CD, and deployment.                                    | Working **Item-Item Collaborative Filtering** recommender served through **FastAPI**, tracked with **MLflow**, monitored with **Prometheus/Grafana**, deployed to cloud.                      |
+| **Milestone 2 (LLMOps)** | Extend the ML workflow into a hybrid **ML + RAG + LLM** pipeline with prompt experimentation, safety, and evaluation. | Full working **Retrieval-Augmented Generation (RAG)** system, multiple prompting strategies, evaluation dataset, automated experimentation engine, guardrails, dashboards, and documentation. |
+
+This system now acts as an **AI Shopping Assistant** that:
+
+* Retrieves relevant products using **FAISS+embeddings**
+* Recommends personalized items using an **ML recommender**
+* Generates summarized, contextual answers using an **LLM advisor**
+* Ensures safety with **input/output moderation**
+* Evaluates LLM performance across **multiple prompting strategies**
+* Is fully monitored, reproducible, and deployable.
+
+---
+
+## 🧠 System Architecture Summary
+
+```
+    ┌───────────────────────────────┐
+    │ User Query                    │
+    └───────────────┬───────────────┘
+                    │
+          Guardrails: Input Filter
+                    │
+         ┌──────────▼─────────┐
+         │     pipeline.py     │
+         └──────────┬─────────┘
+                    │
+     ┌──────────────┼─────────────────┐
+     │              │                 │
+     ▼              ▼                 ▼
+ML Model       RAG Retrieval       Prompt Strategy
+(Item-Item CF) (FAISS + Embeddings) (zero-shot / few-shot / CoT / meta)
+     │              │                 │
+     └──────────────┴─────────────────┘
+                    │
+           Advisor LLM (Gemini/Qwen)
+                    │
+         Guardrails: Output Moderation
+                    │
+                    ▼
+              Final Response
+```
+
+---
+
+## 📦 Core Components
+
+### 🔹 Machine Learning Recommender
+
+* Implemented using **Item-Item Collaborative Filtering**
+* Uses user–product interaction matrix
+* Computes similarity using cosine similarity
+* Outputs top-k personalized recommendations
+
+Files:
+
+* `item_item.py`
+* `service.py`
+* `eval_dataset.py`
+* `metrics.py`
+
+Evaluation metrics include:
+
+* Recall@K
+* NDCG@K
+* Catalog Coverage
+
+ML experiments are tracked in **MLflow**.
+
+---
+
+### 🔹 Retrieval-Augmented Generation (RAG)
+
+The RAG system improves factual grounding.
+
+**Indexing (offline):**
+
+* Processes product dataset into text blocks
+* Embeds using `BAAI/bge-small-en-v1.5`
+* Stores embeddings + metadata in FAISS
+
+File: `ingest.py`
+
+**Inference (online):**
+
+* Retrieve top relevant documents using FAISS
+* Extract product metadata
+* Package into structured prompt context
+
+Files: `rag.py`, `rag_service.py`
+
+---
+
+### 🔹 LLM Advisor + Prompting System
+
+LLM layer generates final natural-language responses.
+
+Supported prompting modes:
+
+| Strategy             | Example                                       | Purpose                        |
+| -------------------- | --------------------------------------------- | ------------------------------ |
+| **Zero-shot**        | “Recommend me a budget phone”                 | Simple baseline                |
+| **Few-shot**         | Use training pairs from sample_responses.json | Improve structure & reasoning  |
+| **Chain-of-Thought** | “Think step-by-step…”                         | Improve reasoning transparency |
+| **Meta Prompting**   | A structured system persona with rules        | Most controlled, consistent    |
+
+The final message is strictly:
+
+* Short
+* factual
+* based on retrieved evidence
+* safe and grounded
+
+File: `advisor.py`
+
+---
+
+### 🔹 Guardrails & Safety
+
+The system prevents:
+
+* Prompt injection
+* Toxic language
+* Personal data leakage
+* Unsafe claims
+
+File: `policy.py`
+
+These are enforced **before LLM call (input)** and **after output (post-processing).**
+
+---
+
+### 🔹 Experimentation Engine (LLMOps Core)
+
+Automates prompt experiments and logs results.
+
+* Reads experiment plan from `experiments_config.csv`
+* Injects chosen prompt strategy
+* Calls HF Space Qwen model or Gemini
+* Logs:
+
+  * response text
+  * latency
+  * prompt variant
+  * correctness score
+  * metadata
+
+Outputs stored in:
+
+* `experiment_results.csv`
+* eval JSON files used later by humans
+
+File: `run_experiments.py`
+
+---
+
+## 📑 Evaluation Dataset
+
+File: `eval_dataset.py` ()
+
+Contains **leave-one-out split logic** for fair evaluation of ML and LLM responses.
+
+Dataset includes:
+
+* Real product queries
+* Expected answers
+* Metadata for scoring
+
+Evaluation is done using:
+
+* Automated embedding similarity scoring
+* Human rating template (helpfulness, factuality, safety)
+
+---
+
+## 🛠️ Setup & Installation
+
+### 1️⃣ Clone the project
+
+```bash
+git clone <repo_url>
+cd <project_name>
+```
+
+### 2️⃣ Create environment
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### 3️⃣ Install dependencies
+
+> For local development:
+
+```bash
+pip install -r requirements_all.txt
+```
+
+> For cloud deployment:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ (Optional) Clean dependencies
+
+```bash
+pip freeze > requirements_all.txt
+pip freeze > requirements.txt
+pipreqs . --force --encoding=utf-8 --ignore .venv,.git
+```
+
+---
+
+## ▶️ Running the System
+
+Terminal 1 (backend API):
+
+```bash
+uvicorn src.app:app --reload
+```
+
+Terminal 2 (UI):
+
+```bash
+streamlit run src/streamlit_app.py
+```
+
+---
+
+## 🔄 Running Prompt Experiments
+
+```bash
+python src/run_experiments.py
+```
+
+Outputs written to:
+
+* `/experiments/experiment_results.csv`
+* `/experiments/eval.jsonl`
+
+---
+
+## 🌥️ Cloud Deployment Summary
+
+* AWS EC2 → Deployed FastAPI + Streamlit
+* S3 → Storage for embeddings and MLflow artifacts
+* CloudWatch → Logs and alerting
+* Docker + CI/CD → Automated deploy on push
+
+---
+
+## 📡 Monitoring
+
+| Component                         | Monitoring Tool      |
+| --------------------------------- | -------------------- |
+| API requests, latency, throughput | Prometheus + Grafana |
+| ML model drift                    | Evidently            |
+| Guardrail events                  | Logging + dashboard  |
+| Experiment tracking               | MLflow               |
+
+---
+
+## 👥 Team & Contributions
+
+| Name                | Role                   | Contribution Summary                                                        |
+| ------------------- | ---------------------- | --------------------------------------------------------------------------- |
+| **Zuha Aqib**       | Pipeline Lead          | Designed pipeline, integrated ML + RAG + LLM, final merging, UI integration |
+| **Muhammad Haaris** | RAG & Fine-Tuning Lead | Built RAG system, embeddings indexing, SFT dataset, experiment logic        |
+| **Maryam**          | Cloud Lead             | Cloud deployment, AWS setup, remote access, environment configuration       |
+| **Maham**           | Cloud Lead             | Containerization, infra debug, deployment, documentation                    |
+
+---
+
+## 🏁 Submission + Tags
+
+Milestone 2 final tag:
+
+```bash
+git tag v2.0-milestone2
+git push origin v2.0-milestone2
+```
+
+---
+
+## 📌 Final Notes
+
+* The project is fully reproducible end-to-end.
+* It demonstrates full lifecycle management across **MLOps → LLMOps**.
+* Architecture supports future extensibility such as:
+
+  * multimodal inputs
+  * A/B testing dashboards
+  * model retraining triggers
+  * LangChain/LlamaIndex integration
+
+---
+
+### 🧩 One-Sentence Summary
+
+> *This project transforms raw product data into a safe, intelligent AI shopping assistant powered by ML recommendations, retrieval-augmented reasoning, and structured LLM experimentation.*
+
+
+MARYAM MAHAM'S WORK:
+
+Project Workflow and Contributions
+
+Team Members: Maham Junaid & Maryam Ihsan
+
+1. Initial Setup
+
+Started by developing the FastAPI backend and the Streamlit frontend to handle the LLM and RAG pipelines.
+
+Created new Dockerfiles for backend and frontend, updated docker-compose.yml, prometheus.yml, and Grafana dashboards.
+
+Existing services already had pre-defined names and structure, making it challenging to integrate without breaking references.
+
+2. Dockerization & Data Management
+
+Dockerized all components locally to streamline development and testing.
+
+Realized that all data needed to be uploaded to S3 for cloud deployment.
+
+Updated codebase to fetch all datasets from S3 instead of local paths.
+
+3. Dependency Management
+
+Initially, rebuilding the backend took a long time because Google Generative AI library was missing from requirements.txt.
+
+Added it and rebuilt backend Docker image.
+
+Backend and other dependencies now fully installed inside containers.
+
+4. Frontend Integration
+
+After backend was running, the Streamlit frontend couldn’t reach the backend because it was hardcoded to 127.0.0.1 instead of using container networking.
+
+Updated frontend code to read API_URL from environment variables.
+
+Created a separate requirements_frontend.txt for Streamlit to speed up builds and avoid installing unnecessary backend packages.
+
+5. Finalizing Local Docker Setup
+
+Built and started all four containers: backend, frontend, Prometheus, and Grafana.
+
+Verified that Grafana dashboards display metrics correctly and that the frontend communicates with the backend via Docker networking.
+
+6. Next Steps for Deployment
+
+After local testing is successful, the plan is to tag Docker images and push them to EC2 for cloud deployment.
+
+Ensure all containers run correctly and dashboards render properly before deployment.
+
+7. Additional Work
+
+CI/CD pipeline updated to include prompt evaluation step.
+
+evaluate_prompts.py script is pending; currently blocked because the expected prompts folder doesn’t exist in the repo.
+
+HAARIS WORK:
+
+As part of D2 (RAG Pipeline) and D1 (Prompt Engineering Workflow), I conducted a comprehensive series of 10 systematic ablation studies on a Retrieval-Augmented Generation (RAG)
+All experiments used the same evaluation framework:
+
+4 held-out test queries with human-written reference answers
+Composite score combining: ROUGE-1, ROUGE-L, BLEU, METEOR, BERTScore (DeBERTa), Embedding Similarity (all-MiniLM-L6-v2), and Faithfulness
+Results saved as individual CSVs and summarized at the end of each notebook
+1_embedding_comparison.csv
+2_generation_model_comparison.csv
+3_top_k_retrieval_ablation.csv
+4_temperature_ablation.csv
+5_max_new_tokens_test.csv
+6_top_p_nucleus_sampling_test.csv
+7_prompt_engineering_comparison.csv
+8_context_chunking_strategy.csv
+9_reranking_with_cross_encoder.csv
+10_similarity_metric_comparison.csv
+
+
+HUGGINGFACE SPACE
+https://huggingface.co/spaces/MuhammadHaaris/mlops
