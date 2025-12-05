@@ -5,20 +5,39 @@ from evidently.report import Report
 from evidently.metric_preset import DataDriftPreset
 from evidently.metrics import DataDriftTable
 from datetime import datetime
+import boto3
+from io import StringIO
+from fastapi.responses import HTMLResponse
 
 # Initialize FastAPI app
 app = FastAPI(title="Evidently Drift Dashboard")
 
+S3_BUCKET = "mlops-d9"
+S3_KEY = "data/raw/amazon.csv"  # path where you stored the dataset in S3
 
-# Load reference and current datasets
+s3 = boto3.client("s3")
+
+
 def load_datasets():
-    # Load your training data as reference
-    reference_data = pd.read_csv("data/splits/train/train_set.csv")
+    # Reference dataset - original local snapshot
+    reference_data = pd.read_csv("data/raw/amazon.csv")
 
-    # Load your test data as current
-    current_data = pd.read_csv("data/splits/test/test_set.csv")
+    # Current dataset - latest uploaded dataset from S3
+    obj = s3.get_object(Bucket=S3_BUCKET, Key=S3_KEY)
+    current_data = pd.read_csv(StringIO(obj["Body"].read().decode("utf-8")))
 
     return reference_data, current_data
+
+
+# # Load reference and current datasets
+# def load_datasets():
+#     # Load your training data as reference
+#     reference_data = pd.read_csv("data/splits/train/train_set.csv")
+
+#     # Load your test data as current
+#     current_data = pd.read_csv("data/splits/test/test_set.csv")
+
+#     return reference_data, current_data
 
 
 def generate_drift_report():
@@ -42,11 +61,32 @@ def update_dashboard():
         return {"status": "error", "error": str(e)}
 
 
+# # Generate initial report
+# generate_drift_report()
+
+# # Mount the static files directory
+# app.mount("/", StaticFiles(directory="monitoring", html=True), name="static")
+
+
+# @app.get("/health")
+# async def health_check():
+#     return {"status": "healthy"}
+
+
+# @app.post("/refresh")
+# async def refresh_dashboard():
+#     return update_dashboard()
+
+# @app.get("/report", response_class=HTMLResponse)
+# def view_report():
+#     with open("monitoring/evidently_report.html", "r", encoding="utf-8") as f:
+#         return f.read()
+
 # Generate initial report
 generate_drift_report()
 
-# Mount the static files directory
-app.mount("/", StaticFiles(directory="monitoring", html=True), name="static")
+# Serve static HTML files (not at root anymore)
+app.mount("/static", StaticFiles(directory="monitoring", html=True), name="static")
 
 
 @app.get("/health")
@@ -57,6 +97,12 @@ async def health_check():
 @app.post("/refresh")
 async def refresh_dashboard():
     return update_dashboard()
+
+
+@app.get("/report", response_class=HTMLResponse)
+def view_report():
+    with open("monitoring/evidently_report.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 
 if __name__ == "__main__":
