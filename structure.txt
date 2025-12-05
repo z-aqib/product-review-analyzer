@@ -1,4 +1,7 @@
 project/
+├── .github
+│   └── workflows
+│       └── ci.yml
 ├── data
 │   ├── embeddings
 │   │   └── adf7761a
@@ -22,12 +25,13 @@ project/
 │   ├── raw
 │   │   ├── amazon.csv
 │   │   └── original_amazon.csv
-│   └── splits
-│       ├── test
-│       │   └── test_set.csv
-│       └── train
-│           ├── train_set.csv
-│           └── val_set.csv
+│   ├── splits
+│   │   ├── test
+│   │   │   └── test_set.csv
+│   │   └── train
+│   │       ├── train_set.csv
+│   │       └── val_set.csv
+│   └── eval.jsonl
 ├── images
 │   ├── cloud-1.jpg
 │   ├── cloud-2.jpg
@@ -296,6 +300,57 @@ project/
 │   ├── streamlit_app.py
 │   ├── test.py
 │   └── train.py
+├── �%
+│   └── mlruns
+│       ├── 0
+│       │   └── meta.yaml
+│       └── 453109747687177287
+│           ├── 72633e32f8ac460aa378b5d94b4a2013
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── 8d3e262d014e4c5595b1064f9f280555
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── d8fbf480d1d545f68fc9dcd45a76733a
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           └── meta.yaml
 ├── .gitignore
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTION.md
