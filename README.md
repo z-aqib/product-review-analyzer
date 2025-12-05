@@ -461,12 +461,27 @@ git push origin v1.0-milestone1
 Developed with ❤️ by Team **Product Review Analyzer**
 
 ---
+# 🚀 **Milestone 2: LLMOps — Operationalizing Large Language Models**
+<p align="left">
+  <img src="https://img.shields.io/badge/Milestone-2.0-blue?style=for-the-badge&logo=github" alt="Milestone 2">
+  <img src="https://img.shields.io/badge/Status-Completed-success?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/LLMOps-Active-orange?style=for-the-badge&logo=openai" alt="LLMOps">
+  <img src="https://img.shields.io/badge/Model-Qwen2.5--7B-purple?style=for-the-badge&logo=huggingface" alt="HuggingFace">
+</p>
 
-# 🛍️ Product Intelligence Recommender System
+> **Phase:** Large Language Model Integration & RAG System
+> **Status:** ✅ Completed & Deployed
+> **Tag:** `v2.0-milestone2`
 
-### **(MLOps → LLMOps End-to-End Project)**
+## 🎯 **Milestone 2 Overview**
 
-> Milestone-1 + Milestone-2 Combined Final Submission
+Building on our reproducible MLOps foundation, **Milestone 2 extends the system into the world of LLMOps** — managing the complete lifecycle of Large Language Models. We've designed, implemented, and evaluated a production-ready **Prompt Engineering + RAG (Retrieval-Augmented Generation)** system that demonstrates best practices in:
+
+- ✅ **Prompt Experimentation** — Zero-Shot, Few-Shot, Chain-of-Thought strategies
+- ✅ **RAG Workflow** — Document ingestion, retrieval, and context-aware generation
+- ✅ **Safety & Guardrails** — PII detection, prompt injection filtering, hallucination prevention
+- ✅ **Monitoring & Evaluation** — Token usage, latency, guardrail violations, data drift
+- ✅ **CI/CD Automation** — End-to-end testing, canary deployment, cloud integration
 
 ---
 
@@ -729,6 +744,27 @@ Outputs written to:
 
 ---
 
+---
+
+## 🔥 **The Star of the Show: Fine-Tuned Model & Hugging Face**
+
+We didn't just rely on generic models. We trained our own! 🚀
+
+We performed **Supervised Fine-Tuning (SFT)** on the **Qwen2.5-7B** architecture using a custom dataset of query-response pairs derived from our Amazon reviews data. This ensures the model speaks the language of "e-commerce" natively!
+
+### 🤖 **1. The Model (Qwen2.5-7B-ProductReviewAnalyzer-SFT)**
+You can download, use, or evaluate our fine-tuned weights directly from Hugging Face.
+
+> 👉 **[Access the SFT Model on Hugging Face](https://huggingface.co/MuhammadHaaris/Qwen2.5-7B-ProductReviewAnalyzer-SFT-FP16)**
+
+### 🌌 **2. Live Demo (Hugging Face Spaces)**
+Want to try it without coding? We hosted the fine-tuned version on a **Gradio** interface.
+
+> 👉 **[Try the Live Demo Here](https://huggingface.co/spaces/MuhammadHaaris/mlops)**
+
+---
+
+
 ## 📡 Monitoring
 
 | Component                         | Monitoring Tool      |
@@ -739,7 +775,20 @@ Outputs written to:
 | Experiment tracking               | MLflow               |
 
 ---
+---
 
+## 🌐 **Service Endpoints (Dev/Stage)**
+
+Here are the main URLs for accessing the deployed services in your local or staging environment:
+
+| Service         | URL                                         | Description                       |
+|-----------------|---------------------------------------------|-----------------------------------|
+| 🛠️ Backend API  | [http://localhost:8001/](http://localhost:8001/)         | FastAPI backend (custom port)     |
+| 📊 Grafana      | [http://localhost:3001/](http://localhost:3001/)         | Grafana dashboards (custom port)  |
+| 📈 Prometheus   | [http://localhost:9091/targets](http://localhost:9091/targets) | Prometheus targets/metrics        |
+| 🖥️ Streamlit UI | [http://localhost:8501/](http://localhost:8501/)         | Streamlit frontend                |
+
+> ⚡ **Note:** These endpoints may differ from default ports. Use these for development, testing, and monitoring your stack.
 ## 👥 Team & Contributions
 
 | Name                | Role                   | Contribution Summary                                                        |
@@ -778,83 +827,3 @@ git push origin v2.0-milestone2
 ### 🧩 One-Sentence Summary
 
 > *This project transforms raw product data into a safe, intelligent AI shopping assistant powered by ML recommendations, retrieval-augmented reasoning, and structured LLM experimentation.*
-
-
-MARYAM MAHAM'S WORK:
-
-Project Workflow and Contributions
-
-Team Members: Maham Junaid & Maryam Ihsan
-
-1. Initial Setup
-
-Started by developing the FastAPI backend and the Streamlit frontend to handle the LLM and RAG pipelines.
-
-Created new Dockerfiles for backend and frontend, updated docker-compose.yml, prometheus.yml, and Grafana dashboards.
-
-Existing services already had pre-defined names and structure, making it challenging to integrate without breaking references.
-
-2. Dockerization & Data Management
-
-Dockerized all components locally to streamline development and testing.
-
-Realized that all data needed to be uploaded to S3 for cloud deployment.
-
-Updated codebase to fetch all datasets from S3 instead of local paths.
-
-3. Dependency Management
-
-Initially, rebuilding the backend took a long time because Google Generative AI library was missing from requirements.txt.
-
-Added it and rebuilt backend Docker image.
-
-Backend and other dependencies now fully installed inside containers.
-
-4. Frontend Integration
-
-After backend was running, the Streamlit frontend couldn’t reach the backend because it was hardcoded to 127.0.0.1 instead of using container networking.
-
-Updated frontend code to read API_URL from environment variables.
-
-Created a separate requirements_frontend.txt for Streamlit to speed up builds and avoid installing unnecessary backend packages.
-
-5. Finalizing Local Docker Setup
-
-Built and started all four containers: backend, frontend, Prometheus, and Grafana.
-
-Verified that Grafana dashboards display metrics correctly and that the frontend communicates with the backend via Docker networking.
-
-6. Next Steps for Deployment
-
-After local testing is successful, the plan is to tag Docker images and push them to EC2 for cloud deployment.
-
-Ensure all containers run correctly and dashboards render properly before deployment.
-
-7. Additional Work
-
-CI/CD pipeline updated to include prompt evaluation step.
-
-evaluate_prompts.py script is pending; currently blocked because the expected prompts folder doesn’t exist in the repo.
-
-HAARIS WORK:
-
-As part of D2 (RAG Pipeline) and D1 (Prompt Engineering Workflow), I conducted a comprehensive series of 10 systematic ablation studies on a Retrieval-Augmented Generation (RAG)
-All experiments used the same evaluation framework:
-
-4 held-out test queries with human-written reference answers
-Composite score combining: ROUGE-1, ROUGE-L, BLEU, METEOR, BERTScore (DeBERTa), Embedding Similarity (all-MiniLM-L6-v2), and Faithfulness
-Results saved as individual CSVs and summarized at the end of each notebook
-1_embedding_comparison.csv
-2_generation_model_comparison.csv
-3_top_k_retrieval_ablation.csv
-4_temperature_ablation.csv
-5_max_new_tokens_test.csv
-6_top_p_nucleus_sampling_test.csv
-7_prompt_engineering_comparison.csv
-8_context_chunking_strategy.csv
-9_reranking_with_cross_encoder.csv
-10_similarity_metric_comparison.csv
-
-
-HUGGINGFACE SPACE
-https://huggingface.co/spaces/MuhammadHaaris/mlops
