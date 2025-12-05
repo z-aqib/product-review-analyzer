@@ -14,8 +14,11 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first
-COPY src/requirements.txt /app/requirements.txt
+COPY src/requirements_frontend.txt /app/requirements.txt
 
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip --default-timeout=120
+RUN pip install --no-cache-dir -r requirements.txt --default-timeout=120
 
 # Copy only the frontend code
 COPY src/streamlit_app.py /app/src/streamlit_app.py
@@ -24,9 +27,6 @@ COPY src/ml /app/src/ml
 COPY src/rag /app/src/rag
 COPY src/sft /app/src/sft
 
-# Upgrade pip and install dependencies
-RUN pip install --upgrade pip --default-timeout=120
-RUN pip install --no-cache-dir -r requirements.txt --default-timeout=120
 
 EXPOSE 8501
 
