@@ -10,9 +10,10 @@ services:
       - "8001:8001"
     environment:
       - PYTHONPATH=/app
-      - AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION: us-east-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=us-east-1
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     restart: unless-stopped
     volumes:
     - ../../src:/app/src
@@ -24,6 +25,8 @@ services:
     container_name: llmops_frontend
     ports:
       - "8501:8501"
+    environment:
+      - API_URL=http://llmops_app:8001/recommend
     depends_on:
       - llmops_app
     restart: unless-stopped
@@ -39,6 +42,38 @@ services:
       - "9091:9090"
     restart: unless-stopped
 
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: llmops_grafana
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #   volumes:
+  #     # - ./src/llm/grafana-dashboards:/var/lib/grafana/dashboards
+  #     - ./src/llm/grafana/dashboards:/var/lib/grafana/dashboards
+  #     - ./src/llm/grafana/provisioning:/etc/grafana/provisioning/dashboards
+
+  #   depends_on:
+  #     - prometheus
+  #   restart: unless-stopped
+
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: llmops_grafana
+  #   ports:
+  #     - "3001:3000"
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #   volumes:
+  #     - ./src/llm/grafana/dashboards:/var/lib/grafana/dashboards
+  #     - ./src/llm/grafana/provisioning:/etc/grafana/provisioning
+  #   depends_on:
+  #     - prometheus
+  #   restart: unless-stopped
+
   grafana:
     image: grafana/grafana:latest
     container_name: llmops_grafana
@@ -48,7 +83,9 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - ./src/llm/grafana-dashboards:/var/lib/grafana/dashboards
+      - D:\sem7\mlops\project\product-review-analyzer\src\llm\grafana\dashboards\:/var/lib/grafana/dashboards
+      - D:\sem7\mlops\project\product-review-analyzer\src\llm\grafana\provisioning\dashboards\:/etc/grafana/provisioning/dashboards
+      - D:\sem7\mlops\project\product-review-analyzer\src\llm\grafana\provisioning\datasources\:/etc/grafana/provisioning/datasources
     depends_on:
       - prometheus
     restart: unless-stopped

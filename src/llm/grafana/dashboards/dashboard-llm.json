@@ -24,7 +24,7 @@
     {
       "title": "Total LLM Requests",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "YOUR_PROM_UID"},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "targets": [
         {
           "expr": "llm_requests_total",
@@ -37,7 +37,7 @@
     {
       "title": "LLM Request Latency (Histogram)",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "YOUR_PROM_UID"},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum(rate(llm_request_latency_seconds_bucket[5m])) by (le))",
@@ -50,7 +50,7 @@
     {
       "title": "Guardrail Violations (Input Validation)",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "YOUR_PROM_UID"},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "targets": [
         {
           "expr": "llm_guardrail_violations_total{type=\"input_validation\"}",
@@ -63,7 +63,7 @@
     {
       "title": "Guardrail Violations (Output Moderation)",
       "type": "timeseries",
-      "datasource": {"type": "prometheus", "uid": "YOUR_PROM_UID"},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
       "targets": [
         {
           "expr": "llm_guardrail_violations_total{type=\"output_moderation\"}",
