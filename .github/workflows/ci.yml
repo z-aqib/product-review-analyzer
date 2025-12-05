@@ -1,4 +1,142 @@
-name: CI Pipeline
+# name: CI Pipeline
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# env:
+#   IMAGE_NAME: ghcr.io/${{ github.repository }}:latest
+#   PYTHON_VERSION: "3.11"
+
+# jobs:
+#   # -------------------------------
+#   # 🧹 Job 1: Lint (Ruff + Black)
+#   # -------------------------------
+#   lint:
+#     name: Lint Code (ruff + black)
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: ${{ env.PYTHON_VERSION }}
+
+#       - name: Install linters
+#         run: |
+#           pip install ruff black
+
+#       - name: Run Ruff linting
+#         run: ruff check .
+
+#       - name: Run Black formatting check
+#         run: black --check .
+
+#   # -------------------------------
+#   # 🧪 Job 2: Test with Coverage
+#   # -------------------------------
+#   test:
+#     name: Run Unit Tests (pytest + coverage)
+#     runs-on: ubuntu-latest
+#     needs: lint
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: ${{ env.PYTHON_VERSION }}
+
+#       - name: Install dependencies
+#         run: |
+#           python -m venv .venv
+#           source .venv/bin/activate
+#           pip install -r requirements.txt
+#           pip install pytest pytest-cov
+
+#       - name: Run tests with coverage
+#         run: |
+#           source .venv/bin/activate
+#           pytest --cov=src --cov-report=xml --cov-fail-under=80
+
+#   # -------------------------------
+#   # 🐳 Job 3: Build & Push Docker Image
+#   # -------------------------------
+#   build:
+#     name: Build & Push Docker Image
+#     runs-on: ubuntu-latest
+#     needs: test
+#     permissions:
+#       contents: read
+#       packages: write
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Log in to GitHub Container Registry
+#         uses: docker/login-action@v3
+#         with:
+#           registry: ghcr.io
+#           username: ${{ github.actor }}
+#           password: ${{ secrets.GITHUB_TOKEN }}
+
+#       - name: Build and tag Docker image
+#         run: |
+#           docker build -t $IMAGE_NAME -t ghcr.io/${{ github.repository }}:${{ github.sha }} .
+
+#       - name: Push image to GHCR
+#         run: |
+#           docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+#           docker push $IMAGE_NAME
+
+#   # -------------------------------
+#   # 🚀 Job 4: Canary Deployment
+#   # -------------------------------
+#   canary-deploy:
+#     name: Canary Deployment
+#     runs-on: ubuntu-latest
+#     needs: build
+
+#     steps:
+#       - name: Run canary container
+#         run: |
+#           docker run -d \
+#             -e CANARY=true \
+#             -p 8000:8000 \
+#             ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+#       - name: Wait for service to start
+#         run: sleep 10
+
+#   # -------------------------------
+#   # ✅ Job 5: Acceptance Tests (Golden Set)
+#   # -------------------------------
+#   acceptance-tests:
+#     name: Acceptance Tests (Golden Set)
+#     runs-on: ubuntu-latest
+#     needs: canary-deploy
+
+#     steps:
+#       - name: Run golden-set acceptance tests
+#         run: |
+#           echo "Running 5+ golden set endpoint checks..."
+#           for i in {1..5}; do
+#             STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health)
+#             if [ "$STATUS" -ne 200 ]; then
+#               echo "❌ Endpoint failed with status $STATUS"
+#               exit 1
+#             fi
+#           done
+#           echo "✅ All endpoints returned 200 OK."
+name: CI Pipeline (ML + RAG + LLM)
 
 on:
   push:
@@ -11,128 +149,152 @@ env:
   PYTHON_VERSION: "3.11"
 
 jobs:
-  # -------------------------------
-  # 🧹 Job 1: Lint (Ruff + Black)
-  # -------------------------------
+
+  # -----------------------------------
+  # 1) LINTING (Ruff + Black)
+  # -----------------------------------
   lint:
-    name: Lint Code (ruff + black)
+    name: Lint Code
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install linters
+        run: pip install ruff black
+
+      - name: Run linters
         run: |
-          pip install ruff black
+          ruff check .
+          black --check .
 
-      - name: Run Ruff linting
-        run: ruff check .
-
-      - name: Run Black formatting check
-        run: black --check .
-
-  # -------------------------------
-  # 🧪 Job 2: Test with Coverage
-  # -------------------------------
+  # -----------------------------------
+  # 2) UNIT TESTS + COVERAGE
+  # -----------------------------------
   test:
-    name: Run Unit Tests (pytest + coverage)
-    runs-on: ubuntu-latest
+    name: Run Tests (pytest + coverage)
     needs: lint
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
           pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov fastapi uvicorn httpx
 
-      - name: Run tests with coverage
+      - name: Run tests
         run: |
-          source .venv/bin/activate
           pytest --cov=src --cov-report=xml --cov-fail-under=80
 
-  # -------------------------------
-  # 🐳 Job 3: Build & Push Docker Image
-  # -------------------------------
-  build:
-    name: Build & Push Docker Image
-    runs-on: ubuntu-latest
+  # -----------------------------------
+  # 3) PROMPT EVALUATION JOB
+  # -----------------------------------
+  prompt-eval:
+    name: Automated Prompt Evaluation (amazon.csv)
     needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pandas
+
+      - name: Create small eval dataset
+        run: |
+          python scripts/create_small_eval_dataset.py
+
+      - name: Run prompt evaluation
+        run: |
+          echo "Running LLM prompt evaluation on amazon.csv"
+          # python src/evaluate.py --dataset data/raw/amazon.csv
+          python scripts/evaluate_prompts.py
+
+  # -----------------------------------
+  # 4) BUILD & PUSH DOCKER IMAGE (RAG API)
+  # -----------------------------------
+  build:
+    name: Build RAG Docker Image
+    needs: prompt-eval
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and tag Docker image
+      - name: Build and tag image (RAG API)
         run: |
-          docker build -t $IMAGE_NAME -t ghcr.io/${{ github.repository }}:${{ github.sha }} .
+          docker build \
+            -f Dockerfile.rag \
+            -t $IMAGE_NAME \
+            -t ghcr.io/${{ github.repository }}:${{ github.sha }} .
 
-      - name: Push image to GHCR
+      - name: Push image
         run: |
           docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
           docker push $IMAGE_NAME
 
-  # -------------------------------
-  # 🚀 Job 4: Canary Deployment
-  # -------------------------------
+  # -----------------------------------
+  # 5) CANARY DEPLOYMENT (LLM SERVICE)
+  # -----------------------------------
   canary-deploy:
-    name: Canary Deployment
+    name: Canary Deploy (LLM API)
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-      - name: Run canary container
+      - name: Start LLM canary container
         run: |
           docker run -d \
             -e CANARY=true \
             -p 8000:8000 \
             ghcr.io/${{ github.repository }}:${{ github.sha }}
 
-      - name: Wait for service to start
+      - name: Wait for service
         run: sleep 10
 
-  # -------------------------------
-  # ✅ Job 5: Acceptance Tests (Golden Set)
-  # -------------------------------
+  # -----------------------------------
+  # 6) ACCEPTANCE TESTS (Golden Set)
+  # -----------------------------------
   acceptance-tests:
-    name: Acceptance Tests (Golden Set)
+    name: Acceptance Tests
     runs-on: ubuntu-latest
     needs: canary-deploy
 
     steps:
-      - name: Run golden-set acceptance tests
+      - name: Golden checks
         run: |
-          echo "Running 5+ golden set endpoint checks..."
+          echo "Testing LLM service health..."
           for i in {1..5}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health)
             if [ "$STATUS" -ne 200 ]; then
-              echo "❌ Endpoint failed with status $STATUS"
+              echo "❌ Health failed: $STATUS"
               exit 1
             fi
           done
-          echo "✅ All endpoints returned 200 OK."
+          echo "✅ Golden health checks passed!"
