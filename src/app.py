@@ -114,7 +114,7 @@ async def recommend(request: QueryRequest) -> QueryResponse:
         logger.exception("Error while running pipeline: %s", e)
         raise HTTPException(
             status_code=500,
-            detail={"error": "internal_error", "message": "Pipeline failed."},
+            detail={"error": "internal_error: " + e, "message": "Pipeline failed."},
         )
 
     # 3) Output moderation guardrails
