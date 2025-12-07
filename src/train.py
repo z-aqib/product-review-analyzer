@@ -1,7 +1,7 @@
 # src/train.py
 import mlflow
 import mlflow.sklearn
-from ml.recommenders.item_item import ItemItemRecommender
+from src.ml.recommenders.item_item import ItemItemRecommender
 
 # Set MLflow tracking URI - using local mlruns directory
 mlflow.set_tracking_uri("http://localhost:5000")  # For local MLflow server
