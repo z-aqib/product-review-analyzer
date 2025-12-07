@@ -2,6 +2,14 @@ project/
 ├── .github
 │   └── workflows
 │       └── ci.yml
+├── artifacts
+│   ├── idx2prod.pkl
+│   ├── idx2user.pkl
+│   ├── item_item_sim.pkl
+│   ├── prod2idx.pkl
+│   ├── prod_name_map.pkl
+│   ├── user2idx.pkl
+│   └── user_item_sparse.pkl
 ├── data
 │   ├── embeddings
 │   │   └── adf7761a
@@ -69,12 +77,37 @@ project/
 │   └── 0
 │       └── models
 │           ├── m-2b4bbb118a2546ed94298a69a71ec762
+│           │   └── artifacts
+│           │       ├── conda.yaml
+│           │       ├── MLmodel
+│           │       ├── model.pkl
+│           │       ├── python_env.yaml
+│           │       └── requirements.txt
 │           ├── m-94e5481742764a1290613761b36ff1ba
+│           │   └── artifacts
+│           │       ├── conda.yaml
+│           │       ├── MLmodel
+│           │       ├── model.pkl
+│           │       ├── python_env.yaml
+│           │       └── requirements.txt
 │           ├── m-f416469ee1ec4675879af070948010ee
+│           │   └── artifacts
+│           │       ├── conda.yaml
+│           │       ├── MLmodel
+│           │       ├── model.pkl
+│           │       ├── python_env.yaml
+│           │       └── requirements.txt
 │           └── m-f89f7edf1b1643468c63696139e2c3cf
+│               └── artifacts
+│                   ├── conda.yaml
+│                   ├── MLmodel
+│                   ├── model.pkl
+│                   ├── python_env.yaml
+│                   └── requirements.txt
 ├── mlruns
 │   ├── 0
 │   │   ├── 4f37005ea74a49a09e4ba50b228ae94b
+│   │   │   ├── artifacts
 │   │   │   ├── metrics
 │   │   │   │   ├── mae
 │   │   │   │   └── rmse
@@ -92,6 +125,7 @@ project/
 │   │   │   │   └── mlflow.user
 │   │   │   └── meta.yaml
 │   │   ├── a83130cfa2ba4bc28c69a59b1077dcb8
+│   │   │   ├── artifacts
 │   │   │   ├── metrics
 │   │   │   │   ├── accuracy
 │   │   │   │   ├── auc
@@ -111,6 +145,7 @@ project/
 │   │   │   │   └── mlflow.user
 │   │   │   └── meta.yaml
 │   │   ├── b77fa02437e54bfbbbd8aea7483e8ddb
+│   │   │   ├── artifacts
 │   │   │   ├── metrics
 │   │   │   │   ├── mae
 │   │   │   │   └── rmse
@@ -128,6 +163,7 @@ project/
 │   │   │   │   └── mlflow.user
 │   │   │   └── meta.yaml
 │   │   ├── c92da179d2b347939decbfa76754382b
+│   │   │   ├── artifacts
 │   │   │   ├── metrics
 │   │   │   │   ├── accuracy
 │   │   │   │   ├── auc
@@ -243,6 +279,8 @@ project/
 │   │   ├── experiments
 │   │   │   ├── experiment_results.csv
 │   │   │   ├── experiments_config.csv
+│   │   │   ├── experiments_config_ci.csv
+│   │   │   ├── experiments_results.txt
 │   │   │   ├── run_experiments.py
 │   │   │   ├── sample_responses.json
 │   │   │   └── test_run_hf.py
@@ -292,7 +330,8 @@ project/
 │   │   ├── query-response-pairs-SFT-training-data.csv
 │   │   └── running-hugging-face-model.ipynb
 │   ├── tests
-│   │   └── test_health.py
+│   │   ├── __init__.py
+│   │   └── test_metrics_and_policy.py
 │   ├── __init__.py
 │   ├── app.py
 │   ├── evaluate.py
@@ -306,6 +345,23 @@ project/
 │       │   └── meta.yaml
 │       └── 453109747687177287
 │           ├── 72633e32f8ac460aa378b5d94b4a2013
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── 75d280d9904440fa8aa42f77f6a254d9
+│           │   ├── artifacts
 │           │   ├── metrics
 │           │   │   └── latency_seconds
 │           │   ├── params
@@ -321,6 +377,23 @@ project/
 │           │   │   └── mlflow.user
 │           │   └── meta.yaml
 │           ├── 8d3e262d014e4c5595b1064f9f280555
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── 8ffce2756ad04490b9766a47c04b0d13
+│           │   ├── artifacts
 │           │   ├── metrics
 │           │   │   └── latency_seconds
 │           │   ├── params
@@ -336,6 +409,23 @@ project/
 │           │   │   └── mlflow.user
 │           │   └── meta.yaml
 │           ├── d8fbf480d1d545f68fc9dcd45a76733a
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── e7f1864b7a0f41ef946b314ce91ccbf8
+│           │   ├── artifacts
 │           │   ├── metrics
 │           │   │   └── latency_seconds
 │           │   ├── params
