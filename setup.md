@@ -56,7 +56,7 @@ cd into the directory where the mlops-key pem file is located
 
 Command to connect to EC2 instance (this opens ubuntu)
 ssh -i "mlops-key.pem" ubuntu@ec2-13-60-193-55.eu-north-1.compute.amazonaws.com
-llomps instance : ssh -i "mlops-key.pem" ubuntu@ec2-13-53-148-28.eu-north-1.compute.amazonaws.com
+llomps instance : ssh -i "mlops-key.pem" ubuntu@ec2-13-60-82-74.eu-north-1.compute.amazonaws.com
 
 Public IPv4 address 13.60.193.55
 Private IPv4 addresses 172.31.38.0

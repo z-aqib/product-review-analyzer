@@ -51,9 +51,10 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - D:\sem7\mlops\project\product-review-analyzer\src\llm\grafana\dashboards\:/var/lib/grafana/dashboards
-      - D:\sem7\mlops\project\product-review-analyzer\src\llm\grafana\provisioning\dashboards\:/etc/grafana/provisioning/dashboards
-      - D:\sem7\mlops\project\product-review-analyzer\src\llm\grafana\provisioning\datasources\:/etc/grafana/provisioning/datasources
+        - ./grafana/dashboards:/var/lib/grafana/dashboards
+        - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+        - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+
     depends_on:
       - prometheus
     restart: unless-stopped
