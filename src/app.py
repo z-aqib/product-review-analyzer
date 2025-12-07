@@ -60,6 +60,17 @@ class QueryResponse(BaseModel):
     guardrail_events: List[GuardrailEvent]
 
 
+# ---------- Health check ----------
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    """
+    Simple health check for Docker/CI.
+    """
+    return {"status": "ok"}
+
+
 # ---------- Endpoint ----------
 
 
