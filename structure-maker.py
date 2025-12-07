@@ -25,7 +25,6 @@ DEFAULT_IGNORES = {
     "node_modules",
     ".ipynb_checkpoints",
     ".mlops-venv",
-    "artifacts",
 }
 
 
