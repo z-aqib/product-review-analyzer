@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository_owner }}/product-review-analyzer
   PYTHON_VERSION: "3.11"
 
 jobs:
@@ -191,11 +191,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull latest image
-        run: docker pull $IMAGE_NAME
+        run: docker pull $REGISTRY/$IMAGE_NAME:latest
 
       - name: Start API container
         run: |
-          docker run -d --rm --name rag-api -p 8000:8000 "$IMAGE_NAME"
+          docker run -d --rm \
+            -p 8000:8000 \
+            --name rag-api \
+            $REGISTRY/$IMAGE_NAME:latest
           echo "Waiting for API to start..."
           for i in {1..10}; do
             if curl -sSf http://localhost:8000/health > /dev/null 2>&1; then
@@ -236,4 +239,4 @@ jobs:
 
       - name: Stop container
         if: always()
-        run: docker stop rag-api
+        run: docker stop rag-api || true
