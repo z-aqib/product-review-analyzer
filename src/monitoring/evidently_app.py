@@ -29,17 +29,6 @@ def load_datasets():
     return reference_data, current_data
 
 
-# # Load reference and current datasets
-# def load_datasets():
-#     # Load your training data as reference
-#     reference_data = pd.read_csv("data/splits/train/train_set.csv")
-
-#     # Load your test data as current
-#     current_data = pd.read_csv("data/splits/test/test_set.csv")
-
-#     return reference_data, current_data
-
-
 def generate_drift_report():
     reference_data, current_data = load_datasets()
 
@@ -60,27 +49,6 @@ def update_dashboard():
     except Exception as e:
         return {"status": "error", "error": str(e)}
 
-
-# # Generate initial report
-# generate_drift_report()
-
-# # Mount the static files directory
-# app.mount("/", StaticFiles(directory="monitoring", html=True), name="static")
-
-
-# @app.get("/health")
-# async def health_check():
-#     return {"status": "healthy"}
-
-
-# @app.post("/refresh")
-# async def refresh_dashboard():
-#     return update_dashboard()
-
-# @app.get("/report", response_class=HTMLResponse)
-# def view_report():
-#     with open("monitoring/evidently_report.html", "r", encoding="utf-8") as f:
-#         return f.read()
 
 # Generate initial report
 generate_drift_report()
