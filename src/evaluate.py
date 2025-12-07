@@ -1,5 +1,4 @@
-# project/src/evaluate.py
-
+# src/evaluate.py
 from __future__ import annotations
 import argparse
 import json

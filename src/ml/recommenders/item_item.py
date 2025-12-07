@@ -1,4 +1,4 @@
-# project/src/ml/recommenders/item_item.py
+# src/ml/recommenders/item_item.py
 
 from __future__ import annotations
 import pandas as pd

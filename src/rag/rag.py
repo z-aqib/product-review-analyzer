@@ -1,4 +1,4 @@
-# src/rag_with_gemini_api.py
+# src/rag/rag.py
 
 import os
 from typing import Dict, Any

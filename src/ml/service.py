@@ -1,3 +1,4 @@
+# src/ml/service.py
 from .recommenders.item_item import ItemItemRecommender
 
 model = ItemItemRecommender("data/processed").fit()
