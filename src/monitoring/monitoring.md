@@ -150,7 +150,7 @@ Evidently monitors data drift in production datasets, comparing live data agains
 ### Docker Service
 
 ```yaml
-evidently_app: 
+evidently_app:
   build:
     context: ../../
     dockerfile: src/llm/Dockerfile.evidently
