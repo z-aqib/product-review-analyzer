@@ -331,7 +331,17 @@ project/
 │   │   └── running-hugging-face-model.ipynb
 │   ├── tests
 │   │   ├── __init__.py
-│   │   └── test_metrics_and_policy.py
+│   │   ├── test_app_api.py
+│   │   ├── test_eval_dataset_split.py
+│   │   ├── test_evaluate_main.py
+│   │   ├── test_item_item_recommender.py
+│   │   ├── test_llm_advisor.py
+│   │   ├── test_metrics.py
+│   │   ├── test_metrics_and_policy.py
+│   │   ├── test_pipeline_orchestration.py
+│   │   ├── test_rag_ask.py
+│   │   ├── test_service_forwarding.py
+│   │   └── test_train_mlflow.py
 │   ├── __init__.py
 │   ├── app.py
 │   ├── evaluate.py
