@@ -1,0 +1,12 @@
+,,composite_score,composite_score,composite_score,bert_score_f1,meteor,embedding_similarity,total_time
+,,mean,std,max,mean,mean,mean,mean
+embedding_model,generation_model,,,,,,,
+BAAI/bge-small-en-v1.5,Qwen/Qwen2.5-7B-Instruct,0.5216,0.0404,0.5962,0.8582,0.2835,0.7163,37.1601
+BAAI/bge-base-en-v1.5,Qwen/Qwen2.5-7B-Instruct,0.4888,0.0596,0.599,0.8426,0.2469,0.6455,40.5475
+sentence-transformers/all-MiniLM-L6-v2,Qwen/Qwen2.5-7B-Instruct,0.4668,0.1016,0.5476,0.8364,0.2215,0.5887,33.1518
+BAAI/bge-small-en-v1.5,mistralai/Mistral-7B-Instruct-v0.2,0.2113,0.2606,0.6038,0.3478,0.1173,0.2859,19.5831
+sentence-transformers/all-MiniLM-L6-v2,mistralai/Mistral-7B-Instruct-v0.2,0.1779,0.2301,0.5537,0.3404,0.0731,0.2174,13.3818
+BAAI/bge-base-en-v1.5,mistralai/Mistral-7B-Instruct-v0.2,0.0978,0.1591,0.5842,0.2803,0.0221,0.0717,5.2762
+BAAI/bge-base-en-v1.5,google/flan-t5-base,0.0055,0.0047,0.0129,0.0,0.0,0.0177,1.5707
+sentence-transformers/all-MiniLM-L6-v2,google/flan-t5-base,0.0051,0.0045,0.0121,0.0,0.0,0.0177,1.4956
+BAAI/bge-small-en-v1.5,google/flan-t5-base,0.004,0.0029,0.0087,0.0,0.0,0.0177,1.6424

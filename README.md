@@ -461,3 +461,369 @@ git push origin v1.0-milestone1
 Developed with ❤️ by Team **Product Review Analyzer**
 
 ---
+# 🚀 **Milestone 2: LLMOps — Operationalizing Large Language Models**
+<p align="left">
+  <img src="https://img.shields.io/badge/Milestone-2.0-blue?style=for-the-badge&logo=github" alt="Milestone 2">
+  <img src="https://img.shields.io/badge/Status-Completed-success?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/LLMOps-Active-orange?style=for-the-badge&logo=openai" alt="LLMOps">
+  <img src="https://img.shields.io/badge/Model-Qwen2.5--7B-purple?style=for-the-badge&logo=huggingface" alt="HuggingFace">
+</p>
+
+> **Phase:** Large Language Model Integration & RAG System
+> **Status:** ✅ Completed & Deployed
+> **Tag:** `v2.0-milestone2`
+
+## 🎯 **Milestone 2 Overview**
+
+Building on our reproducible MLOps foundation, **Milestone 2 extends the system into the world of LLMOps** — managing the complete lifecycle of Large Language Models. We've designed, implemented, and evaluated a production-ready **Prompt Engineering + RAG (Retrieval-Augmented Generation)** system that demonstrates best practices in:
+
+- ✅ **Prompt Experimentation** — Zero-Shot, Few-Shot, Chain-of-Thought strategies
+- ✅ **RAG Workflow** — Document ingestion, retrieval, and context-aware generation
+- ✅ **Safety & Guardrails** — PII detection, prompt injection filtering, hallucination prevention
+- ✅ **Monitoring & Evaluation** — Token usage, latency, guardrail violations, data drift
+- ✅ **CI/CD Automation** — End-to-end testing, canary deployment, cloud integration
+
+---
+
+## 📌 Overview
+
+This project evolved through **two major milestones**:
+
+| Stage                    | Focus                                                                                                                 | Outcome                                                                                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Milestone 1 (MLOps)**  | Build a reproducible ML recommender system with monitoring, CI/CD, and deployment.                                    | Working **Item-Item Collaborative Filtering** recommender served through **FastAPI**, tracked with **MLflow**, monitored with **Prometheus/Grafana**, deployed to cloud.                      |
+| **Milestone 2 (LLMOps)** | Extend the ML workflow into a hybrid **ML + RAG + LLM** pipeline with prompt experimentation, safety, and evaluation. | Full working **Retrieval-Augmented Generation (RAG)** system, multiple prompting strategies, evaluation dataset, automated experimentation engine, guardrails, dashboards, and documentation. |
+
+This system now acts as an **AI Shopping Assistant** that:
+
+* Retrieves relevant products using **FAISS+embeddings**
+* Recommends personalized items using an **ML recommender**
+* Generates summarized, contextual answers using an **LLM advisor**
+* Ensures safety with **input/output moderation**
+* Evaluates LLM performance across **multiple prompting strategies**
+* Is fully monitored, reproducible, and deployable.
+
+---
+
+## 🧠 System Architecture Summary
+
+```
+    ┌───────────────────────────────┐
+    │ User Query                    │
+    └───────────────┬───────────────┘
+                    │
+          Guardrails: Input Filter
+                    │
+         ┌──────────▼─────────┐
+         │     pipeline.py     │
+         └──────────┬─────────┘
+                    │
+     ┌──────────────┼─────────────────┐
+     │              │                 │
+     ▼              ▼                 ▼
+ML Model       RAG Retrieval       Prompt Strategy
+(Item-Item CF) (FAISS + Embeddings) (zero-shot / few-shot / CoT / meta)
+     │              │                 │
+     └──────────────┴─────────────────┘
+                    │
+           Advisor LLM (Gemini/Qwen)
+                    │
+         Guardrails: Output Moderation
+                    │
+                    ▼
+              Final Response
+```
+
+---
+
+## 📦 Core Components
+
+### 🔹 Machine Learning Recommender
+
+* Implemented using **Item-Item Collaborative Filtering**
+* Uses user–product interaction matrix
+* Computes similarity using cosine similarity
+* Outputs top-k personalized recommendations
+
+Files:
+
+* `item_item.py`
+* `service.py`
+* `eval_dataset.py`
+* `metrics.py`
+
+Evaluation metrics include:
+
+* Recall@K
+* NDCG@K
+* Catalog Coverage
+
+ML experiments are tracked in **MLflow**.
+
+---
+
+### 🔹 Retrieval-Augmented Generation (RAG)
+
+The RAG system improves factual grounding.
+
+**Indexing (offline):**
+
+* Processes product dataset into text blocks
+* Embeds using `BAAI/bge-small-en-v1.5`
+* Stores embeddings + metadata in FAISS
+
+File: `ingest.py`
+
+**Inference (online):**
+
+* Retrieve top relevant documents using FAISS
+* Extract product metadata
+* Package into structured prompt context
+
+Files: `rag.py`, `rag_service.py`
+
+---
+
+### 🔹 LLM Advisor + Prompting System
+
+LLM layer generates final natural-language responses.
+
+Supported prompting modes:
+
+| Strategy             | Example                                       | Purpose                        |
+| -------------------- | --------------------------------------------- | ------------------------------ |
+| **Zero-shot**        | “Recommend me a budget phone”                 | Simple baseline                |
+| **Few-shot**         | Use training pairs from sample_responses.json | Improve structure & reasoning  |
+| **Chain-of-Thought** | “Think step-by-step…”                         | Improve reasoning transparency |
+| **Meta Prompting**   | A structured system persona with rules        | Most controlled, consistent    |
+
+The final message is strictly:
+
+* Short
+* factual
+* based on retrieved evidence
+* safe and grounded
+
+File: `advisor.py`
+
+---
+
+### 🔹 Guardrails & Safety
+
+The system prevents:
+
+* Prompt injection
+* Toxic language
+* Personal data leakage
+* Unsafe claims
+
+File: `policy.py`
+
+These are enforced **before LLM call (input)** and **after output (post-processing).**
+
+---
+
+### 🔹 Experimentation Engine (LLMOps Core)
+
+Automates prompt experiments and logs results.
+
+* Reads experiment plan from `experiments_config.csv`
+* Injects chosen prompt strategy
+* Calls HF Space Qwen model or Gemini
+* Logs:
+
+  * response text
+  * latency
+  * prompt variant
+  * correctness score
+  * metadata
+
+Outputs stored in:
+
+* `experiment_results.csv`
+* eval JSON files used later by humans
+
+File: `run_experiments.py`
+
+---
+
+## 📑 Evaluation Dataset
+
+File: `eval_dataset.py` ()
+
+Contains **leave-one-out split logic** for fair evaluation of ML and LLM responses.
+
+Dataset includes:
+
+* Real product queries
+* Expected answers
+* Metadata for scoring
+
+Evaluation is done using:
+
+* Automated embedding similarity scoring
+* Human rating template (helpfulness, factuality, safety)
+
+---
+
+## 🛠️ Setup & Installation
+
+### 1️⃣ Clone the project
+
+```bash
+git clone <repo_url>
+cd <project_name>
+```
+
+### 2️⃣ Create environment
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### 3️⃣ Install dependencies
+
+> For local development:
+
+```bash
+pip install -r requirements_all.txt
+```
+
+> For cloud deployment:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ (Optional) Clean dependencies
+
+```bash
+pip freeze > requirements_all.txt
+pip freeze > requirements.txt
+pipreqs . --force --encoding=utf-8 --ignore .venv,.git
+```
+
+---
+
+## ▶️ Running the System
+
+Terminal 1 (backend API):
+
+```bash
+uvicorn src.app:app --reload
+```
+
+Terminal 2 (UI):
+
+```bash
+streamlit run src/streamlit_app.py
+```
+
+---
+
+## 🔄 Running Prompt Experiments
+
+```bash
+python src/run_experiments.py
+```
+
+Outputs written to:
+
+* `/experiments/experiment_results.csv`
+* `/experiments/eval.jsonl`
+
+---
+
+## 🌥️ Cloud Deployment Summary
+
+* AWS EC2 → Deployed FastAPI + Streamlit
+* S3 → Storage for embeddings and MLflow artifacts
+* CloudWatch → Logs and alerting
+* Docker + CI/CD → Automated deploy on push
+
+---
+
+---
+
+## 🔥 **The Star of the Show: Fine-Tuned Model & Hugging Face**
+
+We didn't just rely on generic models. We trained our own! 🚀
+
+We performed **Supervised Fine-Tuning (SFT)** on the **Qwen2.5-7B** architecture using a custom dataset of query-response pairs derived from our Amazon reviews data. This ensures the model speaks the language of "e-commerce" natively!
+
+### 🤖 **1. The Model (Qwen2.5-7B-ProductReviewAnalyzer-SFT)**
+You can download, use, or evaluate our fine-tuned weights directly from Hugging Face.
+
+> 👉 **[Access the SFT Model on Hugging Face](https://huggingface.co/MuhammadHaaris/Qwen2.5-7B-ProductReviewAnalyzer-SFT-FP16)**
+
+### 🌌 **2. Live Demo (Hugging Face Spaces)**
+Want to try it without coding? We hosted the fine-tuned version on a **Gradio** interface.
+
+> 👉 **[Try the Live Demo Here](https://huggingface.co/spaces/MuhammadHaaris/mlops)**
+
+---
+
+
+## 📡 Monitoring
+
+| Component                         | Monitoring Tool      |
+| --------------------------------- | -------------------- |
+| API requests, latency, throughput | Prometheus + Grafana |
+| ML model drift                    | Evidently            |
+| Guardrail events                  | Logging + dashboard  |
+| Experiment tracking               | MLflow               |
+
+---
+---
+
+## 🌐 **Service Endpoints (Dev/Stage)**
+
+Here are the main URLs for accessing the deployed services in your local or staging environment:
+
+| Service         | URL                                         | Description                       |
+|-----------------|---------------------------------------------|-----------------------------------|
+| 🛠️ Backend API  | [http://localhost:8001/](http://localhost:8001/)         | FastAPI backend (custom port)     |
+| 📊 Grafana      | [http://localhost:3001/](http://localhost:3001/)         | Grafana dashboards (custom port)  |
+| 📈 Prometheus   | [http://localhost:9091/targets](http://localhost:9091/targets) | Prometheus targets/metrics        |
+| 🖥️ Streamlit UI | [http://localhost:8501/](http://localhost:8501/)         | Streamlit frontend                |
+
+> ⚡ **Note:** These endpoints may differ from default ports. Use these for development, testing, and monitoring your stack.
+## 👥 Team & Contributions
+
+| Name                | Role                   | Contribution Summary                                                        |
+| ------------------- | ---------------------- | --------------------------------------------------------------------------- |
+| **Zuha Aqib**       | Pipeline Lead          | Designed pipeline, integrated ML + RAG + LLM, final merging, UI integration |
+| **Muhammad Haaris** | RAG & Fine-Tuning Lead | Built RAG system, embeddings indexing, SFT dataset, experiment logic        |
+| **Maryam**          | Cloud Lead             | Cloud deployment, AWS setup, remote access, environment configuration       |
+| **Maham**           | Cloud Lead             | Containerization, infra debug, deployment, documentation                    |
+
+---
+
+## 🏁 Submission + Tags
+
+Milestone 2 final tag:
+
+```bash
+git tag v2.0-milestone2
+git push origin v2.0-milestone2
+```
+
+---
+
+## 📌 Final Notes
+
+* The project is fully reproducible end-to-end.
+* It demonstrates full lifecycle management across **MLOps → LLMOps**.
+* Architecture supports future extensibility such as:
+
+  * multimodal inputs
+  * A/B testing dashboards
+  * model retraining triggers
+  * LangChain/LlamaIndex integration
+
+---
+
+### 🧩 One-Sentence Summary
+
+> *This project transforms raw product data into a safe, intelligent AI shopping assistant powered by ML recommendations, retrieval-augmented reasoning, and structured LLM experimentation.*

@@ -25,7 +25,6 @@ DEFAULT_IGNORES = {
     "node_modules",
     ".ipynb_checkpoints",
     ".mlops-venv",
-    "artifacts",
 }
 
 
@@ -34,6 +33,7 @@ def is_hidden(p: Path) -> bool:
         ".gitignore",
         ".gitattributes",
         ".gitkeep",
+        ".github",
     }
 
 

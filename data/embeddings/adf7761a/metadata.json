@@ -4,9 +4,9 @@
     "normalize": true,
     "chunking": "none"
   },
-  "created_at": "2025-12-01T18:01:28.785452",
-  "num_docs_indexed": 1465,
-  "num_rows_dataset": 1465,
+  "created_at": "2025-12-05T14:41:39.074225",
+  "num_docs_indexed": 645,
+  "num_rows_dataset": 645,
   "data_path": "data\\raw\\amazon.csv",
   "faiss_index_type": "IndexFlatIP",
   "embedding_dim": 384

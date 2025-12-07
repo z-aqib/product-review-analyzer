@@ -1,0 +1,12 @@
+experiment_id,strategy,sample_type,few_shot_k,user_query_original,user_query_variant,user_id,llm_prompt,scenario_id
+earphones_durability_zero,zero_shot,Earphones / Headphones,0,"I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.","",,"",earphones_durability_under_1000
+earphones_durability_fs3,few_shot_3,Earphones / Headphones,3,"I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.","",,"",earphones_durability_under_1000
+earphones_durability_fs5,few_shot_5,Earphones / Headphones,5,"I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.","",,"",earphones_durability_under_1000
+earphones_durability_cot,cot,Earphones / Headphones,0,"I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.","",,"",earphones_durability_under_1000
+earphones_durability_meta,meta,Earphones / Headphones,0,"I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.","",,"",earphones_durability_under_1000
+
+tv_43_budget_zero,zero_shot,TVs,0,"Which is the best budget 43-inch 4K TV under ₹25,000 based on customer reviews and long-term reliability?","",,"",tv_43_budget_under_25k
+tv_43_budget_fs3,few_shot_3,TVs,3,"Which is the best budget 43-inch 4K TV under ₹25,000 based on customer reviews and long-term reliability?","",,"",tv_43_budget_under_25k
+tv_43_budget_fs5,few_shot_5,TVs,5,"Which is the best budget 43-inch 4K TV under ₹25,000 based on customer reviews and long-term reliability?","",,"",tv_43_budget_under_25k
+tv_43_budget_cot,cot,TVs,0,"Which is the best budget 43-inch 4K TV under ₹25,000 based on customer reviews and long-term reliability?","",,"",tv_43_budget_under_25k
+tv_43_budget_meta,meta,TVs,0,"Which is the best budget 43-inch 4K TV under ₹25,000 based on customer reviews and long-term reliability?","",,"",tv_43_budget_under_25k

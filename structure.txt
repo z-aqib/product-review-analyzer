@@ -1,7 +1,25 @@
 project/
+├── .github
+│   └── workflows
+│       └── ci.yml
+├── artifacts
+│   ├── idx2prod.pkl
+│   ├── idx2user.pkl
+│   ├── item_item_sim.pkl
+│   ├── prod2idx.pkl
+│   ├── prod_name_map.pkl
+│   ├── user2idx.pkl
+│   └── user_item_sparse.pkl
 ├── data
-│   ├── cleaning
-│   │   └── data-cleaning.ipynb
+│   ├── embeddings
+│   │   └── adf7761a
+│   │       ├── documents.pkl
+│   │       ├── index.faiss
+│   │       ├── metadata.json
+│   │       └── metadatas.pkl
+│   ├── insights
+│   │   ├── product_names.csv
+│   │   └── unique_brands.csv
 │   ├── processed
 │   │   ├── eval
 │   │   │   ├── eval_summary_item_item_k10.json
@@ -13,13 +31,15 @@ project/
 │   │   ├── reviews.csv
 │   │   └── users.csv
 │   ├── raw
-│   │   └── amazon.csv
-│   └── splits
-│       ├── test
-│       │   └── test_set.csv
-│       └── train
-│           ├── train_set.csv
-│           └── val_set.csv
+│   │   ├── amazon.csv
+│   │   └── original_amazon.csv
+│   ├── splits
+│   │   ├── test
+│   │   │   └── test_set.csv
+│   │   └── train
+│   │       ├── train_set.csv
+│   │       └── val_set.csv
+│   └── eval.jsonl
 ├── images
 │   ├── cloud-1.jpg
 │   ├── cloud-2.jpg
@@ -37,7 +57,8 @@ project/
 │   ├── mlflow-2.png
 │   ├── mlflow-3.png
 │   ├── Mlops_pipeline.svg
-│   └── rubiks-cool.gif
+│   ├── rubiks-cool.gif
+│   └── working-ui.png
 ├── infra
 │   ├── grafana-dashboards
 │   │   ├── dashboard-1.json
@@ -56,12 +77,37 @@ project/
 │   └── 0
 │       └── models
 │           ├── m-2b4bbb118a2546ed94298a69a71ec762
+│           │   └── artifacts
+│           │       ├── conda.yaml
+│           │       ├── MLmodel
+│           │       ├── model.pkl
+│           │       ├── python_env.yaml
+│           │       └── requirements.txt
 │           ├── m-94e5481742764a1290613761b36ff1ba
+│           │   └── artifacts
+│           │       ├── conda.yaml
+│           │       ├── MLmodel
+│           │       ├── model.pkl
+│           │       ├── python_env.yaml
+│           │       └── requirements.txt
 │           ├── m-f416469ee1ec4675879af070948010ee
+│           │   └── artifacts
+│           │       ├── conda.yaml
+│           │       ├── MLmodel
+│           │       ├── model.pkl
+│           │       ├── python_env.yaml
+│           │       └── requirements.txt
 │           └── m-f89f7edf1b1643468c63696139e2c3cf
+│               └── artifacts
+│                   ├── conda.yaml
+│                   ├── MLmodel
+│                   ├── model.pkl
+│                   ├── python_env.yaml
+│                   └── requirements.txt
 ├── mlruns
 │   ├── 0
 │   │   ├── 4f37005ea74a49a09e4ba50b228ae94b
+│   │   │   ├── artifacts
 │   │   │   ├── metrics
 │   │   │   │   ├── mae
 │   │   │   │   └── rmse
@@ -79,6 +125,7 @@ project/
 │   │   │   │   └── mlflow.user
 │   │   │   └── meta.yaml
 │   │   ├── a83130cfa2ba4bc28c69a59b1077dcb8
+│   │   │   ├── artifacts
 │   │   │   ├── metrics
 │   │   │   │   ├── accuracy
 │   │   │   │   ├── auc
@@ -98,6 +145,7 @@ project/
 │   │   │   │   └── mlflow.user
 │   │   │   └── meta.yaml
 │   │   ├── b77fa02437e54bfbbbd8aea7483e8ddb
+│   │   │   ├── artifacts
 │   │   │   ├── metrics
 │   │   │   │   ├── mae
 │   │   │   │   └── rmse
@@ -115,6 +163,7 @@ project/
 │   │   │   │   └── mlflow.user
 │   │   │   └── meta.yaml
 │   │   ├── c92da179d2b347939decbfa76754382b
+│   │   │   ├── artifacts
 │   │   │   ├── metrics
 │   │   │   │   ├── accuracy
 │   │   │   │   ├── auc
@@ -211,6 +260,11 @@ project/
 │   ├── evidently_report.html
 │   └── generate_drift.py
 ├── notebooks
+│   ├── data-clean-product-names.ipynb
+│   ├── data-cleaning.ipynb
+│   ├── data-extract-product-names.ipynb
+│   ├── data-remove-non-pakistani.ipynb
+│   ├── data-rename-brands.ipynb
 │   ├── item-item-collabfiltering.ipynb
 │   ├── item-item-collabfiltering.py
 │   └── rag_with_gemini_api.ipynb
@@ -218,7 +272,18 @@ project/
 │   ├── app
 │   │   ├── item-item-collabfiltering.py
 │   │   └── main.py
+│   ├── guards
+│   │   ├── __init__.py
+│   │   └── policy.py
 │   ├── llm
+│   │   ├── experiments
+│   │   │   ├── experiment_results.csv
+│   │   │   ├── experiments_config.csv
+│   │   │   ├── experiments_config_ci.csv
+│   │   │   ├── experiments_results.txt
+│   │   │   ├── run_experiments.py
+│   │   │   ├── sample_responses.json
+│   │   │   └── test_run_hf.py
 │   │   └── advisor.py
 │   ├── ml
 │   │   ├── eval
@@ -228,14 +293,154 @@ project/
 │   │   │   └── item_item.py
 │   │   └── service.py
 │   ├── rag
-│   │   ├── rag_service.py
-│   │   └── rag_with_gemini_api.py
+│   │   ├── experiments
+│   │   │   ├── 1-embedding-model-comparison-py.ipynb
+│   │   │   ├── 10-similarity-metric-comparison-py.ipynb
+│   │   │   ├── 2-generation-model-comparison-mistral-py.ipynb
+│   │   │   ├── 2-generation-model-comparison-Qwen-py.ipynb
+│   │   │   ├── 3-top-k-retrieval-ablation-py.ipynb
+│   │   │   ├── 4-temperature-ablation-py.ipynb
+│   │   │   ├── 5-max-new-tokens-test-py.ipynb
+│   │   │   ├── 6-top-p-nucleus-sampling-test-py.ipynb
+│   │   │   ├── 7-prompt-engineering-comparison-py.ipynb
+│   │   │   ├── 8-context-chunking-strategy-py.ipynb
+│   │   │   ├── 9-reranking-with-cross-encoder-py.ipynb
+│   │   │   └── grid-search-hyperparameter-selection.ipynb
+│   │   ├── results
+│   │   │   ├── grid search results
+│   │   │   │   ├── rag_grid_search_results_advanced.csv
+│   │   │   │   ├── rag_model_summary_advanced.csv
+│   │   │   │   └── rag_statistics_summary.csv
+│   │   │   ├── 10_similarity_metric_comparison.csv
+│   │   │   ├── 1_embedding_comparison.csv
+│   │   │   ├── 2_generation_model_comparison_mistral.csv
+│   │   │   ├── 2_generation_model_comparison_Qwen.csv
+│   │   │   ├── 3_top_k_retrieval_ablation.csv
+│   │   │   ├── 4_temperature_ablation.csv
+│   │   │   ├── 5_max_new_tokens_test.csv
+│   │   │   ├── 6_top_p_nucleus_sampling_test.csv
+│   │   │   ├── 7_prompt_engineering_comparison.csv
+│   │   │   ├── 8_context_chunking_strategy.csv
+│   │   │   └── 9_reranking_with_cross_encoder.csv
+│   │   ├── ingest.py
+│   │   ├── rag.py
+│   │   └── rag_service.py
+│   ├── sft
+│   │   ├── complete_sft.ipynb
+│   │   ├── query-response-pairs-SFT-training-data.csv
+│   │   └── running-hugging-face-model.ipynb
 │   ├── tests
-│   │   └── test_health.py
-│   ├── api.py
+│   │   ├── __init__.py
+│   │   └── test_metrics_and_policy.py
+│   ├── __init__.py
+│   ├── app.py
 │   ├── evaluate.py
 │   ├── pipeline.py
+│   ├── streamlit_app.py
+│   ├── test.py
 │   └── train.py
+├── �%
+│   └── mlruns
+│       ├── 0
+│       │   └── meta.yaml
+│       └── 453109747687177287
+│           ├── 72633e32f8ac460aa378b5d94b4a2013
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── 75d280d9904440fa8aa42f77f6a254d9
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── 8d3e262d014e4c5595b1064f9f280555
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── 8ffce2756ad04490b9766a47c04b0d13
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── d8fbf480d1d545f68fc9dcd45a76733a
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           ├── e7f1864b7a0f41ef946b314ce91ccbf8
+│           │   ├── artifacts
+│           │   ├── metrics
+│           │   │   └── latency_seconds
+│           │   ├── params
+│           │   │   ├── few_shot_k
+│           │   │   ├── sample_type
+│           │   │   ├── scenario_id
+│           │   │   └── strategy
+│           │   ├── tags
+│           │   │   ├── mlflow.runName
+│           │   │   ├── mlflow.source.git.commit
+│           │   │   ├── mlflow.source.name
+│           │   │   ├── mlflow.source.type
+│           │   │   └── mlflow.user
+│           │   └── meta.yaml
+│           └── meta.yaml
 ├── .gitignore
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTION.md
@@ -248,6 +453,7 @@ project/
 ├── README.md
 ├── requirements.txt
 ├── requirements_all.txt
+├── security.md
 ├── setup.md
 ├── structure-maker.py
 └── structure.txt
