@@ -199,40 +199,49 @@ jobs:
         needs: canary-deploy
 
         env:
+            REGISTRY: ghcr.io
+            IMAGE_NAME: z-aqib/product-review-analyzer
+            PYTHON_VERSION: 3.11
             GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
             PYTHONPATH: .
 
         steps:
-            - name: Log in to GHCR
-              uses: docker/login-action@v3
-              with:
-                  registry: ghcr.io
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
+          - name: Set up job
+            run: echo "Starting acceptance tests..."
 
-            - name: Pull latest image
-              run: docker pull $REGISTRY/$IMAGE_NAME:latest
+          - name: Log in to GHCR
+            uses: docker/login-action@v3
+            with:
+              registry: ghcr.io
+              username: ${{ github.actor }}
+              password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Start API container
-              run: |
-                  docker run -d --rm \
-                    -p 8000:8000 \
-                    --name rag-api \
-                    $REGISTRY/$IMAGE_NAME:latest
-                  echo "Waiting for API to start..."
-                  for i in {1..10}; do
-                    if curl -sSf http://localhost:8000/health > /dev/null 2>&1; then
-                      echo "API is up"
-                      exit 0
-                    fi
-                    sleep 3
-                  done
-                  echo "API did not start in time"
-                  docker logs rag-api || true
-                  exit 1
+          - name: Pull latest image
+            run: docker pull $REGISTRY/$IMAGE_NAME:latest
 
-            - name: Golden LLM query checks
-              run: |
+          - name: Start API container
+            run: |
+              docker run -d --rm \
+                -p 8000:8000 \
+                -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
+                --name rag-api \
+                $REGISTRY/$IMAGE_NAME:latest
+
+              echo "Waiting for API to start..."
+              for i in {1..10}; do
+                if curl -sSf http://localhost:8000/health >/dev/null 2>&1; then
+                echo "API is up"
+                exit 0
+                fi
+                sleep 3
+              done
+
+              echo "API did not start in time"
+              docker logs rag-api || true
+              exit 1
+
+          - name: Golden LLM query checks
+            run: |
                   echo "Running golden LLM queries against /recommend"
 
                   # Example 1 – laptop query
@@ -257,6 +266,6 @@ jobs:
                   echo "Sample response 2:"
                   cat /tmp/resp2.json
 
-            - name: Stop container
-              if: always()
-              run: docker stop rag-api || true
+          - name: Stop container
+            if: always()
+            run: docker stop rag-api || true
