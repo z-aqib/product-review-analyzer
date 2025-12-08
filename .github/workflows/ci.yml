@@ -47,6 +47,10 @@ jobs:
         runs-on: ubuntu-latest
         needs: lint
 
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -75,6 +79,10 @@ jobs:
         name: Prompt evaluation (LLM experiments CI subset)
         runs-on: ubuntu-latest
         needs: test
+
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
 
         steps:
             - name: Checkout repository
@@ -111,6 +119,10 @@ jobs:
             contents: read
             packages: write
 
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -141,6 +153,10 @@ jobs:
         name: Canary deploy RAG + LLM service
         runs-on: ubuntu-latest
         needs: build
+
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
 
         steps:
             - name: Checkout repository
@@ -181,6 +197,10 @@ jobs:
         name: Acceptance tests (golden LLM queries)
         runs-on: ubuntu-latest
         needs: canary-deploy
+
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
 
         steps:
             - name: Log in to GHCR
