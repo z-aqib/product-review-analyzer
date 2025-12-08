@@ -6,10 +6,10 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy requirements
-COPY requirements.txt .
+COPY requirements_all.txt .
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements_all.txt
 
 # Copy full source code and runtime assets
 COPY src ./src
