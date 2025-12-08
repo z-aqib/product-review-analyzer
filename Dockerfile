@@ -11,9 +11,14 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app code
-COPY src/app ./src/app
+# Copy full source code and runtime assets
+COPY src ./src
 COPY artifacts ./artifacts
+COPY data ./data
+# needed for FAISS / embeddings, etc.
+
+# Optional but nice: ensure Python can see /app
+ENV PYTHONPATH=/app
 
 # Expose FastAPI port
 EXPOSE 8000
