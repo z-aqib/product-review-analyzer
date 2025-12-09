@@ -139,7 +139,7 @@ jobs:
                   docker build \
                     -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
                     -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-                    .
+                    -f Dockerfile.cicd .
 
             - name: Push image to GHCR
               run: |
