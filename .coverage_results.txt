@@ -1,32 +1,78 @@
 > pytest --cov=src
 >>
-========================================================= test session starts ==========================================================
+===================================================================== test session starts =====================================================================
 platform win32 -- Python 3.13.5, pytest-8.4.2, pluggy-1.6.0
 rootdir: D:\Users\DELL\new-onedrive\OneDrive - Institute of Business Administration\Documents\sem7\mlops\project
 configfile: pyproject.toml
 plugins: anyio-4.11.0, Faker-37.11.0, langsmith-0.4.49, cov-7.0.0
-collected 5 items
+collected 30 items
 
-src\tests\test_metrics_and_policy.py .....                                                                                        [100%]
+src\tests\test_app_api.py ...                                                                                                                            [ 10%]
+src\tests\test_eval_dataset_split.py ...                                                                                                                 [ 20%]
+src\tests\test_evaluate_main.py .                                                                                                                        [ 23%]
+src\tests\test_item_item_recommender.py .....                                                                                                            [ 40%]
+src\tests\test_llm_advisor.py ....                                                                                                                       [ 53%]
+src\tests\test_metrics.py ....                                                                                                                           [ 66%]
+src\tests\test_metrics_and_policy.py .....                                                                                                               [ 83%]
+src\tests\test_pipeline_orchestration.py .                                                                                                               [ 86%]
+src\tests\test_rag_ask.py ..                                                                                                                             [ 93%]
+src\tests\test_service_forwarding.py .                                                                                                                   [ 96%]
+src\tests\test_train_mlflow.py .                                                                                                                         [100%]
 
-============================================================ tests coverage ============================================================
-___________________________________________ coverage: platform win32, python 3.13.5-final-0 ____________________________________________
+====================================================================== warnings summary =======================================================================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
 
-Name                                   Stmts   Miss  Cover
-----------------------------------------------------------
-src\__init__.py                            0      0   100%
-src\app.py                                51     51     0%
-src\evaluate.py                           47     47     0%
-src\guards\__init__.py                     0      0   100%
-src\guards\policy.py                      32      2    94%
-src\llm\experiments\test_run_hf.py         5      0   100%
-src\ml\eval\metrics.py                    15      2    87%
-src\pipeline.py                           20     20     0%
-src\streamlit_app.py                      44     44     0%
-src\test.py                                3      3     0%
-src\tests\__init__.py                      0      0   100%
-src\tests\test_metrics_and_policy.py      33      2    94%
-src\train.py                              17     17     0%
-----------------------------------------------------------
-TOTAL                                    267    188    30%
-========================================================== 5 passed in 29.73s ==========================================================
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+src\app.py:41
+  D:\Users\DELL\new-onedrive\OneDrive - Institute of Business Administration\Documents\sem7\mlops\project\src\app.py:41: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    user_id: str = Field(..., example="AG3D6O4STAQKAY2UVGEUV46KN35Q")
+
+src\app.py:42
+  D:\Users\DELL\new-onedrive\OneDrive - Institute of Business Administration\Documents\sem7\mlops\project\src\app.py:42: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    user_query: str = Field(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================================================================= tests coverage ========================================================================
+_______________________________________________________ coverage: platform win32, python 3.13.5-final-0 _______________________________________________________
+
+Name                                       Stmts   Miss  Cover
+--------------------------------------------------------------
+src\__init__.py                                0      0   100%
+src\app.py                                    51      7    86%
+src\evaluate.py                               47      1    98%
+src\guards\__init__.py                         0      0   100%
+src\guards\policy.py                          32      2    94%
+src\llm\advisor.py                            46      1    98%
+src\llm\experiments\test_run_hf.py             3      0   100%
+src\ml\eval\eval_dataset.py                   29      0   100%
+src\ml\eval\metrics.py                        15      0   100%
+src\ml\recommenders\item_item.py              81      3    96%
+src\ml\service.py                              4      0   100%
+src\pipeline.py                               20      5    75%
+src\rag\ingest.py                            141     52    63%
+src\rag\rag.py                                25      1    96%
+src\rag\rag_service.py                         1      0   100%
+src\streamlit_app.py                          44     44     0%
+src\test_guardrails.py                         2      0   100%
+src\tests\__init__.py                          0      0   100%
+src\tests\test_app_api.py                     69      0   100%
+src\tests\test_eval_dataset_split.py          36      0   100%
+src\tests\test_evaluate_main.py               50      0   100%
+src\tests\test_item_item_recommender.py       49      0   100%
+src\tests\test_llm_advisor.py                 65      0   100%
+src\tests\test_metrics.py                     18      0   100%
+src\tests\test_metrics_and_policy.py          33      2    94%
+src\tests\test_pipeline_orchestration.py      31      0   100%
+src\tests\test_rag_ask.py                     53      1    98%
+src\tests\test_service_forwarding.py          13      0   100%
+src\tests\test_train_mlflow.py                34      0   100%
+src\train.py                                  17      1    94%
+--------------------------------------------------------------
+TOTAL                                       1009    120    88%
+=============================================================== 30 passed, 5 warnings in 59.66s ===============================================================

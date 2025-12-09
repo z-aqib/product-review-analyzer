@@ -1,3 +1,4 @@
+# src/pipeline.py
 """
 End-to-end pipeline:
 USER QUERY → ML → RAG → LLM → final text response

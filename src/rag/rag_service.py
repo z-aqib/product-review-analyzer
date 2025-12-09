@@ -1,3 +1,4 @@
+# src/rag/rag_service.py
 """
 Thin wrapper around the RAG notebook code so that the rest of the
 project can simply do:

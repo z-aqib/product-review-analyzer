@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+# structure-maker.py
 """
-structure_beautiful.py
 Generates a visually beautiful tree view of the current directory (like `tree` command)
 and writes it to structure.txt
 """

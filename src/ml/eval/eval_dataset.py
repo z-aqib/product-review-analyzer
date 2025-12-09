@@ -1,4 +1,4 @@
-# project/src/ml/eval/eval_dataset.py
+# src/ml/eval/eval_dataset.py
 
 from __future__ import annotations
 import pandas as pd

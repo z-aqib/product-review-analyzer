@@ -1,238 +1,271 @@
+# .github\workflows\ci.yml
 name: CI Pipeline
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  PYTHON_VERSION: "3.11"
+    REGISTRY: ghcr.io
+    IMAGE_NAME: ${{ github.repository_owner }}/product-review-analyzer
+    PYTHON_VERSION: "3.11"
 
 jobs:
-  # -------------------------------
-  # 🧹 Job 1: Lint (Ruff + Black)
-  # -------------------------------
-  lint:
-    name: Lint Code (ruff + black)
-    runs-on: ubuntu-latest
+    # -------------------------------
+    # 🧹 Job 1: Lint (Ruff + Black)
+    # -------------------------------
+    lint:
+        name: Lint Code (ruff + black)
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install linters
-        run: |
-          pip install ruff black
+            - name: Install linters
+              run: |
+                  pip install ruff black
 
-      - name: Run Ruff linting
-        run: ruff check src --extend-exclude "rag/experiments,sft"
+            - name: Run Ruff linting
+              run: ruff check src --extend-exclude "rag/experiments,sft"
 
-      - name: Run Black formatting check
-        run: black --line-length=100 --check src
-
-  # -------------------------------
-  # 🧪 Job 2: Test with Coverage
-  # -------------------------------
-  test:
-    name: Run Unit Tests (pytest + coverage)
-    runs-on: ubuntu-latest
-    needs: lint
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install -r requirements_all.txt
-          pip install pytest pytest-cov
-
-      - name: Run tests with coverage
-        run: |
-          source .venv/bin/activate
-          pytest --cov=src --cov-report=xml --cov-fail-under=25
-
-  # -------------------------------
-  # 🧪 Job 3: Prompt Evaluation (LLM experiments)
-  # -------------------------------
-  prompt-eval:
-    name: Prompt evaluation (LLM experiments CI subset)
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install -r requirements_all.txt
-
-      - name: Run LLM experiments (CI config)
-        env:
-          CI: "true"
-          PYTHONPATH: .
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          source .venv/bin/activate
-          python -m src.llm.experiments.run_experiments
-
-  # -------------------------------
-  # 🐳 Job 4: Build & Push Docker Image
-  # -------------------------------
-  build:
-    name: Build & Push Docker Image (RAG + LLM API)
-    runs-on: ubuntu-latest
-    needs: prompt-eval
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and tag Docker image
-        run: |
-          docker build \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            .
-
-      - name: Push image to GHCR
-        run: |
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            - name: Run Black formatting check
+              run: black --line-length=100 --check src
 
     # -------------------------------
-  # 🚀 Job 5: Canary Deployment
-  # -------------------------------
-  canary-deploy:
-    name: Canary deploy RAG + LLM service
-    runs-on: ubuntu-latest
-    needs: build
+    # 🧪 Job 2: Test with Coverage
+    # -------------------------------
+    test:
+        name: Run Unit Tests (pytest + coverage)
+        runs-on: ubuntu-latest
+        needs: lint
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Run container (canary)
-        run: |
-          docker run -d --name rag-api-canary \
-            -p 8000:8000 \
-            -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Wait for /health endpoint
-        run: |
-          for i in {1..10}; do
-            if curl -sSf http://localhost:8000/health > /dev/null; then
-              echo "Service is healthy"
-              exit 0
-            fi
-            echo "Waiting for service..."
-            sleep 5
-          done
-          echo "Service did not become healthy in time"
-          docker logs rag-api-canary || true
-          exit 1
+            - name: Install dependencies
+              run: |
+                  python -m venv .venv
+                  source .venv/bin/activate
+                  pip install -r requirements_all.txt
+                  pip install pytest pytest-cov
 
-  # -------------------------------
-  # ✅ Job 6: Acceptance Tests (Golden Set)
-  # -------------------------------
-  acceptance-tests:
-    name: Acceptance tests (golden LLM queries)
-    runs-on: ubuntu-latest
-    needs: canary-deploy
+            - name: Run tests with coverage
+              run: |
+                  source .venv/bin/activate
+                  pytest --cov=src --cov-report=xml --cov-fail-under=25
 
-    steps:
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+    # -------------------------------
+    # 🧪 Job 3: Prompt Evaluation (LLM experiments)
+    # -------------------------------
+    prompt-eval:
+        name: Prompt evaluation (LLM experiments CI subset)
+        runs-on: ubuntu-latest
+        needs: test
 
-      - name: Pull latest image
-        run: docker pull $IMAGE_NAME
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
 
-      - name: Start API container
-        run: |
-          docker run -d --rm --name rag-api -p 8000:8000 "$IMAGE_NAME"
-          echo "Waiting for API to start..."
-          for i in {1..10}; do
-            if curl -sSf http://localhost:8000/health > /dev/null 2>&1; then
-              echo "API is up"
-              exit 0
-            fi
-            sleep 3
-          done
-          echo "API did not start in time"
-          docker logs rag-api || true
-          exit 1
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Golden LLM query checks
-        run: |
-          echo "Running golden LLM queries against /recommend"
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
 
-          # Example 1 – laptop query
-          curl -sSf -X POST "http://localhost:8000/recommend" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "user_id": "AG3D6O4STAQKAY2UVGEUV46KN35Q",
-              "user_query": "I want a Dell laptop for programming under 150k with good battery."
-            }' > /tmp/resp1.json
+            - name: Install dependencies
+              run: |
+                  python -m venv .venv
+                  source .venv/bin/activate
+                  pip install -r requirements_all.txt
 
-          # Example 2 – phone query
-          curl -sSf -X POST "http://localhost:8000/recommend" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "user_id": "AG3D6O4STAQKAY2UVGEUV46KN35Q",
-              "user_query": "Suggest a budget Android phone with good battery life and camera."
-            }' > /tmp/resp2.json
+            - name: Run LLM experiments (CI config)
+              env:
+                  CI: "true"
+                  PYTHONPATH: .
+                  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+              run: |
+                  source .venv/bin/activate
+                  python -m src.llm.experiments.run_experiments
 
-          echo "Sample response 1:"
-          cat /tmp/resp1.json
-          echo ""
-          echo "Sample response 2:"
-          cat /tmp/resp2.json
+    # -------------------------------
+    # 🐳 Job 4: Build & Push Docker Image
+    # -------------------------------
+    build:
+        name: Build & Push Docker Image (RAG + LLM API)
+        runs-on: ubuntu-latest
+        needs: prompt-eval
+        permissions:
+            contents: read
+            packages: write
 
-      - name: Stop container
-        if: always()
-        run: docker stop rag-api
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Log in to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build and tag Docker image
+              run: |
+                  docker build \
+                    -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                    -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+                    .
+
+            - name: Push image to GHCR
+              run: |
+                  docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+                  docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+        # -------------------------------
+    # 🚀 Job 5: Canary Deployment
+    # -------------------------------
+    canary-deploy:
+        name: Canary deploy RAG + LLM service
+        runs-on: ubuntu-latest
+        needs: build
+
+        env:
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Log in to GitHub Container Registry
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Run container (canary)
+              run: |
+                  docker run -d --name rag-api-canary \
+                    -p 8000:8000 \
+                    -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
+                    ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+            - name: Wait for /health endpoint
+              run: |
+                  for i in {1..10}; do
+                    if curl -sSf http://localhost:8000/health > /dev/null; then
+                      echo "Service is healthy"
+                      exit 0
+                    fi
+                    echo "Waiting for service..."
+                    sleep 5
+                  done
+                  echo "Service did not become healthy in time"
+                  docker logs rag-api-canary || true
+                  exit 1
+
+    # -------------------------------
+    # ✅ Job 6: Acceptance Tests (Golden Set)
+    # -------------------------------
+    acceptance-tests:
+        name: Acceptance tests (golden LLM queries)
+        runs-on: ubuntu-latest
+        needs: canary-deploy
+
+        env:
+            REGISTRY: ghcr.io
+            IMAGE_NAME: z-aqib/product-review-analyzer
+            PYTHON_VERSION: 3.11
+            GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+            PYTHONPATH: .
+
+        steps:
+          - name: Set up job
+            run: echo "Starting acceptance tests..."
+
+          - name: Log in to GHCR
+            uses: docker/login-action@v3
+            with:
+              registry: ghcr.io
+              username: ${{ github.actor }}
+              password: ${{ secrets.GITHUB_TOKEN }}
+
+          - name: Pull latest image
+            run: docker pull $REGISTRY/$IMAGE_NAME:latest
+
+          - name: Start API container
+            run: |
+              docker run -d --rm \
+                -p 8000:8000 \
+                -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
+                --name rag-api \
+                $REGISTRY/$IMAGE_NAME:latest
+
+              echo "Waiting for API to start..."
+              for i in {1..10}; do
+                if curl -sSf http://localhost:8000/health >/dev/null 2>&1; then
+                echo "API is up"
+                exit 0
+                fi
+                sleep 3
+              done
+
+              echo "API did not start in time"
+              docker logs rag-api || true
+              exit 1
+
+          - name: Golden LLM query checks
+            run: |
+                  echo "Running golden LLM queries against /recommend"
+
+                  # Example 1 – laptop query
+                  curl -sSf -X POST "http://localhost:8000/recommend" \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                      "user_id": "AG3D6O4STAQKAY2UVGEUV46KN35Q",
+                      "user_query": "I want a Dell laptop for programming under 150k with good battery."
+                    }' > /tmp/resp1.json
+
+                  # Example 2 – phone query
+                  curl -sSf -X POST "http://localhost:8000/recommend" \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                      "user_id": "AG3D6O4STAQKAY2UVGEUV46KN35Q",
+                      "user_query": "Suggest a budget Android phone with good battery life and camera."
+                    }' > /tmp/resp2.json
+
+                  echo "Sample response 1:"
+                  cat /tmp/resp1.json
+                  echo ""
+                  echo "Sample response 2:"
+                  cat /tmp/resp2.json
+
+          - name: Stop container
+            if: always()
+            run: docker stop rag-api || true
