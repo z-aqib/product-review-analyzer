@@ -64,8 +64,14 @@ SPACE_ID = os.getenv("QWEN_SPACE_ID", "MuhammadHaaris/mlops")
 SPACE_API_NAME = os.getenv("QWEN_API_NAME", "/predict")
 
 # Single shared client for all calls
-_qwen_client = Client(SPACE_ID)
-
+# We also configure HTTP-level timeouts via httpx_kwargs so that low-level
+# connections don't hang forever.
+_qwen_client = Client(
+    SPACE_ID,
+    httpx_kwargs={
+        "timeout": 610.0,  # seconds; slightly above our per-attempt job timeout
+    },
+)
 
 # ================================
 # 2. Helpers: HF Space + context
@@ -73,11 +79,20 @@ _qwen_client = Client(SPACE_ID)
 
 
 def call_space(
-    final_prompt: str, max_retries: int = 3, backoff_seconds: float = 5.0
+    final_prompt: str,
+    max_retries: int = 3,
+    backoff_seconds: float = 5.0,
+    per_attempt_timeout: float = 600.0,
 ) -> Tuple[str, float]:
     """
     Send final prompt to the Hugging Face Space (Qwen SFT model)
     and return (response_text, latency_seconds).
+
+    Improvements added:
+    - Use Client.submit() + Job.result(timeout=...) to enforce a HARD timeout
+      per attempt (default 600s = 10 minutes).
+    - Retry transient failures up to `max_retries` times with a fixed backoff.
+    - Never let a single call hang for hours.
     """
     last_error: Exception | None = None
 
@@ -85,23 +100,44 @@ def call_space(
         print(f"        [call_space] Attempt {attempt}/{max_retries}...")
         start = time.time()
         try:
-            result = _qwen_client.predict(
+            # Run the remote prediction in a background job
+            job = _qwen_client.submit(
                 user_input=final_prompt,
                 api_name=SPACE_API_NAME,
             )
+
+            # Block until result or timeout
+            result = job.result(timeout=per_attempt_timeout)
+
             elapsed = time.time() - start
-            print(f"        [call_space] ✅ Success on attempt {attempt}, latency={elapsed:.3f}s")
+            print(
+                f"        [call_space] ✅ Success on attempt {attempt}, " f"latency={elapsed:.3f}s"
+            )
             return str(result), elapsed
+
+        except TimeoutError as e:
+            # Job didn't finish within `per_attempt_timeout`
+            elapsed = time.time() - start
+            last_error = e
+            print(
+                f"        [call_space] ❌ Timeout on attempt {attempt} "
+                f"after {elapsed:.3f}s (>{per_attempt_timeout}s)."
+            )
+            print(f"        [call_space] Error: {e}")
+
         except Exception as e:
+            # Any other network / client / HF error
             elapsed = time.time() - start
             last_error = e
             print(f"        [call_space] ❌ Failed on attempt {attempt} after {elapsed:.3f}s")
             print(f"        [call_space] Error: {e}")
 
-            if attempt < max_retries:
-                print(f"        [call_space] Retrying in {backoff_seconds} seconds...")
-                time.sleep(backoff_seconds)
+        # If we reach here, this attempt failed. Decide whether to retry.
+        if attempt < max_retries:
+            print(f"        [call_space] Retrying in {backoff_seconds} seconds...")
+            time.sleep(backoff_seconds)
 
+    # After exhausting retries, raise the last seen error
     print("        [call_space] ❌ All attempts failed. Giving up for this experiment.")
     raise (last_error if last_error is not None else RuntimeError("Unknown error calling Space"))
 
@@ -316,16 +352,55 @@ def load_config_rows() -> List[Dict[str, str]]:
     return rows
 
 
-def load_existing_results_ids() -> Tuple[List[str], List[Dict[str, str]]]:
+def load_existing_results_ids(
+    expected_fieldnames: List[str],
+) -> Tuple[List[str], List[Dict[str, str]]]:
+    """
+    Load existing results in a way that works for BOTH:
+    - legacy files without a header row
+    - newer files with a proper header
+
+    Strategy:
+    - Read raw rows with csv.reader.
+    - If the first row clearly looks like a header (contains 'experiment_id'
+      or all cells are within expected_fieldnames), treat it as header.
+    - Otherwise treat the file as headerless and map columns positionally
+      using expected_fieldnames.
+    """
     if not RESULTS_PATH.exists():
         return [], []
 
     with RESULTS_PATH.open("r", encoding="utf-8", newline="") as f:
-        reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames or []
-        rows = list(reader)
+        reader = csv.reader(f)
+        raw_rows = list(reader)
 
-    return fieldnames, rows
+    if not raw_rows:
+        # Empty file – treat as no data yet.
+        return expected_fieldnames, []
+
+    header_candidate = raw_rows[0]
+
+    # Heuristics to decide if first row is a header
+    has_experiment_header = "experiment_id" in header_candidate
+    all_in_expected = all(cell in expected_fieldnames for cell in header_candidate)
+
+    if has_experiment_header or all_in_expected:
+        # Looks like a proper header
+        fieldnames = header_candidate
+        data_rows = raw_rows[1:]
+    else:
+        # Legacy file without header: assume columns follow expected_fieldnames
+        fieldnames = expected_fieldnames
+        data_rows = raw_rows
+
+    dict_rows: List[Dict[str, str]] = []
+    for row in data_rows:
+        row_dict: Dict[str, str] = {}
+        for i, name in enumerate(fieldnames):
+            row_dict[name] = row[i] if i < len(row) else ""
+        dict_rows.append(row_dict)
+
+    return fieldnames, dict_rows
 
 
 # === NEW (D1): Load eval.jsonl as scenario_id → record ===
@@ -428,20 +503,8 @@ def main() -> None:
     print("[STEP 2.5] Loading eval.jsonl for quantitative metrics...")
     eval_map = load_eval_dataset()
 
-    # 3) Load existing results
-    print("[STEP 3] Loading existing results (if any) to avoid duplicate runs...")
-    existing_fieldnames, existing_rows = load_existing_results_ids()
-    done_ids = {row.get("experiment_id") for row in existing_rows if row.get("experiment_id")}
-
-    if existing_rows:
-        print(f"✅ Found existing results with {len(existing_rows)} rows.")
-        print(f"   Example existing experiment_ids (up to 5): {list(done_ids)[:5]}")
-    else:
-        print("ℹ️ No existing results file found; all experiments will be treated as new.")
-    print()
-
-    # 4) Prepare result fieldnames
-    print("[STEP 4] Preparing output result schema...")
+    # 3) Prepare result fieldnames / schema
+    print("[STEP 3] Preparing output result schema...")
     extra_fields = [
         "start_time_iso",
         "end_time_iso",
@@ -449,8 +512,8 @@ def main() -> None:
         "response_chars",
         "response_text",
         "error",
-        # === NEW (D1) ===
-        "scenario_id",
+        # D1 fields:
+        "scenario_id",  # will be skipped here if already in config_fieldnames
         "ideal_answer",
         "metric_token_overlap_f1",
         "helpfulness_score",
@@ -460,7 +523,26 @@ def main() -> None:
     result_fieldnames = config_fieldnames + [f for f in extra_fields if f not in config_fieldnames]
     print(f"   Result columns will be: {result_fieldnames}\n")
 
-    # 5) Open results file for append
+    # 4) Load existing results (if any) using robust header / headerless loader
+    print("[STEP 4] Loading existing results (if any) to avoid duplicate runs...")
+    existing_fieldnames, existing_rows = load_existing_results_ids(result_fieldnames)
+
+    done_ids = {row.get("experiment_id") for row in existing_rows if row.get("experiment_id")}
+
+    if existing_rows:
+        print(f"✅ Found existing results with {len(existing_rows)} rows.")
+        print(f"   Example existing experiment_ids (up to 5): {list(done_ids)[:5]}")
+        if "experiment_id" not in existing_fieldnames:
+            print(
+                "   ⚠️ Existing file appears to be legacy (no 'experiment_id' header).\n"
+                "      Duplicate skipping is still enabled using positional mapping,\n"
+                "      but consider adding a header row for better readability."
+            )
+    else:
+        print("ℹ️ No existing results file found; all experiments will be treated as new.")
+    print()
+
+    # 5) Open results file for append, write header if file is new
     print("[STEP 5] Opening results file for append...")
     file_exists = RESULTS_PATH.exists()
     out_file = RESULTS_PATH.open("a", encoding="utf-8", newline="")
@@ -557,18 +639,36 @@ def main() -> None:
         print(f"        ✅ ML returned {len(ml_candidates)} candidates.")
 
         print("   [6a] Running RAG...")
+
+        rag_result = {}
+        rag_error_text = ""
+
         try:
-            rag_result = ask(user_query, k=5)
-        except TypeError:
-            print("        ⚠️ ask(user_query, k=5) failed (TypeError).")
-            print("        → Retrying with ask(user_query) only.")
-            rag_result = ask(user_query)
+            try:
+                # Preferred call: use top-k retrieval
+                rag_result = ask(user_query, k=5)
+            except TypeError:
+                # Backwards compatibility with older signatures
+                print("        ⚠️ ask(user_query, k=5) failed (TypeError).")
+                print("        → Retrying with ask(user_query) only.")
+                rag_result = ask(user_query)
+        except Exception as e:
+            # Catch *any* RAG/Gemini failure (DNS, timeout, gRPC, etc.)
+            rag_error_text = str(e)
+            print("        ❌ RAG call FAILED.")
+            print("           Error:", rag_error_text)
+            # Fall back to an empty result so we can still build a context block
+            rag_result = {
+                "products": [],
+                "rag_answer": "",
+            }
 
         if isinstance(rag_result, dict):
             rag_products = rag_result.get("products") or rag_result.get("items") or []
             print(f"        ✅ RAG returned {len(rag_products)} product items.")
         else:
             print("        ⚠️ RAG result is not a dict. Type:", type(rag_result))
+            rag_products = []
 
         # 6b) Build context and final prompt
         print("   [6b] Building context block from ML + RAG outputs...")
@@ -593,6 +693,19 @@ def main() -> None:
             final_prompt[:300].replace("\n", " ") + ("..." if len(final_prompt) > 300 else ""),
         )
         print()
+
+        # --- NEW: Save final prompt for reproducibility ---
+        PROMPTS_DIR = THIS_DIR / "prompts"
+        PROMPTS_DIR.mkdir(exist_ok=True)
+
+        prompt_filename = PROMPTS_DIR / f"{exp_id}.txt"
+
+        try:
+            with prompt_filename.open("w", encoding="utf-8") as pf:
+                pf.write(final_prompt)
+            print(f"   📄 Saved final prompt to: prompts/{prompt_filename.name}")
+        except Exception as e:
+            print(f"   ⚠️ Failed to save prompt file: {e}")
 
         # 6c) Call HF Space
         print("   [6c] Calling Hugging Face Space (Qwen SFT model)...")
@@ -622,6 +735,13 @@ def main() -> None:
         end_time = datetime.datetime.now()
         end_iso = end_time.isoformat(timespec="seconds")
         print(f"        End time   : {end_iso}")
+
+        # Combine any RAG error + Space error into one string for the CSV.
+        if rag_error_text:
+            if error_text:
+                error_text = f"RAG_ERROR: {rag_error_text} | SPACE_ERROR: {error_text}"
+            else:
+                error_text = f"RAG_ERROR: {rag_error_text}"
 
         # === NEW (D1): compute quantitative metric using eval.jsonl ===
         ideal_answer = ""
