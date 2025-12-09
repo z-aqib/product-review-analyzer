@@ -47,7 +47,7 @@ SAMPLE_RESPONSES_PATH = THIS_DIR / "sample_responses.json"
 # === NEW (D1) ===
 # Try to load eval.jsonl from data/eval.jsonl (spec requirement),
 # but fall back to experiments/ if needed.
-PROJECT_ROOT = THIS_DIR.parents[3]
+PROJECT_ROOT = THIS_DIR.parents[2]
 EVAL_PATH_CANDIDATES = [
     PROJECT_ROOT / "data" / "eval.jsonl",
     THIS_DIR / "eval.jsonl",
