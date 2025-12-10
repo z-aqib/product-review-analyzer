@@ -1,829 +1,1713 @@
+# Amazon Product Review RAG Pipeline with LLMOps
 
-
-# 🛍️ **Product Review Analyzer & Recommender System**
-
-
-<p align="left">
-  <img src="images/rubiks-cool.gif" alt="rubiks-cool" width="100"/>
-</p>
-
-### *An AI-Powered MLOps Project for Scalable Product Intelligence*
-
-> ⚙️ **Milestone-1:** *From Notebook → Reproducible Repository*
-> 🎯 **Next (Milestone-2):** *LLMOps Integration — Personalized Review Generation with Large Language Models*
-
-![Banner](images/logo.png)
+A complete Retrieval-Augmented Generation (RAG) system for Amazon product recommendations, combining machine learning, embeddings, and LLMs with comprehensive monitoring and safety guardrails.
 
 ---
 
-## 🚀 **Elevator Pitch**
+## Table of Contents
 
-Welcome to **Product Review Analyzer**, an **end-to-end MLOps project** that turns **raw Amazon-style reviews** into actionable intelligence 🔍.
-Our system builds an **Item–Item Collaborative Filtering recommender**, tracks it through **MLflow**, monitors it via **Prometheus + Grafana**, and checks for **data drift using Evidently** — all served through a **FastAPI microservice**.
-
-💡 In **Milestone-2 (LLMOps Phase)**, we’ll integrate **LLMs** to:
-
-* 🧠 Generate **personalized product summaries**.
-* 💬 Recommend **context-aware reviews**.
-* 🛒 Help users **make informed shopping decisions** faster and smarter.
-
----
-
-## 🧩 **Key Features**
-
-| Area                        | Feature                           | Tool/Framework                          |
-| --------------------------- | --------------------------------- | --------------------------------------- |
-| 💾 **Data Handling**        | Raw → Processed → Split           | Pandas, Scikit-learn                    |
-| 🧠 **Modeling**             | Item–Item Collaborative Filtering | Custom Python module                    |
-| 📈 **Experiment Tracking**  | Run tracking & model registry     | **MLflow**                              |
-| 🌐 **Serving**              | REST API with Prometheus metrics  | **FastAPI + Prometheus Instrumentator** |
-| 📊 **Monitoring**           | Dashboards and alerting           | **Grafana + Prometheus**                |
-| ⚙️ **Data Drift Detection** | Report generation                 | **Evidently AI**                        |
-| 🐳 **Containerization**     | Multi-service stack               | **Docker Compose**                      |
-| 🧪 **CI/CD & QA**           | Automated linting & testing       | **GitHub Actions**, Pre-commit          |
-| ☁️ **Cloud Integration**    | Hosted on AWS EC2                 | **AWS Cloud Infrastructure**            |
+- [Project Overview](#project-overview)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Deployment Guide](#deployment-guide)
+- [API Documentation](#api-documentation)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Prompt Engineering & Evaluation](#prompt-engineering--evaluation)
+- [Monitoring & Observability](#monitoring--observability)
+- [Data Drift Detection](#data-drift-detection)
+- [Guardrails & Safety](#guardrails--safety)
+- [Cloud Infrastructure](#cloud-infrastructure)
+- [Troubleshooting](#troubleshooting)
+- [Project Structure](#project-structure)
+- [Performance Considerations](#performance-considerations)
+- [Future Enhancements](#future-enhancements)
+- [Contact & Support](#contact--support)
 
 ---
 
-## 🧱 **Architecture Overview**
+## Project Overview
 
-### 🧭 End-to-End Pipeline
+This project implements an end-to-end LLMOps pipeline that helps users discover Amazon products through natural language queries. The system combines multiple stages:
 
-```mermaid
-flowchart LR
-  A[Raw Amazon Reviews 🗂️] --> B[Data Cleaning 🧹]
-  B --> C[Item–Item CF Model 🧠]
-  C --> D[Evaluation: Recall@K, nDCG@K 📊]
-  C --> E[MLflow Tracking & Registry 🧾]
-  C --> F[FastAPI Inference API ⚙️]
-  F --> G[Prometheus Metrics 📈]
-  G --> H[Grafana Dashboards 📊]
-  B --> I[Evidently Drift Report 🔍]
-  I --> H
-```
-## 🧠 System Architecture
+### What Problem Does This Solve?
 
-![System Architecture](images/mlops_pipeline.svg)
+Traditional product search relies on keyword matching. Our system understands user intent and provides personalized, context-aware recommendations by:
 
-[View full MLOps Pipeline diagram](images/mlops_pipeline.svg)
+- Using ML models to identify relevant products based on user history
+- Leveraging RAG to retrieve and summarize actual product reviews
+- Employing LLMs (Gemini) to generate natural, helpful recommendations
+- Ensuring safety through input/output guardrails
+- Monitoring system health and data drift in production
+
+### Example Query
+
+**User:** "I want a Dell laptop for programming under $1500 with good battery life"
+
+**System Response:** A natural language recommendation combining ML scores, review summaries, and price/rating data from actual Amazon products.
+
 ---
 
-## 📂 **Repository Structure**
+## Architecture
+
+### System Flow Diagram
 
 ```
-.
-├── src/
-│   ├── api.py                  # FastAPI App
-│   ├── train.py                # Model Training + MLflow Registration
-│   ├── evaluate.py             # Evaluation Metrics
-│   └── ml/
-│       ├── recommenders/
-│       │   └── item_item.py    # Item–Item Collaborative Filtering
-│       └── eval/
-│           ├── metrics.py      # recall@K, nDCG@K, coverage
-│           └── eval_dataset.py # leave-one-out split generator
-├── monitoring/
-│   ├── generate_drift.py
-│   ├── evidently_app.py
-│   └── evidently_report.html
-├── infra/
-│   ├── prometheus/prometheus.yml
-│   ├── grafana-dashboards/
-│   └── grafana-provisioning/
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── splits/
-├── docker-compose.yml
-├── Dockerfile
-├── Makefile
-├── requirements.txt
-├── CONTRIBUTION.md
-├── LICENSE
-├── .pre-commit-config.yaml
-└── README.md
+┌─────────────────────────────────────────────────────────────────┐
+│                         USER QUERY                              │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+                            ▼
+                  ┌─────────────────────┐
+                  │  Input Validation   │
+                  │    (Guardrails)     │
+                  │ - Prompt Injection  │
+                  │ - PII Detection     │
+                  └──────────┬──────────┘
+                            │
+                            ▼
+        ┌───────────────────────────────────────┐
+        │         STAGE 1: ML RECOMMENDER       │
+        │  - User-based collaborative filtering │
+        │  - Returns top-K product candidates   │
+        └────────────────┬──────────────────────┘
+                         │
+                         ▼
+        ┌───────────────────────────────────────┐
+        │      STAGE 2: RAG PIPELINE            │
+        │  ┌─────────────────────────────────┐  │
+        │  │  1. Embed query (Sentence BERT) │  │
+        │  │  2. Search FAISS index          │  │
+        │  │  3. Retrieve product reviews    │  │
+        │  └─────────────────────────────────┘  │
+        └────────────────┬──────────────────────┘
+                         │
+                         ▼
+        ┌───────────────────────────────────────┐
+        │      STAGE 3: LLM ADVISOR             │
+        │  - Merge ML + RAG results             │
+        │  - Build prompt for Gemini API        │
+        │  - Generate final recommendation      │
+        └────────────────┬──────────────────────┘
+                         │
+                         ▼
+                  ┌─────────────────────┐
+                  │  Output Moderation  │
+                  │    (Guardrails)     │
+                  │ - Toxicity filter   │
+                  │ - Safety check      │
+                  └──────────┬──────────┘
+                            │
+                            ▼
+        ┌───────────────────────────────────────┐
+        │         FINAL RESPONSE                │
+        │  - Natural language recommendation    │
+        │  - Product details + reasoning        │
+        └───────────────────────────────────────┘
+```
+
+### Infrastructure Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      AWS EC2 INSTANCE                           │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                   Docker Compose Stack                    │  │
+│  │                                                            │  │
+│  │  ┌─────────────────┐      ┌──────────────────┐          │  │
+│  │  │  Streamlit UI   │◄────►│  FastAPI Backend │          │  │
+│  │  │   Port: 8501    │      │    Port: 8001    │          │  │
+│  │  └─────────────────┘      └──────────┬───────┘          │  │
+│  │                                       │                   │  │
+│  │                                       │ /metrics          │  │
+│  │                                       ▼                   │  │
+│  │  ┌─────────────────────────────────────────────────┐    │  │
+│  │  │            MONITORING STACK                      │    │  │
+│  │  │  ┌──────────────┐  ┌──────────────┐            │    │  │
+│  │  │  │  Prometheus  │  │   Grafana    │            │    │  │
+│  │  │  │  Port: 9091  │─►│  Port: 3001  │            │    │  │
+│  │  │  └──────────────┘  └──────────────┘            │    │  │
+│  │  │                                                  │    │  │
+│  │  │  ┌──────────────────────────────────────────┐  │    │  │
+│  │  │  │  Evidently (Data Drift Detection)       │  │    │  │
+│  │  │  │  Port: 7000                              │  │    │  │
+│  │  │  └──────────────────────────────────────────┘  │    │  │
+│  │  └─────────────────────────────────────────────────┘    │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└──────────────────────────┬───────────────────────────────────────┘
+                           │
+                           ▼
+              ┌────────────────────────┐
+              │       AWS S3           │
+              │  - Embeddings (FAISS)  │
+              │  - Product datasets    │
+              │  - Drift data          │
+              └────────────────────────┘
 ```
 
 ---
 
-## 📦 **Quick Start**
+## Features
 
-### 🧰 1. Clone & Setup
+### ✨ Core Capabilities
+
+- **Natural Language Querying**: Ask for products in plain English
+- **Hybrid Recommendations**: Combines ML collaborative filtering + semantic search
+- **Review-Based Insights**: Uses actual Amazon reviews via RAG
+- **LLM-Powered Responses**: Gemini generates natural, helpful answers
+- **Safety First**: Input validation and output moderation guardrails
+- **Production-Ready Monitoring**: Prometheus, Grafana, and Evidently integration
+- **Cloud-Native Deployment**: Fully containerized with Docker Compose on AWS EC2
+
+### 🛡️ Guardrails
+
+- **Input Protection**: Prompt injection detection, PII filtering
+- **Output Safety**: Toxicity detection, content moderation
+- **Audit Logging**: All guardrail events tracked in monitoring
+
+### 📊 Observability
+
+- Real-time metrics (request volume, latency, errors)
+- LLM-specific metrics (guardrail violations)
+- Data drift detection between training and production data
+- Grafana dashboards with 95th percentile latency tracking
+
+---
+
+## Prerequisites
+
+### Required Accounts & Keys
+
+1. **AWS Account** with:
+   - EC2 access
+   - S3 bucket access
+   - IAM credentials
+
+2. **Gemini API Key**:
+   - Sign up at [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Generate an API key
+
+### Local Development
+
+- Docker & Docker Compose installed
+- Python 3.9+
+- Git
+
+---
+
+## Deployment Guide
+
+### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/YourOrg/product-review-analyzer.git
-cd product-review-analyzer
-
-# create environment
-python -m venv .venv
-source .venv/bin/activate     # (Windows: .venv\Scripts\activate)
-
-# install dependencies
-pip install -r requirements.txt
-
-# activate pre-commit hooks
-pre-commit install
+git clone https://github.com/z-aqib/product-review-analyzer
+cd product-review-analyzer/src/llm
 ```
 
-### 🧠 2. Train and Track Model
+### Step 2: Configure Environment Variables
+
+Create a `.env` file in the project root:
 
 ```bash
-mlflow server --host 0.0.0.0 --port 5000
-python src/train.py
+# .env
+GEMINI_API_KEY=your_gemini_api_key_here
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_DEFAULT_REGION=us-east-1
 ```
 
-Access MLflow UI → [http://localhost:5000](http://localhost:5000)
-Latest model: **`product-recommender:v1.0`**
+### Step 3: AWS S3 Setup
 
----
-
-### ⚡ 3. Run the API Locally
+Upload required files to S3:
 
 ```bash
-make dev
-# OR manually:
-uvicorn src.api:app --host 0.0.0.0 --port 8000
+# Example S3 structure
+s3://your-bucket/
+├── embeddings/
+│   └── index.faiss
+├── datasets/
+│   ├── products.csv
+│   └── current_data.csv  # For Evidently drift detection
 ```
 
-Endpoints:
+Update your code to reference the correct S3 bucket name.
 
-* `/docs` → interactive FastAPI Swagger UI
-* `/health` → health check
-* `/metrics` → Prometheus metrics
-
-Example:
+### Step 4: Local Deployment
 
 ```bash
-curl -X POST "http://localhost:8000/predict" -H "Content-Type: application/json" -d '{"user_id": 123, "k": 10}'
-```
-![FAST-API](images/fast-api.jpg)
----
+# Build and start all services
+docker-compose up --build -d
 
-### 🧠 4. Run Monitoring Stack
+# Check logs
+docker-compose logs -f
+
+# Verify services are running
+docker-compose ps
+```
+
+### Step 5: AWS EC2 Deployment
+
+#### Launch EC2 Instance
+
+- **Instance Type**: `t3.medium` (2 vCPU, 4 GB RAM)
+- **OS**: Ubuntu 22.04 LTS
+- **Storage**: 20 GB gp3 EBS
+
+#### Configure Security Group
+
+Open the following ports:
+
+| Port | Service | Protocol |
+|------|---------|----------|
+| 22 | SSH | TCP |
+| 8501 | Streamlit | TCP |
+| 8001 | FastAPI | TCP |
+| 7000 | Evidently | TCP |
+| 3001 | Grafana | TCP |
+| 9091 | Prometheus | TCP |
+
+#### SSH into EC2 and Deploy
 
 ```bash
-docker compose up --build
+# SSH into instance
+ssh -i your-key.pem ubuntu@13.60.49.144
+
+# Install Docker
+sudo apt update
+sudo apt install docker.io docker-compose -y
+sudo usermod -aG docker ubuntu
+
+# Clone and deploy
+git clone https://github.com/z-aqib/product-review-analyzer
+cd product-review-analyzer/src/llm
+
+# Create .env file with your credentials
+nano .env
+
+# Deploy
+docker-compose up --build -d
 ```
 
-| Service         | URL                                                      | Default Login |
-| --------------- | -------------------------------------------------------- | ------------- |
-| API             | [http://localhost:8000/docs](http://localhost:8000/docs) | —             |
-| Prometheus      | [http://localhost:9090](http://localhost:9090)           | —             |
-| Grafana         | [http://localhost:3000](http://localhost:3000)           | admin / admin |
-| Evidently Drift | [http://localhost:7000](http://localhost:7000)           | —             |
+### Step 6: Access Services
+
+| Service | URL |
+|---------|-------------------------------------|
+| Streamlit UI | `http://13.60.49.144:8501` |
+| FastAPI Docs | `http://13.60.49.144:8001/docs` |
+| Grafana | `http://13.60.49.144:3001` |
+| Prometheus | `http://13.60.49.144:9091` |
+| Evidently Report | `http://13.60.49.144:7000/report` |
+
+**Default Grafana Credentials**: `admin` / `admin`
 
 ---
 
-## 📈 **Evaluation**
+## API Documentation
 
-We measure:
+### Base URL
 
-* ✅ **Recall@K** → true item in top-K?
-* ✅ **nDCG@K** → discounted gain for correct ranking
-* ✅ **Catalog Coverage** → % of unique items recommended
+```
+http://13.60.49.144:8001
+```
 
-Run manually:
+### Endpoints
+
+#### 1. Health Check
 
 ```bash
-python -m src.evaluate --data-dir data/processed --k 10
+GET /health
 ```
 
----
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-12-07T10:30:00Z"
+}
+```
 
-## 🧾 **MLflow Model Registry**
-
-Tracked & versioned experiments with MLflow.
-
-| Model                 | Version | Stage      | URI                                                              |
-| --------------------- | ------- | ---------- | ---------------------------------------------------------------- |
-| `product-recommender` | v1.0    | Production | [http://localhost:5000/#/models](http://localhost:5000/#/models) |
-
-To start MLflow tracking server:
+#### 2. RAG Query (Main Pipeline)
 
 ```bash
-mlflow server --host 0.0.0.0 --port 5000
+POST /query
+Content-Type: application/json
+
+{
+  "user_id": "AG3D6O4STAQKAY2UVGEUV46KN35Q",
+  "query": "I want a Dell laptop for programming under $1500"
+}
 ```
 
----
+**Response:**
+```json
+{
+  "user_query": "I want a Dell laptop for programming under $1500",
+  "ml_candidates": [
+    {
+      "product_id": "B08XYZ123",
+      "product_name": "Dell XPS 15",
+      "score": 0.87
+    }
+  ],
+  "rag_result": {
+    "products": [
+      {
+        "product_id": "B08XYZ123",
+        "name": "Dell XPS 15",
+        "price": 1399.99,
+        "rating": 4.5,
+        "retrieval_score": 0.92,
+        "document": "Great laptop for programming..."
+      }
+    ],
+    "rag_answer": "Based on reviews, the Dell XPS 15..."
+  },
+  "final_answer": "I recommend the Dell XPS 15 for your programming needs..."
+}
+```
 
-## 📊 **Monitoring with Prometheus + Grafana**
-
-* Prometheus scrapes `/metrics` from FastAPI.
-* Grafana visualizes:
-
-  * API latency
-  * Requests per second
-  * Prediction counts
-
-📸 **Dashboard Snapshots:**
-![Grafana 1](images/grafana-dashboard-1.png)
-![Grafana 2](images/grafana-dashboard-2.png)
-
----
-
-## 🧮 **Evidently (Data Drift Reports)**
-
-Generate drift report:
+#### 3. Refresh Evidently Report
 
 ```bash
-make drift
+POST /refresh
 ```
 
-Serve the dashboard:
+Regenerates the data drift report by comparing reference and current datasets.
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Drift report regenerated"
+}
+```
+
+#### 4. View Drift Report
 
 ```bash
-make serve-drift
+GET /report
 ```
 
-👉 [http://localhost:7000](http://localhost:7000)
-
-📸 Example:
-![Drift Report](images/evidently_report_1.png)
+Returns HTML page with Evidently data drift analysis.
 
 ---
 
-## ☁️ **Cloud Deployment**
+## CI/CD Pipeline
 
-### 🌩️ AWS Integration
+This project implements a comprehensive **GitHub Actions CI/CD pipeline** that automates testing, building, and deployment.
 
-| Component     | AWS Service Used          | Purpose                  |
-| ------------- | ------------------------- | ------------------------ |
-| API Hosting   | **EC2**                   | Host FastAPI container   |
-| Model Storage | **S3**                    | MLflow backend artifacts |
-| Monitoring    | **CloudWatch (optional)** | Alerting / Logs          |
+### Pipeline Stages
 
-### 🖼️ AWS Components
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     GITHUB ACTIONS WORKFLOW                     │
+└─────────────────────────────────────────────────────────────────┘
 
-<p align="center">
-  <img src="images/cloud-1.jpg" alt="EC2 Instance Setup" width="350"/>
-  &nbsp;&nbsp;&nbsp;
-  <img src="images/cloud-4.jpg" alt="S3 Bucket Overview" width="350"/>
-</p>
+    ┌──────────────────┐
+    │  1. LINT         │
+    │  - Ruff          │
+    │  - Black         │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │  2. TEST         │
+    │  - pytest        │
+    │  - Coverage 25%+ │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │  3. PROMPT EVAL  │
+    │  - LLM tests     │
+    │  - Gemini API    │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │  4. BUILD        │
+    │  - Docker image  │
+    │  - Push to GHCR  │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │  5. CANARY       │
+    │  - Deploy test   │
+    │  - Health check  │
+    └────────┬─────────┘
+             │
+             ▼
+    ┌──────────────────┐
+    │  6. ACCEPTANCE   │
+    │  - Golden tests  │
+    │  - Query checks  │
+    └──────────────────┘
+```
 
-See 👉 [images](images) for additional setup and configuration screenshots !
+### Job Details
 
+#### 1. **Lint** 🧹
+- **Tools**: Ruff (linting) + Black (formatting)
+- **Purpose**: Enforce code quality standards
+- **Command**:
+  ```bash
+  ruff check src --extend-exclude "rag/experiments,sft"
+  black --line-length=100 --check src
+  ```
 
-🔧 **How to Reproduce Cloud Setup:**
+#### 2. **Test** 🧪
+- **Tools**: pytest + coverage
+- **Requirement**: Minimum 25% code coverage
+- **Command**:
+  ```bash
+  pytest --cov=src --cov-report=xml --cov-fail-under=25
+  ```
 
-1. Launch EC2 instance (Ubuntu 22.04, t2.medium)
-2. Install Docker + Docker Compose
-3. Clone repo and run `docker compose up -d`
-4. Access the live stack:
+#### 3. **Prompt Evaluation** 🧪
+- **Purpose**: Test LLM experiments and prompt engineering strategies
+- **Uses**: Gemini API + fine-tuned Qwen model for validation
+- **Environment**: CI mode with limited test cases (full suite runs locally)
+- **Metrics Tracked**: Token overlap F1, latency, response quality
+- **Command**:
+  ```bash
+  python -m src.llm.experiments.run_experiments
+  ```
+- See [Prompt Engineering & Evaluation](#prompt-engineering--evaluation) section for details
 
-| Service    | Public URL                                                     |
-| ---------- | -------------------------------------------------------------- |
-| API Docs   | [http://13.60.193.55:8000/docs](http://13.60.193.55:8000/docs) |
-| Grafana    | [http://13.60.193.55:3000](http://13.60.193.55:3000)           |
-| Prometheus | [http://13.60.193.55:9090](http://13.60.193.55:9090)           |
+#### 4. **Build & Push** 🐳
+- **Registry**: GitHub Container Registry (GHCR)
+- **Tags**:
+  - `latest` (most recent)
+  - `<commit-sha>` (version-specific)
+- **Command**:
+  ```bash
+  docker build -t ghcr.io/<repo>:latest .
+  docker push ghcr.io/<repo>:latest
+  ```
 
----
+#### 5. **Canary Deployment** 🚀
+- **Purpose**: Deploy to test environment
+- **Validation**: Health endpoint check (`/health`)
+- **Timeout**: 50 seconds with retries
+- **Command**:
+  ```bash
+  docker run -d --name rag-api-canary -p 8000:8000 <image>
+  curl http://localhost:8000/health
+  ```
 
-## ⚙️ **Makefile Targets**
+#### 6. **Acceptance Tests** ✅
+- **Purpose**: Validate golden test queries
+- **Test Cases**:
+  - Laptop query: "Dell laptop for programming under 150k"
+  - Phone query: "Budget Android phone with good battery"
+- **Endpoint**: `/recommend`
+- **Example**:
+  ```bash
+  curl -X POST "http://localhost:8000/recommend" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "user_id": "AG3D6O4STAQKAY2UVGEUV46KN35Q",
+      "user_query": "I want a Dell laptop for programming"
+    }'
+  ```
 
-| Command            | Description                       |
-| ------------------ | --------------------------------- |
-| `make dev`         | Run FastAPI with hot-reload       |
-| `make train`       | Train and register model          |
-| `make drift`       | Generate Evidently drift report   |
-| `make serve-drift` | Serve drift dashboard (port 7000) |
-| `make stack-up`    | Bring up Docker monitoring stack  |
-| `make stack-down`  | Stop Docker containers            |
+### Pipeline Triggers
 
----
+- **Push to main**: Full pipeline runs
+- **Pull Requests**: Full validation before merge
 
+### Required Secrets
 
-Includes:
+Configure in GitHub repository settings:
 
-* Member names & ERP IDs
-* Task allocation (data, model, infra, monitoring)
-* Branch naming conventions (`feat/`, `fix/`, `infra/`)
+```
+GEMINI_API_KEY       # For LLM testing and experiments
+GITHUB_TOKEN         # Auto-provided for GHCR access
+```
 
----
+### Local CI Testing
 
-## 🧹 **Pre-Commit Hooks**
-
-✅ Configured hooks:
-
-* `trailing-whitespace`
-* `end-of-file-fixer`
-* `detect-secrets`
-* `black` + `ruff` formatters
-
-Run manually:
+Run CI checks locally before pushing:
 
 ```bash
-pre-commit run --all-files
+# Lint
+ruff check src
+black --line-length=100 --check src
+
+# Test
+pytest --cov=src --cov-fail-under=25
+
+# Build Docker
+docker build -t rag-api-local .
+docker run -d -p 8000:8000 rag-api-local
+
+# Health check
+curl http://localhost:8000/health
 ```
 
 ---
 
-## 🧪 **GitHub CI/CD (Milestone Requirement)**
+## Prompt Engineering & Evaluation
 
-| Stage            | Description                            |
-| ---------------- | -------------------------------------- |
-| 🧼 Lint          | Check style via Ruff + Black           |
-| 🧠 Test          | Run pytest (≥80% coverage)             |
-| 🏗️ Build        | Docker image tagged with `$GITHUB_SHA` |
-| 🧪 Canary Deploy | Push image to canary env               |
-| 🩺 Acceptance    | Test 5+ golden requests on canary      |
+This project implements a **comprehensive prompt engineering framework** with automated evaluation and experimentation.
 
-✅ Defined in `.github/workflows/ci.yml`
+### Overview
 
----
+The prompt evaluation system tests multiple prompting strategies, tracks quantitative metrics, and integrates with MLflow for experiment tracking.
 
-## 🧰 **FAQ**
+### Architecture
 
-**Q:** Why UTF-16 in requirements.txt?
-**A:** Some systems needed BOM-encoded format for compatibility; open with UTF-16 in editors if installation fails.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   PROMPT EVALUATION PIPELINE                    │
+└─────────────────────────────────────────────────────────────────┘
 
-**Q:** How do I fix Docker permission issues on Windows?
-**A:** Run PowerShell as Admin → `wsl --update` → restart Docker Desktop.
+    ┌──────────────────────┐
+    │  Experiment Config   │
+    │  (CSV with variants) │
+    └──────────┬───────────┘
+               │
+               ▼
+    ┌──────────────────────┐
+    │   Load Eval Dataset  │
+    │   (eval.jsonl)       │
+    │   - scenario_id      │
+    │   - ideal_answer     │
+    └──────────┬───────────┘
+               │
+               ▼
+    ┌──────────────────────────────────────┐
+    │  For Each Experiment:                │
+    │  1. Build prompt with strategy       │
+    │  2. Run ML + RAG pipeline            │
+    │  3. Generate response (Qwen/Gemini)  │
+    │  4. Compute metrics                  │
+    │  5. Log to MLflow                    │
+    └──────────┬───────────────────────────┘
+               │
+               ▼
+    ┌──────────────────────────────────────┐
+    │         Results & Metrics            │
+    │  - experiment_results.csv            │
+    │  - MLflow tracking UI                │
+    │  - Token overlap F1 scores           │
+    │  - Latency measurements              │
+    └──────────────────────────────────────┘
+```
 
-**Q:** Grafana dashboard not showing data?
-**A:** Ensure Prometheus target (`/metrics`) is healthy at [http://localhost:9090/targets](http://localhost:9090/targets).
+### Prompting Strategies
 
----
+The system supports multiple prompting strategies for comparison:
 
-## 🔮 **Future Vision (LLMOps Stage 2)**
+#### 1. **Zero-Shot**
+- **Description**: Direct instruction without examples
+- **Use Case**: Baseline performance
+- **Example**:
+  ```
+  You are an expert product advisor. Use the ML ranking and RAG
+  snippets to recommend the best product(s) for the user.
+  ```
 
-> “Beyond recommendations — we aim for intelligent conversations about products.” 🧠💬
+#### 2. **Few-Shot (3-shot / 5-shot)**
+- **Description**: Include example conversations before the query
+- **Use Case**: Improve response quality and consistency
+- **Configuration**: `few_shot_k=3` or `few_shot_k=5`
+- **Example**:
+  ```
+  Here are example conversations:
 
-In Milestone-2, we’ll enhance our system into a **multimodal LLMOps pipeline**:
+  Example 1:
+  User: I need a laptop for gaming
+  Assistant: Based on the reviews, I recommend...
 
-* 🤖 Generate **personalized product reviews** based on user history.
-* 🗣️ Use **LLMs (like GPT-4 or Falcon)** for summarizing customer sentiment.
-* 🔍 Provide **context-aware recommendations** combining embeddings from text and structured data.
-* 📦 Deploy via **LangChain + FastAPI + MLflow Serving** with real-time drift alerts.
+  [2-4 more examples]
 
-**Use Cases:**
+  Now answer the next user query...
+  ```
 
-* 🛍️ Smart shopping assistants that summarize reviews.
-* 💬 Automated brand insight generation.
-* 📈 Continuous model retraining triggered by drift reports.
+#### 3. **Chain-of-Thought (CoT)**
+- **Description**: Encourages step-by-step reasoning
+- **Use Case**: Complex comparisons requiring explicit trade-off analysis
+- **Example**:
+  ```
+  When answering, first think step-by-step about the options using
+  the ML and RAG information. Explicitly compare the top candidates.
+  Then end with a short section titled 'Final Recommendation'.
+  ```
 
----
+#### 4. **Meta-Prompting**
+- **Description**: Structured output format with pros/cons
+- **Use Case**: Clear, scannable recommendations
+- **Example**:
+  ```
+  You are a brutally honest product advisor. You must:
+  - Pick at most 1-2 main options
+  - Clearly list pros and cons based on reviews
+  - Call out if information is missing
 
-## 🪪 **License & Compliance**
+  Output format:
+  1. Short answer (1-2 sentences)
+  2. Bullet list of pros and cons
+  3. Final recommendation
+  ```
 
-* 📜 **License:** MIT License — see `LICENSE`
-* 🤝 **Code of Conduct:** Contributor Covenant — `CODE_OF_CONDUCT.md`
-* 🧩 **Dependency Scan:** `pip-audit` integrated (fails build on critical CVEs)
+### Experiment Configuration
 
----
+Experiments are defined in CSV format with the following structure:
 
-## 🏁 **Known Issues / TODOs**
+```csv
+experiment_id,strategy,few_shot_k,sample_type,scenario_id,user_query_variant,user_id
+exp_001,zero_shot,0,,laptop_01,I need a Dell laptop for programming,AG3D6O4...
+exp_002,few_shot,3,laptop,laptop_01,I need a Dell laptop for programming,AG3D6O4...
+exp_003,cot,0,,laptop_01,I need a Dell laptop for programming,AG3D6O4...
+exp_004,meta,0,,phone_01,Budget Android phone with good camera,AG3D6O4...
+```
 
-* [ ] Fix Dockerfile app entry path → `src.api:app`
-* [ ] Validate all import paths in `train.py`
-* [ ] Add additional unit tests for drift metrics
-* [ ] Integrate GitHub container registry publishing
+**Key Fields:**
+- `experiment_id`: Unique identifier for the experiment
+- `strategy`: Prompting strategy (zero_shot, few_shot, cot, meta)
+- `few_shot_k`: Number of examples (0, 3, or 5)
+- `sample_type`: Filter examples by category (laptop, phone, etc.)
+- `scenario_id`: Links to eval.jsonl for quantitative metrics
+- `user_query_variant`: The query to test
+- `user_id`: User ID for ML recommender
 
----
+### Evaluation Metrics
 
-## ✨ **Screenshots**
+#### Automated Metrics
 
-| Component       | Preview                                      |
-| --------------- | -------------------------------------------- |
-| 🐳 Docker Setup | ![Docker Setup](images/docker-setup.png)     |
-| 📈 Grafana      | ![Grafana 3](images/grafana-dashboard-3.jpg) |
-| 🧮 MLflow       | ![MLflow](images/mlflow-1.png)               |
-| 🔍 Evidently    | ![Drift](images/evidently_report_2.png)      |
+1. **Token Overlap F1**
+   - Compares generated response with ideal answer from eval.jsonl
+   - Formula: `F1 = 2 * (precision * recall) / (precision + recall)`
+   - Normalized token-level comparison
+   - Range: 0.0 - 1.0 (higher is better)
 
----
+2. **Latency (seconds)**
+   - End-to-end response time
+   - Includes ML + RAG + LLM generation
+   - Tracked per experiment
 
-## 🌟 **Team**
+3. **Response Length**
+   - Character count of generated response
+   - Helps identify overly verbose or too-short answers
 
-| Name             | ERP ID | Role                                    |
-| ---------------- | ------ | --------------------------------------- |
-| **Zuha Aqib**    | 26106  | Team Lead — Data Pipeline & Model Training + CI/CD |
-| **Maham Junaid** | 26909  | Cloud Integration & Monitoring setup    |
-| **Maryam Ihsan** | 27152  | Evaluation & API Documentation    |
-| **Muhammad Haaris** | 27083  | Data Pipeline & Model Training + CI/CD  |
+#### Manual Metrics (Human Evaluation)
 
----
+After automated runs, team members manually score:
 
+1. **Helpfulness Score (1-5)**
+   - 1: Not helpful, missing key info
+   - 3: Adequate, covers basics
+   - 5: Extremely helpful, actionable insights
 
-## 🧩 Task Breakdown and Contributions
+2. **Factuality Score (1-5)**
+   - 1: Contains incorrect information
+   - 3: Mostly accurate, minor issues
+   - 5: Fully accurate, well-grounded in data
 
-| Member           | Primary Responsibilities                       | Details of Work Done                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ---------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Zuha Aqib**    | Data Pipeline, Model Training, and CI/CD | <ul><li>Led data cleaning and preprocessing of Amazon reviews dataset</li><li>Implemented core data pipeline architecture</li><li>Co-developed **Item–Item Collaborative Filtering** algorithm</li><li>Implemented GitHub Actions workflow for CI/CD pipeline</li><li>Set up automated testing and linting checks</li><li>Created data validation and model testing workflows</li><li>Managed model versioning and artifact tracking</li><li>Implemented automated deployment pipelines</li></ul> |
-| **Muhammad Haaris** | Data Pipeline, Model Training, and CI/CD | <ul><li>Co-developed data preprocessing and cleaning workflows</li><li>Implemented train-test split methodology</li><li>Enhanced **Item–Item Collaborative Filtering** implementation</li><li>Set up Docker containerization for model training</li><li>Configured CI/CD pipelines for model deployment</li><li>Implemented automated model retraining workflows</li><li>Created data validation checks</li><li>Set up monitoring for model training pipelines</li></ul> |
-| **Maham Junaid** | Cloud Integration & API Documentation | <ul><li>Implemented AWS EC2 instance setup for model deployment</li><li>Configured S3 buckets for data and model storage</li><li>Set up CloudWatch monitoring for model performance</li><li>Created comprehensive FastAPI documentation</li><li>Developed API schema and example cURL commands</li><li>Implemented automated API testing</li><li>Created cloud infrastructure documentation</li><li>Set up cloud-based monitoring dashboards</li></ul> |
-| **Maryam Ihsan** | Cloud Integration & API Documentation | <ul><li>Configured AWS Lambda functions for serverless operations</li><li>Implemented automated cloud deployment scripts</li><li>Created cloud service integration documentation</li><li>Enhanced FastAPI documentation with detailed examples</li><li>Developed comprehensive API testing suite</li><li>Created cloud deployment guides in README.md</li><li>Documented cloud service interactions</li><li>Implemented cloud resource monitoring</li></ul> |
+### Evaluation Dataset (eval.jsonl)
 
----
+Located at `data/eval.jsonl`, each line contains:
 
-## 🌿 Branch-Naming Convention
+```json
+{
+  "scenario_id": "laptop_01",
+  "user_query": "I need a Dell laptop for programming under $1500",
+  "ideal_answer": "Based on your requirements, I recommend the Dell XPS 15...",
+  "context": "Programming laptop, budget $1500, Dell preferred"
+}
+```
 
-| Branch Name                        | Prefix Category           | Purpose / Description                                                                                              |
-| ---------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **`fix/structure`**                | `fix/`                    | Minor structural fixes and directory cleanup after initial setup (refined imports, paths, and relative structure). |
-| **`infra/app-setup`**              | `infra/`                  | Configured application infrastructure — FastAPI service wiring, environment variables, and app-level organization. |
-| **`infra/bootstrap-setup`**        | `infra/`                  | Initial repository bootstrap: virtual environment, Makefile, requirements, and local project scaffolding.          |
-| **`infra/cloud-integration`**      | `infra/`                  | Cloud integration setup — connecting Dockerized services with cloud endpoints (planned deployment stage).          |
-| **`ml-workflow-monitoring-setup`** | `ml-workflow/` *(custom)* | Integrated ML workflow monitoring — Prometheus, Grafana dashboards, and MLflow logging integration.                |
-| **`main`**                         | —                         | Stable release branch for milestone submissions and final presentation.                                            |
+### MLflow Integration
 
+All experiments are logged to MLflow for tracking and comparison:
 
-## 🧑‍💻 **Contribution Guide**
+**Logged Parameters:**
+- `strategy`: Prompting strategy used
+- `few_shot_k`: Number of examples
+- `sample_type`: Example category filter
+- `scenario_id`: Evaluation scenario
 
-See 👉 [CONTRIBUTION.md](CONTRIBUTION.md)
-updated information can be found in CONTRIBUTION.md
+**Logged Metrics:**
+- `latency_seconds`: Response time
+- `metric_token_overlap_f1`: Automated quality score
 
-## 🌟 **Bonus Features**
+**Accessing MLflow UI:**
+```bash
+# Start MLflow server
+mlflow ui --port 5000
 
-| Bonus Feature                                | Description                                                                                                         | Status        |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------- |
-| 🐳 *Docker Compose Multi-Service Setup*    | Separate containers/services for *App, **DB, **Prometheus, and **Grafana*. Supports dev/test/prod profiles. | ✅ Implemented |
-| ⚡ *GPU-enabled Image & Self-Hosted Runner* | CI/CD pipeline uses GPU-enabled Docker image for model training and integrates with self-hosted GitHub runner.      | ▓▓░░░ 40%     |
-| 🏗️ *IaC Sample (Terraform / MinIO)*       | Example scripts to spin up local object storage (MinIO) and other resources via Terraform or other IaC tools.       | ▓░░░░ 20%     |
-| 📊 *End-to-End Load Test Script (k6)*      | Load testing scripts with latency SLO assertions for the deployed services.                                         | ▓░░░░ 30%     |
-| 🛡️ *Dependency Vulnerability Scan*        | pip-audit checks for critical CVEs and fails build if found.                                                      | ✅ Implemented |
-| 📦 *Git LFS (Large File Support)*          | Optional: Not required for this project due to dataset size, but pipeline supports it.                              | ✅ Implemented/ Optional   |
+# Open in browser
+# http://localhost:5000
+```
 
-all remaining will be fully implemented in stage 2 !!!
+### Running Experiments
 
-## 💡 **Tag & Submission**
-
-✅ Push with tag:
+#### Local (Full Suite)
 
 ```bash
-git tag v1.0-milestone1
-git push origin v1.0-milestone1
+# Run all experiments from experiments_config.csv
+python -m src.llm.experiments.run_experiments
+
+# View results
+cat src/llm/experiments/experiment_results.csv
+
+# Start MLflow UI to compare runs
+mlflow ui
 ```
 
+#### CI Mode (Subset)
 
----
-
-### 💬 *“From product reviews to product intelligence — the journey starts here.”* 🧠💬✨
-
-Developed with ❤️ by Team **Product Review Analyzer**
-
----
-# 🚀 **Milestone 2: LLMOps — Operationalizing Large Language Models**
-<p align="left">
-  <img src="https://img.shields.io/badge/Milestone-2.0-blue?style=for-the-badge&logo=github" alt="Milestone 2">
-  <img src="https://img.shields.io/badge/Status-Completed-success?style=for-the-badge" alt="Status">
-  <img src="https://img.shields.io/badge/LLMOps-Active-orange?style=for-the-badge&logo=openai" alt="LLMOps">
-  <img src="https://img.shields.io/badge/Model-Qwen2.5--7B-purple?style=for-the-badge&logo=huggingface" alt="HuggingFace">
-</p>
-
-> **Phase:** Large Language Model Integration & RAG System
-> **Status:** ✅ Completed & Deployed
-> **Tag:** `v2.0-milestone2`
-
-## 🎯 **Milestone 2 Overview**
-
-Building on our reproducible MLOps foundation, **Milestone 2 extends the system into the world of LLMOps** — managing the complete lifecycle of Large Language Models. We've designed, implemented, and evaluated a production-ready **Prompt Engineering + RAG (Retrieval-Augmented Generation)** system that demonstrates best practices in:
-
-- ✅ **Prompt Experimentation** — Zero-Shot, Few-Shot, Chain-of-Thought strategies
-- ✅ **RAG Workflow** — Document ingestion, retrieval, and context-aware generation
-- ✅ **Safety & Guardrails** — PII detection, prompt injection filtering, hallucination prevention
-- ✅ **Monitoring & Evaluation** — Token usage, latency, guardrail violations, data drift
-- ✅ **CI/CD Automation** — End-to-end testing, canary deployment, cloud integration
-
----
-
-## 📌 Overview
-
-This project evolved through **two major milestones**:
-
-| Stage                    | Focus                                                                                                                 | Outcome                                                                                                                                                                                       |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Milestone 1 (MLOps)**  | Build a reproducible ML recommender system with monitoring, CI/CD, and deployment.                                    | Working **Item-Item Collaborative Filtering** recommender served through **FastAPI**, tracked with **MLflow**, monitored with **Prometheus/Grafana**, deployed to cloud.                      |
-| **Milestone 2 (LLMOps)** | Extend the ML workflow into a hybrid **ML + RAG + LLM** pipeline with prompt experimentation, safety, and evaluation. | Full working **Retrieval-Augmented Generation (RAG)** system, multiple prompting strategies, evaluation dataset, automated experimentation engine, guardrails, dashboards, and documentation. |
-
-This system now acts as an **AI Shopping Assistant** that:
-
-* Retrieves relevant products using **FAISS+embeddings**
-* Recommends personalized items using an **ML recommender**
-* Generates summarized, contextual answers using an **LLM advisor**
-* Ensures safety with **input/output moderation**
-* Evaluates LLM performance across **multiple prompting strategies**
-* Is fully monitored, reproducible, and deployable.
-
----
-
-## 🧠 System Architecture Summary
-
-```
-    ┌───────────────────────────────┐
-    │ User Query                    │
-    └───────────────┬───────────────┘
-                    │
-          Guardrails: Input Filter
-                    │
-         ┌──────────▼─────────┐
-         │     pipeline.py     │
-         └──────────┬─────────┘
-                    │
-     ┌──────────────┼─────────────────┐
-     │              │                 │
-     ▼              ▼                 ▼
-ML Model       RAG Retrieval       Prompt Strategy
-(Item-Item CF) (FAISS + Embeddings) (zero-shot / few-shot / CoT / meta)
-     │              │                 │
-     └──────────────┴─────────────────┘
-                    │
-           Advisor LLM (Gemini/Qwen)
-                    │
-         Guardrails: Output Moderation
-                    │
-                    ▼
-              Final Response
-```
-
----
-
-## 📦 Core Components
-
-### 🔹 Machine Learning Recommender
-
-* Implemented using **Item-Item Collaborative Filtering**
-* Uses user–product interaction matrix
-* Computes similarity using cosine similarity
-* Outputs top-k personalized recommendations
-
-Files:
-
-* `item_item.py`
-* `service.py`
-* `eval_dataset.py`
-* `metrics.py`
-
-Evaluation metrics include:
-
-* Recall@K
-* NDCG@K
-* Catalog Coverage
-
-ML experiments are tracked in **MLflow**.
-
----
-
-### 🔹 Retrieval-Augmented Generation (RAG)
-
-The RAG system improves factual grounding.
-
-**Indexing (offline):**
-
-* Processes product dataset into text blocks
-* Embeds using `BAAI/bge-small-en-v1.5`
-* Stores embeddings + metadata in FAISS
-
-File: `ingest.py`
-
-**Inference (online):**
-
-* Retrieve top relevant documents using FAISS
-* Extract product metadata
-* Package into structured prompt context
-
-Files: `rag.py`, `rag_service.py`
-
----
-
-### 🔹 LLM Advisor + Prompting System
-
-LLM layer generates final natural-language responses.
-
-Supported prompting modes:
-
-| Strategy             | Example                                       | Purpose                        |
-| -------------------- | --------------------------------------------- | ------------------------------ |
-| **Zero-shot**        | “Recommend me a budget phone”                 | Simple baseline                |
-| **Few-shot**         | Use training pairs from sample_responses.json | Improve structure & reasoning  |
-| **Chain-of-Thought** | “Think step-by-step…”                         | Improve reasoning transparency |
-| **Meta Prompting**   | A structured system persona with rules        | Most controlled, consistent    |
-
-The final message is strictly:
-
-* Short
-* factual
-* based on retrieved evidence
-* safe and grounded
-
-File: `advisor.py`
-
----
-
-### 🔹 Guardrails & Safety
-
-The system prevents:
-
-* Prompt injection
-* Toxic language
-* Personal data leakage
-* Unsafe claims
-
-File: `policy.py`
-
-These are enforced **before LLM call (input)** and **after output (post-processing).**
-
----
-
-### 🔹 Experimentation Engine (LLMOps Core)
-
-Automates prompt experiments and logs results.
-
-* Reads experiment plan from `experiments_config.csv`
-* Injects chosen prompt strategy
-* Calls HF Space Qwen model or Gemini
-* Logs:
-
-  * response text
-  * latency
-  * prompt variant
-  * correctness score
-  * metadata
-
-Outputs stored in:
-
-* `experiment_results.csv`
-* eval JSON files used later by humans
-
-File: `run_experiments.py`
-
----
-
-## 📑 Evaluation Dataset
-
-File: `eval_dataset.py` ()
-
-Contains **leave-one-out split logic** for fair evaluation of ML and LLM responses.
-
-Dataset includes:
-
-* Real product queries
-* Expected answers
-* Metadata for scoring
-
-Evaluation is done using:
-
-* Automated embedding similarity scoring
-* Human rating template (helpfulness, factuality, safety)
-
----
-
-## 🛠️ Setup & Installation
-
-### 1️⃣ Clone the project
+In CI/CD, a smaller config (`experiments_config_ci.csv`) runs automatically:
 
 ```bash
-git clone <repo_url>
-cd <project_name>
+# Triggered by GitHub Actions
+# Uses experiments_config_ci.csv for speed
+CI=true python -m src.llm.experiments.run_experiments
 ```
 
-### 2️⃣ Create environment
+### Results Analysis
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
+Results are saved to `src/llm/experiments/experiment_results.csv` with columns:
+
+| Column | Description |
+|--------|-------------|
+| experiment_id | Unique experiment identifier |
+| strategy | Prompting strategy used |
+| few_shot_k | Number of few-shot examples |
+| user_query_variant | The query tested |
+| response_text | Full LLM response |
+| latency_seconds | Response time |
+| metric_token_overlap_f1 | Automated quality score |
+| helpfulness_score | Manual rating (1-5) |
+| factuality_score | Manual rating (1-5) |
+| error | Error message if failed |
+
+#### Sample Analysis Workflow
+
+```python
+import pandas as pd
+
+# Load results
+df = pd.read_csv("src/llm/experiments/experiment_results.csv")
+
+# Compare strategies by F1 score
+strategy_performance = df.groupby("strategy")["metric_token_overlap_f1"].mean()
+print(strategy_performance)
+
+# Find best performing experiments
+top_experiments = df.nlargest(5, "metric_token_overlap_f1")
+print(top_experiments[["experiment_id", "strategy", "metric_token_overlap_f1"]])
+
+# Analyze latency by strategy
+latency_by_strategy = df.groupby("strategy")["latency_seconds"].describe()
+print(latency_by_strategy)
 ```
 
-### 3️⃣ Install dependencies
+### Few-Shot Example Management
 
-> For local development:
+Sample responses are stored in `sample_responses.json`:
 
-```bash
-pip install -r requirements_all.txt
+```json
+{
+  "items": [
+    {
+      "type": "laptop",
+      "query": "I need a laptop for programming",
+      "response": "Based on your needs, I recommend...",
+      "review_of_response": "This is a great response because..."
+    },
+    {
+      "type": "phone",
+      "query": "Budget phone with good battery",
+      "response": "For battery life on a budget...",
+      "review_of_response": "Helpful and specific"
+    }
+  ]
+}
 ```
 
-> For cloud deployment:
+**Selection Logic:**
+- Filter by `sample_type` (laptop, phone, etc.)
+- Exclude negative examples (reviews containing "not very good")
+- Select top-k most relevant examples
 
-```bash
-pip install -r requirements.txt
+### Fine-Tuned Model Integration
+
+The system uses a **fine-tuned Qwen model** hosted on Hugging Face Spaces:
+
+**Configuration:**
+```python
+SPACE_ID = "MuhammadHaaris/mlops"
+SPACE_API_NAME = "/predict"
 ```
 
-### 4️⃣ (Optional) Clean dependencies
+**Calling the Model:**
+```python
+from gradio_client import Client
 
-```bash
-pip freeze > requirements_all.txt
-pip freeze > requirements.txt
-pipreqs . --force --encoding=utf-8 --ignore .venv,.git
+client = Client(SPACE_ID)
+result = client.predict(
+    user_input=final_prompt,
+    api_name=SPACE_API_NAME
+)
+```
+
+**Retry Logic:**
+- 3 attempts with exponential backoff
+- 5-second delay between retries
+- Graceful error handling and logging
+
+### Best Practices
+
+1. **Start with Zero-Shot**: Establish baseline performance
+2. **Add Few-Shot Gradually**: Test 3-shot before 5-shot
+3. **Use CoT for Complex Queries**: Multi-product comparisons benefit from step-by-step reasoning
+4. **Validate with eval.jsonl**: Always include scenario_id for quantitative metrics
+5. **Manual Review**: Automated metrics don't capture all quality aspects
+6. **Track in MLflow**: Compare experiments systematically
+7. **CI Integration**: Keep CI config small (5-10 experiments) for fast feedback
+
+### Extending the Framework
+
+**Adding New Strategies:**
+
+Edit `build_llm_prompt_for_strategy()` in `run_experiments.py`:
+
+```python
+if strategy == "your_new_strategy":
+    prompt += "\n\nYour custom instruction here..."
+```
+
+**Adding New Metrics:**
+
+Extend the results schema and computation logic:
+
+```python
+# In run_experiments.py
+def compute_your_metric(response: str, reference: str) -> float:
+    # Your metric logic
+    return score
+
+# Add to result_row
+result_row["your_metric_name"] = compute_your_metric(response_text, ideal_answer)
 ```
 
 ---
 
-## ▶️ Running the System
+## Monitoring & Observability
 
-Terminal 1 (backend API):
+### Prometheus Metrics
 
-```bash
-uvicorn src.app:app --reload
+Access at: `http://13.60.49.144:9091`
+
+#### Available Metrics
+
+**LLM-Specific Metrics:**
+
+```promql
+# Total LLM requests
+llm_requests_total
+
+# LLM latency histogram
+llm_request_latency_seconds_bucket
+
+# Guardrail violations
+llm_guardrail_violations_total{type="input_validation"}
+llm_guardrail_violations_total{type="output_moderation"}
 ```
 
-Terminal 2 (UI):
+**System Metrics:**
 
-```bash
-streamlit run src/streamlit_app.py
+```promql
+# Python runtime
+python_gc_objects_collected_total
+python_gc_collections_total
+process_resident_memory_bytes
+process_cpu_seconds_total
+
+# HTTP metrics
+http_requests_total
+http_request_duration_seconds
+```
+
+### Grafana Dashboards
+
+Access at: `http://13.60.49.144:3001`
+
+#### Key Panels
+
+1. **Total LLM Requests**
+   - Query: `llm_requests_total`
+
+2. **LLM Latency (95th Percentile)**
+   - Query: `histogram_quantile(0.95, sum(rate(llm_request_latency_seconds_bucket[5m])) by (le))`
+
+3. **Guardrail Violations**
+   - Input: `llm_guardrail_violations_total{type="input_validation"}`
+   - Output: `llm_guardrail_violations_total{type="output_moderation"}`
+
+4. **System Health**
+   - Memory: `process_resident_memory_bytes`
+   - CPU: `rate(process_cpu_seconds_total[5m])`
+
+---
+
+## Data Drift Detection
+
+### Evidently Configuration
+
+Evidently monitors **data drift** by comparing reference (training) and current (production) datasets.
+
+#### What is Monitored
+
+1. **Data Drift**: Statistical changes in feature distributions
+2. **Dataset Statistics**: Missing values, outliers, data quality
+3. **Feature-Level Drift**: Individual feature distribution shifts
+
+**Note: Current implementation focuses on data drift. Concept drift** (changes in the relationship between features and target) is not yet implemented but can be added as a future enhancement.
+
+#### Drift Detection Workflow
+
+```python
+import pandas as pd
+from evidently.report import Report
+from evidently.metric_preset import DataDriftPreset
+
+# Load datasets
+ref = pd.read_csv("data/raw/amazon.csv")           # Reference (training)
+cur = pd.read_csv("data/raw/amazon_current.csv")   # Current (production)
+
+# Generate report
+report = Report(metrics=[DataDriftPreset()])
+report.run(reference_data=ref, current_data=cur)
+
+# Save HTML report
+report.save_html("monitoring/evidently_report.html")
+```
+
+#### Accessing Drift Reports
+
+1. **Static Report** (generated locally):
+   ```bash
+   python generate_drift.py
+   open monitoring/evidently_report.html
+   ```
+
+2. **Dynamic Report** (via API):
+   - Regenerate: `POST http://13.60.49.144:7000/refresh`
+   - View: `GET http://13.60.49.144:7000/report`
+
+#### Drift Metrics Tracked
+
+| Metric | Description |
+|--------|-------------|
+| Dataset Drift | Overall drift detection across all features |
+| Feature Drift | Per-feature statistical drift (Kolmogorov-Smirnov test) |
+| Missing Values | Changes in data completeness |
+| Correlations | Changes in feature relationships |
+
+#### S3 Integration
+
+- **Reference Dataset**: Stored in GitHub repo (baseline)
+- **Current Dataset**: Stored in S3 (updated daily/weekly)
+- **Benefit**: Enables continuous drift monitoring without manual data uploads
+
+### How to Use Evidently
+
+Access at: `http://13.60.49.144:7000/report`
+
+**What It Monitors:**
+
+- **Dataset Drift**: Compares production data against reference (training) data
+- **Feature Distribution Changes**: Detects shifts in product attributes
+- **Data Quality**: Identifies missing values, outliers
+
+**Workflow:**
+
+1. **Initial Setup**: Reference dataset stored in GitHub repo
+2. **Production Data**: Current dataset stored in S3
+3. **Refresh Report**: POST to `/refresh` to regenerate
+4. **View Report**: Navigate to `/report` in browser
+
+**Example:**
+
+```python
+# Trigger report regeneration
+import requests
+
+response = requests.post("http://13.60.49.144:7000/refresh")
+print(response.json())
+
+# View in browser
+# Open: http://13.60.49.144:7000/report
 ```
 
 ---
 
-## 🔄 Running Prompt Experiments
+## Guardrails & Safety
 
-```bash
-python src/run_experiments.py
+### Input Validation
+
+Protects against malicious or unsafe user queries.
+
+#### Checks Performed
+
+1. **Prompt Injection Detection**
+   - Blocks: "ignore previous instructions", "act as an unfiltered model"
+   - Action: Hard fail (query rejected)
+
+2. **PII Detection**
+   - Detects: Emails, phone numbers
+   - Action: Soft fail (flagged but may proceed)
+
+#### Code Example
+
+```python
+from guards.policy import validate_input_query, GuardrailViolation
+
+try:
+    report = validate_input_query(user_query)
+    print("Input safe:", report)
+except GuardrailViolation as e:
+    print(f"Blocked: {e.kind} - {e.details}")
 ```
 
-Outputs written to:
+### Output Moderation
 
-* `/experiments/experiment_results.csv`
-* `/experiments/eval.jsonl`
+Ensures generated responses are safe and appropriate.
+
+#### Checks Performed
+
+1. **Toxicity Filter**
+   - Detects: Harmful language, profanity
+   - Keywords: "kill", "hate you", "stupid"
+   - Action: Sanitize or block
+
+#### Code Example
+
+```python
+from guards.policy import moderate_output_text, GuardrailViolation
+
+try:
+    safe_output = moderate_output_text(llm_response)
+    print("Safe output:", safe_output["text"])
+except GuardrailViolation as e:
+    print(f"Moderated: {e.kind}")
+```
+
+### Pipeline Integration
+
+```
+USER QUERY
+    │
+    ▼
+Input Validation (Guardrails) ──► Reject / Flag PII
+    │
+    ▼
+RAG Retrieval & LLM Advisor
+    │
+    ▼
+Output Moderation (Guardrails) ──► Sanitize / Block toxic content
+    │
+    ▼
+FINAL RESPONSE
+```
+
+### Monitoring Guardrail Events
+
+All violations are logged with:
+
+```json
+{
+  "kind": "input_prompt_injection",
+  "message": "Query contains prompt-injection style instructions",
+  "details": {"pattern": "(?i)ignore previous instructions"}
+}
+```
+
+These events are tracked in Prometheus:
+
+```promql
+llm_guardrail_violations_total{type="input_validation"}
+llm_guardrail_violations_total{type="output_moderation"}
+```
 
 ---
 
-## 🌥️ Cloud Deployment Summary
+## Cloud Infrastructure
 
-* AWS EC2 → Deployed FastAPI + Streamlit
-* S3 → Storage for embeddings and MLflow artifacts
-* CloudWatch → Logs and alerting
-* Docker + CI/CD → Automated deploy on push
+### AWS Services Used
+
+#### 1. EC2 (Compute)
+
+- **Purpose**: Host entire MLOps pipeline
+- **Instance Type**: `t3.medium` (2 vCPU, 4 GB RAM)
+- **Components Running**:
+  - Streamlit UI
+  - FastAPI backend
+  - RAG pipeline
+  - Prometheus, Grafana, Evidently
+
+#### 2. S3 (Storage)
+
+- **Purpose**: Cloud storage for datasets and artifacts
+- **Contents**:
+  - FAISS embeddings index
+  - Product datasets
+  - Current data for drift detection
+
+#### 3. Security Groups
+
+Configured ports for external access (see deployment section).
+
+### Docker Compose Services
+
+```yaml
+services:
+  llmops_app:
+    # FastAPI backend + RAG + ML
+    ports: ["8001:8001"]
+
+  streamlit_app:
+    # User interface
+    ports: ["8501:8501"]
+
+  prometheus:
+    # Metrics collection
+    ports: ["9091:9090"]
+
+  grafana:
+    # Visualization
+    ports: ["3001:3000"]
+
+  evidently_app:
+    # Data drift monitoring
+    ports: ["7000:7000"]
+```
+
+### Stateless Design
+
+- EC2 instance pulls all data from S3 at startup
+- No persistent local storage required
+- Easy to redeploy or scale
 
 ---
 
----
+Fine-Tuned Model & Hugging Face Integration
 
-## 🔥 **The Star of the Show: Fine-Tuned Model & Hugging Face**
+We didn't just rely on generic models — we trained our own! 🚀
 
-We didn't just rely on generic models. We trained our own! 🚀
+We performed **Supervised Fine-Tuning (SFT)** on the **Qwen2.5-7B** architecture using a custom dataset of query-response pairs derived from our Amazon reviews data. This ensures the model speaks the language of e-commerce natively!
 
-We performed **Supervised Fine-Tuning (SFT)** on the **Qwen2.5-7B** architecture using a custom dataset of query-response pairs derived from our Amazon reviews data. This ensures the model speaks the language of "e-commerce" natively!
+#### 🤖 The Model (Qwen2.5-7B-ProductReviewAnalyzer-SFT)
 
-### 🤖 **1. The Model (Qwen2.5-7B-ProductReviewAnalyzer-SFT)**
 You can download, use, or evaluate our fine-tuned weights directly from Hugging Face.
 
 > 👉 **[Access the SFT Model on Hugging Face](https://huggingface.co/MuhammadHaaris/Qwen2.5-7B-ProductReviewAnalyzer-SFT-FP16)**
 
-### 🌌 **2. Live Demo (Hugging Face Spaces)**
-Want to try it without coding? We hosted the fine-tuned version on a **Gradio** interface.
+**Model Details**:
+- **Base Model**: Qwen2.5-7B
+- **Training Data**: Custom query-response pairs from Amazon product reviews
+- **Precision**: FP16 for efficient inference
+- **Use Case**: Product recommendation and review analysis
+
+**Download & Use**:
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model_name = "MuhammadHaaris/Qwen2.5-7B-ProductReviewAnalyzer-SFT-FP16"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# Generate response
+inputs = tokenizer("What's a good laptop for programming?", return_tensors="pt")
+outputs = model.generate(**inputs, max_length=200)
+response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+print(response)
+```
+
+#### 🌌 Live Demo (Hugging Face Spaces)
+
+Want to try it without coding? We hosted the fine-tuned model on a **Gradio** interface for interactive testing.
 
 > 👉 **[Try the Live Demo Here](https://huggingface.co/spaces/MuhammadHaaris/mlops)**
 
+**Features**:
+- Interactive chat interface
+- Real-time product recommendations
+- No setup required — just start asking questions!
+
+**Example Queries**:
+- "Recommend a budget gaming laptop"
+- "Best phone with long battery life under $500"
+- "Compare Dell XPS vs MacBook for programming"
+
+#### Integration in Project
+
+The fine-tuned model is integrated in our prompt evaluation framework:
+
+```python
+from gradio_client import Client
+
+SPACE_ID = "MuhammadHaaris/mlops"
+SPACE_API_NAME = "/predict"
+
+client = Client(SPACE_ID)
+result = client.predict(
+    user_input=prompt,
+    api_name=SPACE_API_NAME
+)
+```
+
+**Location**: `src/llm/experiments/run_experiments.py`
+
+**Benefits**:
+- Domain-specific knowledge for product recommendations
+- Better understanding of e-commerce terminology
+- Improved response quality compared to generic models
+- Cost-effective inference with FP16 precision
+
 ---
 
+### Code Standards
 
-## 📡 Monitoring
-
-| Component                         | Monitoring Tool      |
-| --------------------------------- | -------------------- |
-| API requests, latency, throughput | Prometheus + Grafana |
-| ML model drift                    | Evidently            |
-| Guardrail events                  | Logging + dashboard  |
-| Experiment tracking               | MLflow               |
-
----
----
-
-## 🌐 **Service Endpoints (Dev/Stage)**
-
-Here are the main URLs for accessing the deployed services in your local or staging environment:
-
-| Service         | URL                                         | Description                       |
-|-----------------|---------------------------------------------|-----------------------------------|
-| 🛠️ Backend API  | [http://localhost:8001/](http://localhost:8001/)         | FastAPI backend (custom port)     |
-| 📊 Grafana      | [http://localhost:3001/](http://localhost:3001/)         | Grafana dashboards (custom port)  |
-| 📈 Prometheus   | [http://localhost:9091/targets](http://localhost:9091/targets) | Prometheus targets/metrics        |
-| 🖥️ Streamlit UI | [http://localhost:8501/](http://localhost:8501/)         | Streamlit frontend                |
-
-> ⚡ **Note:** These endpoints may differ from default ports. Use these for development, testing, and monitoring your stack.
-## 👥 Team & Contributions
-
-| Name                | Role                   | Contribution Summary                                                        |
-| ------------------- | ---------------------- | --------------------------------------------------------------------------- |
-| **Zuha Aqib**       | Pipeline Lead          | Designed pipeline, integrated ML + RAG + LLM, final merging, UI integration |
-| **Muhammad Haaris** | RAG & Fine-Tuning Lead | Built RAG system, embeddings indexing, SFT dataset, experiment logic        |
-| **Maryam**          | Cloud Lead             | Cloud deployment, AWS setup, remote access, environment configuration       |
-| **Maham**           | Cloud Lead             | Containerization, infra debug, deployment, documentation                    |
+- **Linting**: Use Ruff for Python linting
+- **Formatting**: Use Black (line length: 100)
+- **Testing**: Maintain minimum 25% code coverage
+- **Documentation**: Update README for new features
+- **Commits**: Use conventional commit messages
 
 ---
 
-## 🏁 Submission + Tags
+## Troubleshooting
 
-Milestone 2 final tag:
+### Common Issues
+
+#### 1. Services Not Starting
 
 ```bash
-git tag v2.0-milestone2
-git push origin v2.0-milestone2
+# Check logs
+docker-compose logs -f
+
+# Restart specific service
+docker-compose restart llmops_app
+
+# Rebuild from scratch
+docker-compose down
+docker-compose up --build -d
+```
+
+#### 2. Gemini API Errors
+
+**Error**: `GEMINI_API_KEY is not set`
+
+**Solution**: Check `.env` file exists and contains valid key
+
+```bash
+# Verify .env
+cat .env | grep GEMINI_API_KEY
+
+# Restart services after updating .env
+docker-compose down
+docker-compose up -d
+```
+
+#### 3. S3 Access Issues
+
+**Error**: `Unable to download from S3`
+
+**Solution**: Verify AWS credentials and bucket permissions
+
+```bash
+# Test AWS credentials
+aws s3 ls s3://your-bucket/
+
+# Update .env with correct credentials
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+```
+
+#### 4. Out of Memory on EC2
+
+**Symptom**: Services crashing, slow response
+
+**Solution**: Monitor memory usage
+
+```bash
+# Check memory
+free -h
+
+# Check Docker stats
+docker stats
+
+# Consider upgrading to t3.large (8 GB RAM)
+```
+
+#### 5. Port Already in Use
+
+**Error**: `Port 8501 is already allocated`
+
+**Solution**: Kill existing processes or change ports
+
+```bash
+# Find process using port
+sudo lsof -i :8501
+
+# Kill process
+sudo kill -9 <PID>
+
+# Or change port in docker-compose.yml
+```
+
+### Health Check Commands
+
+```bash
+# Check all services status
+docker-compose ps
+
+# Test FastAPI
+curl http://localhost:8001/health
+
+# Test Prometheus targets
+curl http://localhost:9091/api/v1/targets
+
+# View Grafana datasources
+curl http://admin:admin@localhost:3001/api/datasources
+```
+
+### Logs Location
+
+```bash
+# Application logs
+docker-compose logs llmops_app
+
+# Prometheus logs
+docker-compose logs prometheus
+
+# Grafana logs
+docker-compose logs grafana
 ```
 
 ---
 
-## 📌 Final Notes
+## Project Structure
 
-* The project is fully reproducible end-to-end.
-* It demonstrates full lifecycle management across **MLOps → LLMOps**.
-* Architecture supports future extensibility such as:
-
-  * multimodal inputs
-  * A/B testing dashboards
-  * model retraining triggers
-  * LangChain/LlamaIndex integration
+```
+product-review-analyzer/
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── data/
+│
+├── M1images/
+│
+├── M2images/
+│
+├── notebooks/
+│   ├── data-clean-product-names.ipynb
+│   ├── data-cleaning.ipynb
+│   ├── data-extract-product-names.ipynb
+│   ├── data-remove-non-pakistani.ipynb
+│   ├── data-rename-brands.ipynb
+│   ├── item-item-collabfiltering.ipynb
+│   ├── item-item-collabfiltering.py
+│   └── rag_with_gemini_api.ipynb
+│
+├── src/
+│   ├── app/
+│   │   ├── item-item-collabfiltering.py
+│   │   └── main.py
+│   │
+│   ├── guards/
+│   │   ├── _pycache_/
+│   │   ├── guardrails.md
+│   │   ├── policy.py
+│   │   └── _init_.py
+│   │
+│   ├── llm/
+│   │   ├── experiments/
+│   │   │   ├── experiments_config.csv
+│   │   │   ├── experiments_config_ci.csv
+│   │   │   ├── experiments_results.txt
+│   │   │   ├── experiment_results.csv
+│   │   │   ├── run_experiments.py
+│   │   │   ├── sample_responses.json
+│   │   │   └── test_run_hf.py
+│   │   │
+│   │   ├── grafana/
+│   │   │   ├── dashboards/
+│   │   │   │   └── dashboard-llm.json
+│   │   │   └── provisioning/
+│   │   │       ├── dashboards/
+│   │   │       │   └── dashboards.yml
+│   │   │       └── datasources/
+│   │   │           └── prometheus.yml
+│   │   │
+│   │   ├── prometheus/
+│   │   │   └── prometheus.yml
+│   │   │
+│   │   ├── src/
+│   │   │   └── llm/
+│   │   │       ├── grafana/
+│   │   │       │   ├── dashboards/
+│   │   │       │   └── provisioning/
+│   │   │       ├── grafana-dashboards/
+│   │   │       └── prometheus/
+│   │   │           └── prometheus.yml
+│   │   │
+│   │   ├── _pycache_/
+│   │   ├── .env
+│   │   ├── advisor.py
+│   │   ├── docker-compose.yml
+│   │   ├── Dockerfile.backend
+│   │   ├── Dockerfile.evidently
+│   │   └── Dockerfile.frontend
+│   │
+│   ├── ml/
+│   │   ├── eval/
+│   │   │   ├── eval_dataset.py
+│   │   │   └── metrics.py
+│   │   │
+│   │   ├── grafana-dashboards/
+│   │   │   ├── dashboard-1.json
+│   │   │   └── dashboard-1.png
+│   │   │
+│   │   ├── prometheus/
+│   │   │   └── prometheus.yml
+│   │   │
+│   │   ├── recommenders/
+│   │   │   ├── _pycache_/
+│   │   │   └── item_item.py
+│   │   │
+│   │   ├── _pycache_/
+│   │   ├── docker-compose.yml
+│   │   └── service.py
+│   │
+│   ├── monitoring/
+│   │   ├── _pycache_/
+│   │   ├── cloud.md
+│   │   ├── evidently_app.py
+│   │   ├── evidently_report.html
+│   │   ├── generate_drift.py
+│   │   └── monitoring.md
+│   │
+│   ├── rag/
+│   │   ├── experiments/
+│   │   │   ├── 1-embedding-model-comparison-py.ipynb
+│   │   │   ├── 2-generation-model-comparison-mistral-py.ipynb
+│   │   │   ├── 2-generation-model-comparison-Qwen-py.ipynb
+│   │   │   ├── 3-top-k-retrieval-ablation-py.ipynb
+│   │   │   ├── 4-temperature-ablation-py.ipynb
+│   │   │   ├── 5-max-new-tokens-test-py.ipynb
+│   │   │   ├── 6-top-p-nucleus-sampling-test-py.ipynb
+│   │   │   ├── 7-prompt-engineering-comparison-py.ipynb
+│   │   │   ├── 8-context-chunking-strategy-py.ipynb
+│   │   │   ├── 9-reranking-with-cross-encoder-py.ipynb
+│   │   │   ├── 10-similarity-metric-comparison-py.ipynb
+│   │   │   └── grid-search-hyperparameter-selection.ipynb
+│   │   │
+│   │   ├── results/
+│   │   │   ├── grid search results/
+│   │   │   │   ├── rag_grid_search_results_advanced.csv
+│   │   │   │   ├── rag_model_summary_advanced.csv
+│   │   │   │   └── rag_statistics_summary.csv
+│   │   │   ├── 1_embedding_comparison.csv
+│   │   │   ├── 2_generation_model_comparison_mistral.csv
+│   │   │   ├── 2_generation_model_comparison_Qwen.csv
+│   │   │   ├── 3_top_k_retrieval_ablation.csv
+│   │   │   ├── 4_temperature_ablation.csv
+│   │   │   ├── 5_max_new_tokens_test.csv
+│   │   │   ├── 6_top_p_nucleus_sampling_test.csv
+│   │   │   ├── 7_prompt_engineering_comparison.csv
+│   │   │   ├── 8_context_chunking_strategy.csv
+│   │   │   ├── 9_reranking_with_cross_encoder.csv
+│   │   │   └── 10_similarity_metric_comparison.csv
+│   │   │
+│   │   ├── _pycache_/
+│   │   ├── ingest.py
+│   │   ├── rag.py
+│   │   └── rag_service.py
+│   │
+│   ├── sft/
+│   │   ├── complete_sft.ipynb
+│   │   ├── query-response-pairs-SFT-training-data.csv
+│   │   └── running-hugging-face-model.ipynb
+│   │
+│   ├── tests/
+│   │   ├── test_metrics_and_policy.py
+│   │   └── _init_.py
+│   │
+│   ├── _pycache_/
+│   ├── app.py
+│   ├── evaluate.py
+│   ├── pipeline.py
+│   ├── requirements-evidently.txt
+│   ├── requirements.txt
+│   ├── requirements_frontend.txt
+│   ├── streamlit_app.py
+│   ├── test.py
+│   ├── train.py
+│   └── _init_.py
+│
+├── tests/
+│   ├── small_eval_test.py
+│   ├── test_prompts.py
+│   └── test_rag_api.py
+│
+├── .gitignore
+├── contribution.md
+├── Makefile
+├── README.md
+├── requirements-all.txt
+├── SECURITY.md
+└── setup.md
+```
 
 ---
 
-### 🧩 One-Sentence Summary
+## Performance Considerations
 
-> *This project transforms raw product data into a safe, intelligent AI shopping assistant powered by ML recommendations, retrieval-augmented reasoning, and structured LLM experimentation.*
+### Resource Usage
+
+- **Memory**: ~3.5 GB under normal load
+- **CPU**: ~40% utilization on t3.medium
+- **Storage**: Embeddings (~500 MB), datasets (~100 MB)
+
+### Optimization Tips
+
+1. **FAISS Index**: Use IVF (Inverted File) indices for larger datasets
+2. **Batch Processing**: Process multiple queries in parallel
+3. **Caching**: Cache frequently requested products
+4. **Connection Pooling**: Reuse database connections
+5. **Async I/O**: Use async/await for I/O-bound operations
+
+### Scaling Considerations
+
+- **Horizontal Scaling**: Deploy multiple EC2 instances behind load balancer
+- **Database**: Consider PostgreSQL with pgvector for production
+- **Embeddings**: Pre-compute and cache product embeddings
+- **Rate Limiting**: Implement API rate limits to prevent abuse
+
+---
+
+### Acknowledgments
+
+This project leverages several excellent open-source technologies:
+
+- **Gemini API** by Google for LLM capabilities
+- **Sentence Transformers** for embedding generation
+- **FAISS** by Meta for efficient similarity search
+- **Evidently AI** for drift detection
+- **Prometheus & Grafana** for observability
+- **LangChain** & **LlamaIndex**: RAG frameworks
+- **FastAPI**: Modern Python web framework
+- **Streamlit**: Rapid UI development
+- **MLflow**: Experiment tracking
+
+## 🎁 Bonus Features
+
+### 1. LangChain + Custom Retriever Implementation
+
+We implemented a complete **LangChain-based RAG pipeline** as an alternative to our main RAG system, showcasing advanced retrieval capabilities.
+
+**Location**: `src/rag/langchain_rag.py`
+
+**Features**:
+- Uses the **exact same Amazon product dataset** and BGE embeddings as the main RAG
+- Implements a **custom retriever** `RatingAwareRetriever` that:
+  - Performs similarity search
+  - Automatically prioritizes products with **rating ≥ 3.8**
+  - Falls back gracefully if not enough high-rated items are found
+- Provides `ask_langchain(question: str, k: int = 5)` — same output format as original RAG
+- Adds `"engine": "langchain_rating_aware"` field to identify the version
+
+**How to Run**:
+```bash
+# Run the LangChain RAG demo
+python -m src.rag.langchain_rag
+```
+
+**Example Usage**:
+```python
+from src.rag.langchain_rag import ask_langchain
+
+response = ask_langchain("I need a laptop for programming", k=5)
+print(response)
+# Output includes products with ratings ≥ 3.8 prioritized
+```
+
+### 2. A/B Testing Dashboard for Prompt Variants
+
+We added **A/B testing capabilities** to compare different prompt strategies in production, complete with Grafana visualizations.
+
+**Grafana Dashboard Panels**:
+
+1. **Prompt Variant Usage (Bar Chart)**
+   - Tracks usage count for each prompt variant
+   - Metric: `prompt_variant_usage_total`
+   - Horizontal bar chart showing distribution
+
+2. **Prompt Variant Latency (Time Series)**
+   - Monitors average response time per variant
+   - Metric: `rate(prompt_response_seconds_sum[5m]) / rate(prompt_response_seconds_count[5m])`
+   - Helps identify performance differences between strategies
+
+**Dashboard Configuration** (`src/llm/grafana/dashboards/dashboard-llm.json`):
+```json
+{
+  "id": 5,
+  "type": "barchart",
+  "title": "Prompt Variant Usage (A/B Testing)",
+  "datasource": {"type": "prometheus", "uid": "prometheus"},
+  "targets": [
+    {
+      "expr": "prompt_variant_usage_total",
+      "legendFormat": "{{variant}}",
+      "refId": "A"
+    }
+  ]
+}
+```
+
+**How to Use**:
+1. Access Grafana at `http://13.60.49.144:3001`
+2. Navigate to "LLM Dashboard"
+3. View "Prompt Variant Usage" and "Prompt Variant Latency" panels
+4. Compare performance across zero-shot, few-shot, CoT, and meta-prompting strategies
+
+---
+
+## Quick Start Summary
+
+```bash
+# 1. Clone and setup
+git clone https://github.com/z-aqib/product-review-analyzer
+cd product-review-analyzer/src/llm
+cp .env.example .env  # Add your API keys
+
+# 2. Deploy locally
+docker-compose up --build -d
+
+# 3. Access services
+# Streamlit: http://localhost:8501
+# API: http://localhost:8001/docs
+# Grafana: http://localhost:3001
+# MLflow: http://localhost:5000
+
+# 4. Run tests
+pytest --cov=src --cov-fail-under=25
+
+# 5. Run prompt experiments
+python -m src.llm.experiments.run_experiments
+
+# 6. Deploy to AWS EC2
+# Follow the AWS deployment guide above
+```
+
+---
+
+**Built with ❤️ by the LLMOps Team**

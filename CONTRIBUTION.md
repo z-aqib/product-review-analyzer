@@ -1,49 +1,143 @@
-# CONTRIBUTION.md
+# Team Contributions
 
-**Project:** *Product Review Analyzer —ML & LLMops*
-**Course:** MLOps & LLMOps (Fall 2025, IBA Karachi)
+This document outlines the individual contributions of each team member to the Amazon Product Review RAG Pipeline with LLMOps project.
 
 ---
 
 ## 👥 Team Members
 
-| Name             | ERP ID | Role                                    |
-| ---------------- | ------ | --------------------------------------- |
-| **Zuha Aqib**    | 26106  | Team Lead — Data Pipeline & Model Training + CI/CD |
-| **Maham Junaid** | 26909  | Model Integration, Cloud Deployment & Monitoring Setup    |
-| **Maryam Ihsan** | 27152  | Model Integration, Cloud Deployment & Monitoring Setup    |
-| **Muhammad Haaris** | 27083  | Data Pipeline & Model Training + CI/CD  |
+### Maham Junaid
+
+#### Core Contributions
+- **FastAPI Backend Development**
+  - Developed `app.py` with complete FastAPI endpoints for RAG queries
+  - Implemented `/query`, `/health`, `/refresh`, and `/report` endpoints
+  - Designed API request/response schemas
+
+- **Monitoring Stack**
+  - Created Prometheus metrics collection for LLM latency, token usage & response rate
+  - Built Grafana dashboards for real-time observability
+  - Configured monitoring stack integration with FastAPI backend
+  - Created `monitoring.md` documentation for metrics & drift detection (D4)
+
+- **Cloud Infrastructure**
+  - Led D7 Cloud Integration (AWS EC2 deployment, Docker Compose setup, S3 integration)
+  - Configured EC2 security groups & deployment workflows
+  - Contributed to infra documentation
+
+- **Frontend Development**
+  - Developed Streamlit UI with Maryam
+  - Implemented query interface and visualization of retrieved results
+
+- **Containerization & Deployment**
+  - Contributed to local Dockerization setup (Dockerfiles & Docker Compose)
+  - Assisted in multi-container orchestration
+
+- **A/B Testing Feature (Bonus +5 pts)**
+  - Implemented A/B testing dashboard to compare prompt variants and model responses
+  - Integrated evaluation metrics for comparison
+
+- *Safety & *Documentation**
+  - Assisted in guardrails implementation
+  - Contributed to Monitoring documentation
+  - Contributed to README & cloud integration docs
 
 ---
 
-## 🧩 Task Breakdown and Contributions
+### Maryam Ihsan
 
-| Member           | Primary Responsibilities                       | Details of Work Done                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ---------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Zuha Aqib**    | Data Pipeline, Model Training, and CI/CD | <ul><li>Led data cleaning and preprocessing of Amazon reviews dataset</li><li>Implemented core data pipeline architecture</li><li>Co-developed **Item–Item Collaborative Filtering** algorithm</li><li>Implemented GitHub Actions workflow for CI/CD pipeline</li><li>Set up automated testing and linting checks</li><li>Created data validation and model testing workflows</li><li>Managed model versioning and artifact tracking</li><li>Implemented automated deployment pipelines</li></ul> |
-| **Muhammad Haaris** | Data Pipeline, Model Training, and CI/CD | <ul><li>Co-developed data preprocessing and cleaning workflows</li><li>Implemented train-test split methodology</li><li>Enhanced **Item–Item Collaborative Filtering** implementation</li><li>Set up Docker containerization for model training</li><li>Configured CI/CD pipelines for model deployment</li><li>Implemented automated model retraining workflows</li><li>Created data validation checks</li><li>Set up monitoring for model training pipelines</li></ul> |
-| **Maham Junaid and Maryam Ihsan** | <ul><li>Integrated the trained recommendation model notebook into the project and generated all necessary serialized artifacts (.pkl files) for production use.</li><li>Configured AWS S3 for artifact and data storage, uploading processed model files for remote accessibility.</li><li>Developed the FastAPI application to serve model predictions through /health and /recommend endpoints.</li><li>Tested and verified API responses locally using cURL and FastAPI’s interactive /docs UI.</li><li>Dockerized the entire stack locally using Docker Compose, including services for the recommender API, Prometheus, and Grafana for observability.</li><li>Set up Prometheus for metrics collection and Grafana dashboards for system and model monitoring.</li><li>Created and configured AWS EC2 instance for deployment of all three containers (FastAPI, Prometheus, Grafana).</li><li>Pushed Docker images to Docker Hub and pulled them on EC2 for smooth deployment.</li><li>Resolved multiple EC2 free-tier storage issues by optimizing Docker image builds and using BuildKit for lightweight images.</li><li>Troubleshot container and network issues across the stack, ensuring all services ran correctly and communicated seamlessly.</li><li>Successfully deployed the full pipeline (API + Monitoring) on EC2 with working endpoints and dashboards.</li><li>Collaboratively handled iterative testing, error resolution, and documentation of the deployment workflow.</li></ul> |
+#### Core Contributions
+- **FastAPI Backend Development**
+  - Collaborated on `app.py` implementation for RAG query endpoints
+  - Contributed to pipeline integration and API route design
+
+- **Monitoring & Observability**
+  - Developed Evidently monitoring dashboard for data drift detection
+  - Collaborated on Prometheus/Grafana monitoring setup and configuration
+  - Created monitoring documentation (D4)
+
+- **Cloud Infrastructure**
+  - Worked on D7 Cloud Integration (AWS EC2 deployment, S3 integration)
+  - Contributed to cloud infrastructure documentation
+
+- **Frontend Development**
+  - Built Streamlit frontend application for RAG querying with Maham
+  - Designed user-friendly UI for product recommendations
+
+- **Containerization & Deployment**
+  - Contributed to local Dockerization setup (Dockerfiles & Docker Compose)
+  - Assisted in multi-container orchestration
+
+- **Safety & Documentation**
+  - Assisted in guardrails implementation
+  - Contributed to guardrails documentation (D3)
+  - Contributed to README & cloud integration docs
+
+- **CI/CD Pipeline**
+  - Initiated CI/CD workflows with GitHub Actions (D5)
+
 ---
 
-## 🌿 Branch-Naming Convention
+### Zuha Aqib
 
-| Branch Name                        | Prefix Category           | Purpose / Description                                                                                              |
-| ---------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **`fix/structure`**                | `fix/`                    | Minor structural fixes and directory cleanup after initial setup (refined imports, paths, and relative structure). |
-| **`infra/app-setup`**              | `infra/`                  | Configured application infrastructure — FastAPI service wiring, environment variables, and app-level organization. |
-| **`infra/bootstrap-setup`**        | `infra/`                  | Initial repository bootstrap: virtual environment, Makefile, requirements, and local project scaffolding.          |
-| **`infra/cloud-integration`**      | `infra/`                  | Cloud integration setup — connecting Dockerized services with cloud endpoints (planned deployment stage).          |
-| **`ml-workflow-monitoring-setup`** | `ml-workflow/` *(custom)* | Integrated ML workflow monitoring — Prometheus, Grafana dashboards, and MLflow logging integration.                |
-| **`main`**                         | —                         | Stable release branch for milestone submissions and final presentation.                                            |
+#### Core Contributions
+- **RAG Pipeline Development**
+  - Developed `pipeline.py` for end-to-end RAG retrieval & LLM orchestration
 
-**Workflow followed:**
+- **Document Ingestion & Embeddings**
+  - Implemented `ingest.py` for document ingestion & embedding generation
+  - Built FAISS vector index handling
 
-1. Each member created a feature branch → committed changes → pushed → opened PR into `develop`.
-2. After review and testing, `develop` was merged into `main` for stable releases.
+- **Prompt Engineering**
+  - Completed D1 Prompt Engineering experimentation
+  - Created multiple prompt strategies and evaluation metrics (F1, latency)
+
+- **CI/CD Pipeline**
+  - Configured automated testing & deployment workflows
+
+- **Coverage**
+  - Created tests for all running files and ran pytest --cov=src to get 88% coverage over all files in src.
+
+- **Safety**
+  - Implemented guardrails with Maryam & Maham
 
 ---
 
-## 🧠 Summary
+### Mohammed Haris
 
-This project was built collaboratively using **GitHub**, **Docker**, and **FastAPI**, following true MLOps principles — modular code, containerized infrastructure, and automated monitoring.
-Each member contributed in a complementary domain (data, model, API, infra), ensuring smooth integration from dataset to deployment.
+#### Core Contributions
+- **RAG Implementation**
+  - Implemented `rag.py` for semantic search & document retrieval
+  - Performed retrieval experimentation, optimization & evaluation
+
+- **LangChain Integration (Bonus +5 pts)**
+  - Implemented LangChain workflow for modular pipeline routing
+  - Built custom retrieval chain with assistance from Zuha
+
+- **Security & Compliance**
+  - Authored `SECURITY.md` under D8 Compliance
+  - Worked on injection prevention & validation measures
+
+- **Performance Testing**
+  - Evaluated retrieval performance and optimized parameters
+
+---
+
+## 📝 Summary of Deliverables
+
+| Deliverable | Owner(s) |
+|------------|----------|
+| D1 Prompt Engineering | Zuha |
+| D2 RAG Pipeline | All (component-wise) |
+| D3 Guardrails | Zuha, Maham, Maryam |
+| D4 Monitoring | Maham (Prometheus/Grafana), Maryam (Evidently) |
+| D5 CI/CD | Maryam (init), Zuha (expansion) |
+| D6 Docs | Maham & Maryam |
+| D7 Cloud | Maham & Maryam |
+| D8 Security | Haris |
+
+### Bonus Features (+5 pts)
+- **LangChain Integration** — Haris
+- **A/B Testing Dashboard** — Maham
+
+---
