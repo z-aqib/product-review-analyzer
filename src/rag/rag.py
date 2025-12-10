@@ -26,7 +26,7 @@ if not api_key:
     raise RuntimeError("GEMINI_API_KEY is not set. Check your .env file.")
 
 genai.configure(api_key=api_key)
-RAG_MODEL = genai.GenerativeModel("gemini-2.5-flash")
+RAG_MODEL = genai.GenerativeModel("gemini-2.5-flash-live")
 
 
 # ================================

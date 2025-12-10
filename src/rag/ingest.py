@@ -93,7 +93,7 @@ if not api_key:
 
 # Gemini config
 genai.configure(api_key=api_key)
-RAG_MODEL = genai.GenerativeModel("gemini-2.5-flash")
+RAG_MODEL = genai.GenerativeModel("gemini-2.5-flash-live")
 
 # Globals used by ask()
 df: pd.DataFrame | None = None

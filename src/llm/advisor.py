@@ -19,7 +19,7 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 # Model for FINAL RESPONSE (advisor)
-ADVISOR_MODEL = genai.GenerativeModel("gemini-2.5-flash")
+ADVISOR_MODEL = genai.GenerativeModel("gemini-2.5-flash-live")
 
 
 # -------------------------------------
