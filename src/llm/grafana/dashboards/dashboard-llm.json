@@ -22,6 +22,7 @@
   "links": [],
   "panels": [
     {
+      "id": 1,
       "title": "Total LLM Requests",
       "type": "timeseries",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -35,7 +36,8 @@
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
     },
     {
-      "title": "LLM Request Latency (Histogram)",
+      "id": 2,
+      "title": "LLM Request Latency (95th percentile)",
       "type": "timeseries",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
       "targets": [
@@ -48,6 +50,7 @@
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
     },
     {
+      "id": 3,
       "title": "Guardrail Violations (Input Validation)",
       "type": "timeseries",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -61,6 +64,7 @@
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
     },
     {
+      "id": 4,
       "title": "Guardrail Violations (Output Moderation)",
       "type": "timeseries",
       "datasource": {"type": "prometheus", "uid": "prometheus"},
@@ -72,6 +76,62 @@
         }
       ],
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+    },
+
+    {
+      "id": 5,
+      "type": "barchart",
+      "title": "Prompt Variant Usage (A/B Testing)",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {
+          "expr": "prompt_variant_usage_total",
+          "legendFormat": "{{variant}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "displayLabels": ["value"],
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "barWidth": 0.7
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Prompt Variant Latency (Average Response Time)",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {
+          "expr": "rate(prompt_response_seconds_sum[5m]) / rate(prompt_response_seconds_count[5m])",
+          "legendFormat": "{{variant}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      }
     }
   ],
   "schemaVersion": 42,
