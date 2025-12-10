@@ -1,3 +1,4 @@
+# src/rag/ingest.py
 # ================================
 # ONE-CLICK RAG ON AMAZON PRODUCTS
 # FAISS + BGE embeddings + GEMINI LLM

@@ -1,4 +1,4 @@
-# project/src/ml/eval/metrics.py
+# src/ml/eval/metrics.py
 
 from __future__ import annotations
 from math import log2

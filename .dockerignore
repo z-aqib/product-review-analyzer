@@ -1,3 +1,4 @@
+# .dockerignore
 # Ignore Python cache and build artifacts
 _pycache_/
 *.pyc

@@ -1,3 +1,4 @@
+# src/pipeline.py
 """
 End-to-end pipeline:
 USER QUERY → ML → RAG → LLM → final text response
@@ -15,6 +16,83 @@ from .rag.rag_service import ask  # you will create this wrapper file from noteb
 
 # ---- Import LLM advisor
 from .llm.advisor import generate_final_answer
+import time
+
+# def run_pipeline(user_id: str, user_query: str) -> Dict:
+#     """
+#     Unified pipeline:
+#     1. Get ML recommendations
+#     2. Get RAG results
+#     3. Get final LLM answer
+#     Returns dict containing all intermediate + final results.
+#     """
+
+#     # 1) ML
+#     print("Begin ML")
+#     ml_candidates = get_ml_candidates_for_user(user_id=user_id, k=5)
+#     print("ML result ", ml_candidates)
+
+#     # 2) RAG
+#     print("Begin RAG")
+#     rag_result = ask(user_query, k=5)
+#     print("RAG result ", rag_result)
+
+#     # 3) LLM Advisor
+#     print("Begin LLM Advisor")
+#     final_answer = generate_final_answer(
+#         user_query=user_query,
+#         ml_candidates=ml_candidates,
+#         rag_result=rag_result,
+#     )
+
+#     return {
+#         "user_query": user_query,
+#         "ml_candidates": ml_candidates,
+#         "rag_result": rag_result,
+#         "final_answer": final_answer,
+#     }
+
+
+# def run_pipeline(user_id: str, user_query: str) -> Dict:
+#     """
+#     Unified pipeline:
+#     1. Get ML recommendations
+#     2. Get RAG results
+#     3. Get final LLM answer (with A/B testing)
+#     Returns dict containing all intermediate + final results + prompt variant + response time.
+#     """
+
+#     # 1) ML
+#     print("Begin ML")
+#     ml_candidates = get_ml_candidates_for_user(user_id=user_id, k=5)
+#     print("ML result ", ml_candidates)
+
+#     # 2) RAG
+#     print("Begin RAG")
+#     rag_result = ask(user_query, k=5)
+#     print("RAG result ", rag_result)
+
+#     # 3) LLM Advisor with A/B testing
+#     print("Begin LLM Advisor")
+#     start_time = time.time()
+#     final_result = generate_final_answer(
+#         user_query=user_query,
+#         ml_candidates=ml_candidates,
+#         rag_result=rag_result,
+#     )
+#     elapsed_time = time.time() - start_time
+
+#     # final_result is a dict: {"final_answer": str, "variant": "A"/"B", "response_time": float}
+#     # Make sure generate_final_answer is updated to return this structure
+
+#     return {
+#         "user_query": user_query,
+#         "ml_candidates": ml_candidates,
+#         "rag_result": rag_result,
+#         "final_answer": final_result["final_answer"],
+#         "prompt_variant": final_result["variant"],
+#         "response_time": elapsed_time,
+#     }
 
 
 def run_pipeline(user_id: str, user_query: str) -> Dict:
@@ -22,8 +100,8 @@ def run_pipeline(user_id: str, user_query: str) -> Dict:
     Unified pipeline:
     1. Get ML recommendations
     2. Get RAG results
-    3. Get final LLM answer
-    Returns dict containing all intermediate + final results.
+    3. Get final LLM answer (with A/B testing)
+    Returns dict containing all intermediate + final results + prompt variant + response time.
     """
 
     # 1) ML
@@ -36,19 +114,26 @@ def run_pipeline(user_id: str, user_query: str) -> Dict:
     rag_result = ask(user_query, k=5)
     print("RAG result ", rag_result)
 
-    # 3) LLM Advisor
+    # 3) LLM Advisor with A/B testing
     print("Begin LLM Advisor")
-    final_answer = generate_final_answer(
+    start_time = time.time()
+    final_result = generate_final_answer(
         user_query=user_query,
         ml_candidates=ml_candidates,
         rag_result=rag_result,
     )
+    elapsed_time = time.time() - start_time
 
     return {
         "user_query": user_query,
         "ml_candidates": ml_candidates,
         "rag_result": rag_result,
-        "final_answer": final_answer,
+        # FIX: use correct key from generate_final_answer()
+        "final_answer": final_result.get("answer"),
+        # FIX: use correct variant name
+        "prompt_variant": final_result.get("variant", "N/A"),
+        # FIX: combine outer latency + inner latency
+        "response_time": final_result.get("response_time", elapsed_time),
     }
 
 
