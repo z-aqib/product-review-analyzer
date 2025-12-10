@@ -1,0 +1,76 @@
+# # Dockerfile.backend
+# FROM python:3.10
+
+# WORKDIR /app
+
+# # System dependencies
+# RUN apt-get update && apt-get install -y \
+#     build-essential \
+#     gcc \
+#     libffi-dev \
+#     libssl-dev \
+#     python3-dev \
+#     curl \
+#  && rm -rf /var/lib/apt/lists/*
+
+# # Copy requirements first
+# COPY src/requirements.txt /app/requirements.txt
+
+
+# # Copy backend code
+# COPY src/app.py /app/src/app.py
+# COPY src/llm /app/src/llm
+# COPY src/ml /app/src/ml
+# COPY src/rag /app/src/rag
+# COPY src/sft /app/src/sft
+
+# # Upgrade pip and install dependencies
+# RUN pip install --upgrade pip --default-timeout=120
+# RUN pip install --no-cache-dir -r requirements.txt --default-timeout=120
+# RUN pip install google-generativeai
+
+
+# EXPOSE 8001
+
+# CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8001"]
+
+
+# ============================
+# FAST, CACHE-FRIENDLY BACKEND
+# ============================
+
+FROM python:3.10
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies (rarely changes → good cache)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    libffi-dev \
+    libssl-dev \
+    python3-dev \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# ----------------------------
+# STEP 1: COPY ONLY requirements first
+# (This ensures pip install is cached unless req.txt changes)
+# ----------------------------
+COPY src/requirements.txt /app/requirements.txt
+
+# Upgrade pip & install dependencies
+RUN pip install --upgrade pip --default-timeout=120 \
+ && pip install --no-cache-dir -r requirements.txt --default-timeout=120 \
+ && pip install google-generativeai
+
+# ----------------------------
+# STEP 2: Copy the actual backend code
+# (This changes frequently → fast rebuilds)
+# ----------------------------
+COPY src /app/src
+
+EXPOSE 8001
+
+CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8001"]

@@ -1,8 +1,10 @@
 # src/streamlit_app.py
 import streamlit as st
 import requests
+import os
 
-API_URL = "http://127.0.0.1:8000/recommend"
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8001/recommend")
+
 
 st.set_page_config(page_title="Product Review & Recommendation Chat", page_icon="🤖")
 

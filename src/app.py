@@ -1,10 +1,16 @@
 # src/app.py
 
 from typing import Any, Dict, List
-
 import logging
+import time
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+
+# Use the FastAPI Instrumentator instead of start_http_server
+from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Counter, Histogram
+
 
 from .pipeline import run_pipeline
 from .guards.policy import (
@@ -14,16 +20,28 @@ from .guards.policy import (
 )
 
 # ---------- Logging setup ----------
-
 logger = logging.getLogger("rag_api")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
+# ---------- Prometheus metrics ----------
+REQUEST_COUNT = Counter("llm_requests_total", "Total number of LLM requests")
+LATENCY = Histogram("llm_request_latency_seconds", "Latency of LLM requests")
+GUARDRAIL_VIOLATIONS = Counter(
+    "llm_guardrail_violations_total", "Total number of guardrail violations", ["type"]
+)
+PROMPT_VARIANT_COUNTER = Counter(
+    "prompt_variant_usage", "Counts how many times each prompt variant was used", ["variant"]
+)
+
+PROMPT_RESPONSE_TIME = Histogram(
+    "prompt_response_seconds", "Time taken by LLM to respond", ["variant"]
+)
+
 
 # ---------- FastAPI app ----------
-
 app = FastAPI(
     title="MLOps Milestone 2 API",
     description=(
@@ -34,9 +52,11 @@ app = FastAPI(
 )
 
 
+# Integrate Prometheus metrics with FastAPI
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
+
 # ---------- Request / Response models ----------
-
-
 class QueryRequest(BaseModel):
     user_id: str = Field(..., example="AG3D6O4STAQKAY2UVGEUV46KN35Q")
     user_query: str = Field(
@@ -52,12 +72,28 @@ class GuardrailEvent(BaseModel):
     details: Dict[str, Any] | None = None
 
 
+# class QueryResponse(BaseModel):
+#     user_query: str
+#     ml_candidates: Any
+#     rag_result: Any
+#     final_answer: str
+#     guardrail_events: List[GuardrailEvent]
+
+
 class QueryResponse(BaseModel):
     user_query: str
     ml_candidates: Any
     rag_result: Any
     final_answer: str
     guardrail_events: List[GuardrailEvent]
+
+    # ---- New fields for A/B testing ----
+    prompt_variant: str = Field(
+        ..., example="A", description="The prompt variant used (A/B/FALLBACK)"
+    )
+    response_time: float = Field(
+        ..., example=1.23, description="Time in seconds taken by LLM to respond"
+    )
 
 
 # ---------- Health check ----------
@@ -72,13 +108,106 @@ def health() -> dict[str, str]:
 
 
 # ---------- Endpoint ----------
+# @app.post("/recommend", response_model=QueryResponse)
+# async def recommend(request: QueryRequest) -> QueryResponse:
+#     start_time = time.time()  # Start latency timer
+#     REQUEST_COUNT.inc()  # Increment request count
+
+#     guardrail_events: List[GuardrailEvent] = []
+
+#     # 1) Input validation guardrails
+#     try:
+#         input_report = validate_input_query(request.user_query)
+#         if input_report["flags"]:
+#             logger.info("Input guardrail flags: %s", input_report["flags"])
+#             guardrail_events.append(
+#                 GuardrailEvent(
+#                     type="input_validation",
+#                     kind="input_flags",
+#                     message="Input query triggered guardrail flags.",
+#                     details=input_report,
+#                 )
+#             )
+#             GUARDRAIL_VIOLATIONS.labels(type="input_validation").inc()
+#     except GuardrailViolation as e:
+#         logger.warning("Input guardrail violation: %s", e, exc_info=True)
+#         GUARDRAIL_VIOLATIONS.labels(type="input_validation").inc()
+#         raise HTTPException(
+#             status_code=400,
+#             detail={
+#                 "error": "unsafe_input",
+#                 "kind": e.kind,
+#                 "message": str(e),
+#                 "details": e.details,
+#             },
+#         )
+
+#     # 2) Main business logic pipeline
+#     try:
+#         pipeline_result = run_pipeline(
+#             user_id=request.user_id,
+#             user_query=request.user_query,
+#         )
+#     except Exception as e:
+#         logger.exception("Error while running pipeline: %s", e)
+#         raise HTTPException(
+#             status_code=500,
+#             detail={"error": "internal_error: " + e, "message": "Pipeline failed."},
+#         )
+
+#     # 3) Output moderation guardrails
+#     final_answer = pipeline_result.get("final_answer", "")
+#     try:
+#         output_report = moderate_output_text(final_answer)
+#         if output_report["flags"]:
+#             logger.info("Output guardrail flags: %s", output_report["flags"])
+#             guardrail_events.append(
+#                 GuardrailEvent(
+#                     type="output_moderation",
+#                     kind="output_flags",
+#                     message="Final answer triggered guardrail flags.",
+#                     details=output_report,
+#                 )
+#             )
+#             GUARDRAIL_VIOLATIONS.labels(type="output_moderation").inc()
+#         safe_answer = output_report["text"]
+#     except GuardrailViolation as e:
+#         logger.warning("Output guardrail violation: %s", e, exc_info=True)
+#         GUARDRAIL_VIOLATIONS.labels(type="output_moderation").inc()
+#         guardrail_events.append(
+#             GuardrailEvent(
+#                 type="output_moderation",
+#                 kind=e.kind,
+#                 message=str(e),
+#                 details=e.details,
+#             )
+#         )
+#         # Replace model answer with a generic safe message
+#         safe_answer = (
+#             "Sorry, I couldn't generate a safe response for this query. "
+#             "Please try rephrasing your question."
+#         )
+
+#     # Observe latency
+#     LATENCY.observe(time.time() - start_time)
+
+#     return QueryResponse(
+#         user_query=pipeline_result.get("user_query", request.user_query),
+#         ml_candidates=pipeline_result.get("ml_candidates"),
+#         rag_result=pipeline_result.get("rag_result"),
+#         final_answer=safe_answer,
+#         guardrail_events=guardrail_events,
+#     )
 
 
 @app.post("/recommend", response_model=QueryResponse)
 async def recommend(request: QueryRequest) -> QueryResponse:
+    start_time = time.time()  # Start total latency timer
+    REQUEST_COUNT.inc()  # Increment request count
+
     guardrail_events: List[GuardrailEvent] = []
 
-    # 1) Input validation guardrails
+    # ---------- Input validation ----------
     try:
         input_report = validate_input_query(request.user_query)
         if input_report["flags"]:
@@ -91,9 +220,10 @@ async def recommend(request: QueryRequest) -> QueryResponse:
                     details=input_report,
                 )
             )
+            GUARDRAIL_VIOLATIONS.labels(type="input_validation").inc()
     except GuardrailViolation as e:
         logger.warning("Input guardrail violation: %s", e, exc_info=True)
-        # You can log this into Prometheus / Grafana or MLflow as a guardrail metric
+        GUARDRAIL_VIOLATIONS.labels(type="input_validation").inc()
         raise HTTPException(
             status_code=400,
             detail={
@@ -104,7 +234,7 @@ async def recommend(request: QueryRequest) -> QueryResponse:
             },
         )
 
-    # 2) Main business logic pipeline
+    # ---------- Main pipeline ----------
     try:
         pipeline_result = run_pipeline(
             user_id=request.user_id,
@@ -114,10 +244,10 @@ async def recommend(request: QueryRequest) -> QueryResponse:
         logger.exception("Error while running pipeline: %s", e)
         raise HTTPException(
             status_code=500,
-            detail={"error": "internal_error: " + e, "message": "Pipeline failed."},
+            detail={"error": "internal_error", "message": "Pipeline failed."},
         )
 
-    # 3) Output moderation guardrails
+    # ---------- Output moderation ----------
     final_answer = pipeline_result.get("final_answer", "")
     try:
         output_report = moderate_output_text(final_answer)
@@ -131,9 +261,11 @@ async def recommend(request: QueryRequest) -> QueryResponse:
                     details=output_report,
                 )
             )
+            GUARDRAIL_VIOLATIONS.labels(type="output_moderation").inc()
         safe_answer = output_report["text"]
     except GuardrailViolation as e:
         logger.warning("Output guardrail violation: %s", e, exc_info=True)
+        GUARDRAIL_VIOLATIONS.labels(type="output_moderation").inc()
         guardrail_events.append(
             GuardrailEvent(
                 type="output_moderation",
@@ -142,11 +274,21 @@ async def recommend(request: QueryRequest) -> QueryResponse:
                 details=e.details,
             )
         )
-        # Replace model answer with a generic safe message
         safe_answer = (
             "Sorry, I couldn't generate a safe response for this query. "
             "Please try rephrasing your question."
         )
+
+    # ---------- Update A/B testing metrics ----------
+    prompt_variant = pipeline_result.get("prompt_variant")
+    response_time = pipeline_result.get("response_time", 0.0)
+
+    if prompt_variant:
+        PROMPT_VARIANT_COUNTER.labels(variant=prompt_variant).inc()
+        PROMPT_RESPONSE_TIME.labels(variant=prompt_variant).observe(response_time)
+
+    # ---------- Observe total request latency ----------
+    LATENCY.observe(time.time() - start_time)
 
     return QueryResponse(
         user_query=pipeline_result.get("user_query", request.user_query),
@@ -154,4 +296,167 @@ async def recommend(request: QueryRequest) -> QueryResponse:
         rag_result=pipeline_result.get("rag_result"),
         final_answer=safe_answer,
         guardrail_events=guardrail_events,
+        prompt_variant=pipeline_result.get("prompt_variant", "N/A"),
+        response_time=pipeline_result.get("response_time", 0.0),
     )
+
+
+# from typing import Any, Dict, List
+
+# import logging
+# import time
+# from fastapi import FastAPI, HTTPException, Request
+# from pydantic import BaseModel, Field
+# from prometheus_client import Counter, Histogram, start_http_server
+
+# from .pipeline import run_pipeline
+# from .guards.policy import (
+#     validate_input_query,
+#     moderate_output_text,
+#     GuardrailViolation,
+# )
+
+# # ---------- Logging setup ----------
+
+# logger = logging.getLogger("rag_api")
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+# )
+
+# # ---------- Prometheus metrics ----------
+# REQUEST_COUNT = Counter("llm_requests_total", "Total number of LLM requests")
+# LATENCY = Histogram("llm_request_latency_seconds", "Latency of LLM requests")
+# GUARDRAIL_VIOLATIONS = Counter(
+#     "llm_guardrail_violations_total", "Total number of guardrail violations", ["type"]
+# )
+
+# # Start Prometheus metrics server on port 8000 (scraped by Prometheus)
+# start_http_server(8000)
+
+# # ---------- FastAPI app ----------
+
+# app = FastAPI(
+#     title="MLOps Milestone 2 API",
+#     description=(
+#         "Unified ML + RAG + LLM advisor pipeline with basic guardrails "
+#         "for input validation and output moderation."
+#     ),
+#     version="2.0.0",
+# )
+
+
+# # ---------- Request / Response models ----------
+
+
+# class QueryRequest(BaseModel):
+#     user_id: str = Field(..., example="AG3D6O4STAQKAY2UVGEUV46KN35Q")
+#     user_query: str = Field(
+#         ...,
+#         example="I want a Dell laptop for programming under 150k with good battery.",
+#     )
+
+
+# class GuardrailEvent(BaseModel):
+#     type: str
+#     kind: str
+#     message: str
+#     details: Dict[str, Any] | None = None
+
+
+# class QueryResponse(BaseModel):
+#     user_query: str
+#     ml_candidates: Any
+#     rag_result: Any
+#     final_answer: str
+#     guardrail_events: List[GuardrailEvent]
+
+
+# # ---------- Endpoint ----------
+
+
+# @app.post("/recommend", response_model=QueryResponse)
+# async def recommend(request: QueryRequest) -> QueryResponse:
+#     start_time = time.time()  # Start latency timer
+#     REQUEST_COUNT.inc()  # Increment request count
+
+#     guardrail_events: List[GuardrailEvent] = []
+
+#     # 1) Input validation guardrails
+#     try:
+#         input_report = validate_input_query(request.user_query)
+#         if input_report["flags"]:
+#             logger.info("Input guardrail flags: %s", input_report["flags"])
+#             guardrail_events.append(
+#                 GuardrailEvent(
+#                     type="input_validation",
+#                     kind="input_flags",
+#                     message="Input query triggered guardrail flags.",
+#                     details=input_report,
+#                 )
+#             )
+#     except GuardrailViolation as e:
+#         logger.warning("Input guardrail violation: %s", e, exc_info=True)
+#         GUARDRAIL_VIOLATIONS.labels(type="input_validation").inc()
+#         # You can log this into Prometheus / Grafana or MLflow as a guardrail metric
+#         raise HTTPException(
+#             status_code=400,
+#             detail={
+#                 "error": "unsafe_input",
+#                 "kind": e.kind,
+#                 "message": str(e),
+#                 "details": e.details,
+#             },
+#         )
+
+#     # 2) Main business logic pipeline
+#     try:
+#         pipeline_result = run_pipeline(
+#             user_id=request.user_id,
+#             user_query=request.user_query,
+#         )
+#     except Exception as e:
+#         logger.exception("Error while running pipeline: %s", e)
+#         raise HTTPException(
+#             status_code=500,
+#             detail={"error": "internal_error", "message": "Pipeline failed."},
+#         )
+
+#     # 3) Output moderation guardrails
+#     final_answer = pipeline_result.get("final_answer", "")
+#     try:
+#         output_report = moderate_output_text(final_answer)
+#         if output_report["flags"]:
+#             logger.info("Output guardrail flags: %s", output_report["flags"])
+#             guardrail_events.append(
+#                 GuardrailEvent(
+#                     type="output_moderation",
+#                     kind="output_flags",
+#                     message="Final answer triggered guardrail flags.",
+#                     details=output_report,
+#                 )
+#             )
+#         safe_answer = output_report["text"]
+#     except GuardrailViolation as e:
+#         logger.warning("Output guardrail violation: %s", e, exc_info=True)
+#         guardrail_events.append(
+#             GuardrailEvent(
+#                 type="output_moderation",
+#                 kind=e.kind,
+#                 message=str(e),
+#                 details=e.details,
+#             )
+#         )
+#         # Replace model answer with a generic safe message
+#         safe_answer = (
+#             "Sorry, I couldn't generate a safe response for this query. "
+#             "Please try rephrasing your question."
+#         )
+
+#     return QueryResponse(
+#         user_query=pipeline_result.get("user_query", request.user_query),
+#         ml_candidates=pipeline_result.get("ml_candidates"),
+#         rag_result=pipeline_result.get("rag_result"),
+#         final_answer=safe_answer,
+#         guardrail_events=guardrail_events,
+#     )

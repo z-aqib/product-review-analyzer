@@ -1,0 +1,64 @@
+# # global:
+# #   scrape_interval: 5s
+
+# # scrape_configs:
+# #   - job_name: "fastapi"
+# #     static_configs:
+# #       - targets: ["recommender:8000"]  # macOS/Windows Docker
+# #         # On Linux, use your machine IP (e.g., 172.17.0.1:8000) or run API as a compose service.
+
+# global:
+#   scrape_interval: 5s
+
+# scrape_configs:
+#   - job_name: "fastapi"
+#     static_configs:
+#       - targets: ["recommender:8000"]  # use container name, not public IP
+
+#   - job_name: "prometheus"
+#     static_configs:
+#       - targets: ["prometheus:9090"]  # optional, you can leave localhost if needed
+
+
+# mlops phase1 working code below
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "fastapi"
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ["recommender:8000"]
+    basic_auth:
+      username: 'prometheus'
+      password: 'prometheus'
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+
+# new code for mlops phase2
+# global:
+#   scrape_interval: 5s
+
+# scrape_configs:
+#   - job_name: "mlops_fastapi"
+#     metrics_path: '/metrics'
+#     static_configs:
+#       - targets: ["recommender:8000"]
+#     basic_auth:
+#       username: 'prometheus'
+#       password: 'prometheus'
+
+#   - job_name: "llmops_fastapi"
+#     metrics_path: '/metrics'
+#     static_configs:
+#       - targets: ["llmops:8000"]  # Replace 'llmops' with your Docker service name or localhost if local
+#     basic_auth:
+#       username: 'prometheus'
+#       password: 'prometheus'
+
+#   - job_name: "prometheus"
+#     static_configs:
+#       - targets: ["localhost:9090"]
