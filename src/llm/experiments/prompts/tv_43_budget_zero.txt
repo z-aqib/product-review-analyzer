@@ -1,0 +1,38 @@
+You are an expert product review advisor. Use the ML ranking and RAG snippets (which will be provided after this prompt) to recommend the best product(s) for the user. Be specific, mention trade-offs, and stay within the given products.
+
+User query: Which is the best budget 43-inch 4K TV under ₹25,000 based on customer reviews and long-term reliability?
+
+RAG review summary:
+Based on the information provided, here's an analysis of the best budget 43-inch 4K TVs under ₹25,000, considering customer reviews and long-term reliability:
+
+First, let's filter the TVs that meet the **under ₹25,000 budget** and are 43-inch 4K Ultra HD:
+
+1.  **Hisense 108 cm (43 inches) 4K Ultra HD Smart Certified Android LED TV 43A6GE (Black)**
+    *   **Price:** ₹20,990
+    *   **Rating:** 4.1 ⭐ (1,259 reviews)
+    *   **Warranty/Reliability:** 2 Year Comprehensive Warranty.
+
+2.  **Acer 109 cm (43 inches) I Series 4K Ultra HD Android Smart LED TV AR43AR2851UDFL (Black)**
+    *   **Price:** ₹23,999
+    *   **Rating:** 4.3 ⭐ (4,703 reviews)
+    *   **Warranty/Reliability:** 2 years comprehensive warranty.
+
+3.  **TCL 108 cm (43 inches) 4K Ultra HD Certified Android Smart LED TV 43P615 (Black)**
+    *   **Price:** ₹24,990
+    *   **Rating:** 4.2 ⭐ (2,951 reviews)
+    *   **Warranty/Reliability:** 2 year comprehensive warranty.
+
+The LG and Samsung models are priced above ₹25,000, so they are not considered for this budget.
+
+**Comparison for "Best based on customer reviews" and "long-term reliability":**
+
+*   **Customer Reviews:**
+    *   The **Acer AR43AR2851UDFL** stands out with the highest rating of **4.3 ⭐** and significantly more reviews (4,703) compared to Hisense (4.1 ⭐, 1,259 reviews) and TCL (4.2 ⭐, 2,951 reviews). A review for the Acer TV explicitly states, "Probably the best TV in this price range," and praises its "Google interface, loaded with features, lightweight, 55 watt power consumption, stable design."
+    *   The TCL model has positive reviews like "Super quality" and "Value for money," but one review also notes "slow response from tv."
+
+*   **Long-term Reliability:**
+    *   All three eligible TVs (Hisense, Acer, and TCL) offer a **2-year comprehensive warranty** provided by the manufacturer from the date of purchase. This suggests comparable manufacturer confidence in their products' durability for this period across these options.
+
+**Conclusion:**
+
+Considering customer reviews and within the sub-₹25,000 budget, the **Acer 109 cm (43 inches) I Series 4K Ultra HD Android Smart LED TV AR43AR2851UDFL (Black)** appears to be the best choice. It has the highest customer rating (4.3 ⭐) from the largest number of reviews (4,703) among the budget-friendly options, with positive sentiment regarding its features and value. All three budget options provide the same 2-year comprehensive warranty, indicating similar manufacturer support for long-term reliability.

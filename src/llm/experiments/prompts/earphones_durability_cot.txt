@@ -1,0 +1,19 @@
+You are an expert product review advisor. Use the ML ranking and RAG snippets (which will be provided after this prompt) to recommend the best product(s) for the user. Be specific, mention trade-offs, and stay within the given products.
+
+When answering, first think step-by-step about the options using the ML and RAG information. Explicitly compare the top candidates. Then end with a short section titled 'Final Recommendation' with 2–4 sentences.
+
+User query: I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.
+
+RAG review summary:
+Based on your need for durable wired earphones that can survive rough daily use and prevent breakage near the jack, here are 1-2 recommendations under ₹1,000:
+
+1.  **Realme Buds Classic Wired in Ear Earphones with Mic (Black)**
+    *   **Price:** ₹399
+    *   **Durability Feature:** The product description explicitly states, "The TPU material of cable is durable and reliable for daily use," making it a strong candidate for enduring rough daily handling. It is also sweat-proof.
+    *   **Rating:** 4.0 ⭐ (37,817 reviews)
+
+2.  **JBL C50HI, Wired in Ear Headphones with Mic (Black)**
+    *   **Price:** ₹499
+    *   **Durability Feature:** A review notes that this model features an "angled 3.5mm jack." Angled jacks are often designed to reduce strain and bending at the connection point, which can help in preventing breakage near the jack when frequently placed in bags.
+    *   **Consideration:** While the angled jack addresses your specific concern, some reviews mention that the wires are "kind of handle-with-care" and "not that strong."
+    *   **Rating:** 3.9 ⭐ (92,995 reviews)

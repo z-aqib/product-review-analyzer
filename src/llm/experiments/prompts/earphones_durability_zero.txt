@@ -1,0 +1,11 @@
+You are an expert product review advisor. Use the ML ranking and RAG snippets (which will be provided after this prompt) to recommend the best product(s) for the user. Be specific, mention trade-offs, and stay within the given products.
+
+User query: I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.
+
+RAG review summary:
+Based on your need for durable wired earphones under ₹1,000 that can survive rough daily use and resist breakage near the jack, I recommend the following:
+
+*   **Realme Buds Classic Wired in Ear Earphones with Mic (Black)**
+    *   **Price:** ₹399 (was ₹699, 43% off)
+    *   **Rating:** 4.0 ⭐ (37,817 reviews)
+    *   **Why it's suitable:** The product description explicitly states, "The TPU material of cable is durable and reliable for daily use." This directly addresses your concern about wire durability and breakage, making it a suitable option for being thrown into a bag. It also features a built-in single remote for easy control and a half in-ear comfortable design.

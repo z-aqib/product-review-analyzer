@@ -1,13 +1,2 @@
-earphones_durability_zero,zero_shot,Earphones / Headphones,0,"I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.",,,,earphones_durability_under_1000,2025-12-08T14:03:27,2025-12-08T14:17:07,819.535,222,"Go with the Realme Buds Classic. The TPU cable is explicitly mentioned as being durable and the price is unbeatable right now at ₹399 (was ₹699, 43% off). People are using them daily for calls and music without any issues.",,"An ideal answer recommends 1–2 specific wired earphones, explains durability around the jack using reviews, stays under ₹1,000, and clearly calls out pros/cons and any mic/comfort trade-offs.",0.1515,0.0412,0.1389,,,"You are an expert product review advisor. Use the ML ranking and RAG snippets (which will be provided after this prompt) to recommend the best product(s) for the user. Be specific, mention trade-offs, and stay within the given products.
-
-User query: I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.
-
-RAG review summary:
-Based on the information provided, here is a recommendation for durable wired earphones under ₹1,000:
-
-**Realme Buds Classic Wired in Ear Earphones with Mic (Black)**
-
-*   **Price:** ₹399 (was ₹699, 43% off)
-*   **Durability Feature:** The product description explicitly states, ""The TPU material of cable is durable and reliable for daily use."" This directly addresses your concern about wires breaking. It is also sweat-proof, adding to its overall robustness.
-*   **Other Features:** It features a large 14.2mm driver for high-fidelity music, a half in-ear comfortable design, an in-line HD microphone for clear calls, richer bass, and a built-in single remote for easy control.
-*   **Reviews:** Reviews praise the sound quality and clear calling experience, with no specific complaints about wire durability or breaking."
+experiment_id,strategy,sample_type,few_shot_k,user_query_original,user_query_variant,user_id,llm_prompt,scenario_id,start_time_iso,end_time_iso,latency_seconds,response_chars,response_text,error,ideal_answer,metric_token_overlap_f1,helpfulness_score,factuality_score
+earphones_durability_zero,zero_shot,Earphones / Headphones,0,"I keep throwing my wired earphones in my bag and they often break near the jack. Recommend 1–2 durable wired earphones that can survive rough daily use under ₹1,000.",,,,earphones_durability_under_1000,2025-12-09T18:09:11,2025-12-09T18:16:00,409.536,248,,,"An ideal answer recommends 1–2 specific wired earphones, explains durability around the jack using reviews, stays under ₹1,000, and clearly calls out pros/cons and any mic/comfort trade-offs.",0.1471,,
